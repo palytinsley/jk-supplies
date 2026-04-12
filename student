@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Junk Kouture — Supply Request</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,600;0,700;1,600&family=Mulish:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f2ede4;
+  --surface: #faf7f2;
+  --surface2: #ede8df;
+  --border: #1a1a1a;
+  --border-light: #ccc5b8;
+  --accent: #c93318;
+  --text: #1a1a1a;
+  --muted: #6b6257;
+  --success: #1a6b3c;
+  --danger: #c93318;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Mulish', sans-serif;
+  min-height: 100vh;
+  padding-bottom: 5rem;
+}
+
+/* HEADER */
+.header {
+  background: var(--text);
+  padding: 1.25rem 1.25rem 1rem;
+  border-bottom: 3px solid var(--accent);
+}
+.header-inner { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; }
+.header-left {}
+.header-eyebrow {
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 0.3rem;
+}
+.header-title {
+  font-family: 'Lora', serif;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #f2ede4;
+  line-height: 1.05;
+}
+.header-title em { font-style: italic; color: #fff; }
+.header-sub {
+  margin-top: 0.35rem;
+  font-size: 0.78rem;
+  color: #888;
+  font-weight: 500;
+  line-height: 1.4;
+}
+.cart-badge {
+  background: var(--accent);
+  color: #fff;
+  font-weight: 800;
+  font-size: 0.7rem;
+  min-width: 40px;
+  height: 40px;
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  line-height: 1;
+  border: 2px solid #fff;
+}
+.cart-badge .n { font-size: 1.1rem; font-weight: 800; }
+.cart-badge .l { font-size: 0.55rem; text-transform: uppercase; letter-spacing: 0.05em; }
+
+/* CONTAINER */
+.container { max-width: 520px; margin: 0 auto; padding: 1.25rem 1rem 2rem; }
+
+/* SECTION LABEL */
+.section-label {
+  font-size: 0.62rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--muted);
+  margin-bottom: 0.6rem;
+  margin-top: 1.4rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.section-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border-light);
+}
+
+/* CART */
+.cart-empty {
+  background: var(--surface);
+  border: 1.5px dashed var(--border-light);
+  border-radius: 6px;
+  padding: 1.1rem;
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 500;
+}
+.cart-items { display: flex; flex-direction: column; gap: 0.4rem; }
+.cart-item {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 5px;
+  padding: 0.7rem 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  animation: popin 0.18s ease;
+}
+@keyframes popin { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+.cart-item-icon { font-size: 1.1rem; flex-shrink: 0; }
+.cart-item-body { flex: 1; min-width: 0; }
+.cart-item-name { font-weight: 700; font-size: 0.86rem; }
+.cart-item-detail { font-size: 0.73rem; color: var(--muted); margin-top: 0.1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cart-item-remove { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 1rem; padding: 0.2rem 0.3rem; flex-shrink: 0; transition: color 0.12s; }
+.cart-item-remove:hover { color: var(--danger); }
+
+/* FORM CARD */
+.form-card {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 6px;
+  padding: 1.1rem;
+  margin-bottom: 0.75rem;
+}
+.form-row { margin-bottom: 0.9rem; }
+.form-row:last-child { margin-bottom: 0; }
+
+label {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: var(--muted);
+  margin-bottom: 0.35rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+select, input[type="text"], input[type="email"], textarea {
+  width: 100%;
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  border-radius: 4px;
+  color: var(--text);
+  font-family: 'Mulish', sans-serif;
+  font-size: 0.92rem;
+  font-weight: 500;
+  padding: 0.6rem 0.85rem;
+  outline: none;
+  transition: border-color 0.12s, box-shadow 0.12s;
+  appearance: none;
+  -webkit-appearance: none;
+}
+select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='7'%3E%3Cpath d='M1 1l4.5 4.5L10 1' stroke='%231a1a1a' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.85rem center;
+  background-color: var(--bg);
+  padding-right: 2.4rem;
+  cursor: pointer;
+}
+select:focus, input:focus, textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 2px 2px 0 var(--accent);
+}
+textarea { resize: vertical; min-height: 68px; }
+
+/* SUB-OPTIONS */
+.sub-options { display: none; margin-top: 0.8rem; border-top: 1px dashed var(--border-light); padding-top: 0.8rem; }
+.sub-options.visible { display: block; }
+.sub-section { margin-bottom: 0.85rem; }
+.sub-section:last-child { margin-bottom: 0; }
+
+/* FINISH TOGGLE */
+.finish-toggle { display: flex; gap: 0.35rem; flex-wrap: wrap; margin-top: 0.3rem; }
+.finish-btn {
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  border-radius: 3px;
+  padding: 0.38rem 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  color: var(--text);
+  transition: all 0.12s;
+  font-family: 'Mulish', sans-serif;
+}
+.finish-btn:hover { background: var(--text); color: var(--bg); }
+.finish-btn.selected { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+/* COLOR GRID */
+.color-group-label {
+  font-size: 0.63rem;
+  font-weight: 800;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin: 0.55rem 0 0.28rem;
+}
+.color-grid { display: flex; flex-wrap: wrap; gap: 0.38rem; }
+.color-swatch {
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: transform 0.1s, box-shadow 0.1s;
+  position: relative;
+  flex-shrink: 0;
+}
+.color-swatch:hover { transform: scale(1.18); }
+.color-swatch.selected {
+  border-color: var(--text);
+  transform: scale(1.1);
+  box-shadow: 0 0 0 2px var(--accent);
+}
+.color-swatch[title]::after {
+  content: attr(title);
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--text);
+  color: #f2ede4;
+  font-size: 0.6rem;
+  font-weight: 700;
+  padding: 0.18rem 0.4rem;
+  border-radius: 3px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.1s;
+  z-index: 10;
+}
+.color-swatch:hover::after { opacity: 1; }
+.selected-color-display {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-top: 0.55rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--muted);
+  min-height: 1.4rem;
+}
+.sel-color-dot {
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(0,0,0,0.15);
+  flex-shrink: 0;
+}
+
+/* PILLS */
+.pill-group { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-top: 0.3rem; }
+.pill {
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  border-radius: 3px;
+  padding: 0.35rem 0.8rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  color: var(--text);
+  transition: all 0.12s;
+  user-select: none;
+  font-family: 'Mulish', sans-serif;
+}
+.pill:hover { background: var(--text); color: var(--bg); }
+.pill.selected { background: var(--accent); border-color: var(--accent); color: #fff; }
+.pill.multi.selected { background: var(--text); border-color: var(--text); color: var(--bg); }
+
+/* OTHER FIELD */
+.other-field { display: none; margin-top: 0.55rem; }
+.other-field.visible { display: block; }
+.other-trigger { margin-top: 0.5rem; }
+
+/* DIVIDER */
+hr.div { border: none; border-top: 1px solid var(--border-light); margin: 0.9rem 0; }
+
+/* BUTTONS */
+.btn-add {
+  width: 100%;
+  background: var(--text);
+  border: 1.5px solid var(--text);
+  color: var(--bg);
+  font-family: 'Mulish', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 800;
+  padding: 0.82rem;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.12s;
+  margin-bottom: 0.5rem;
+  letter-spacing: 0.03em;
+}
+.btn-add:hover { background: var(--accent); border-color: var(--accent); }
+
+.btn-submit {
+  width: 100%;
+  background: var(--accent);
+  border: 1.5px solid var(--accent);
+  color: #fff;
+  font-family: 'Mulish', sans-serif;
+  font-size: 0.92rem;
+  font-weight: 800;
+  padding: 0.9rem;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.12s;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.btn-submit:hover { background: #a82a13; border-color: #a82a13; }
+.submit-hint { text-align: center; font-size: 0.72rem; color: var(--muted); margin-top: 0.45rem; font-weight: 500; }
+
+/* INFO CARD */
+.info-card {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 6px;
+  padding: 1.1rem;
+  margin-bottom: 1rem;
+}
+.email-feedback { font-size: 0.73rem; font-weight: 700; margin-top: 0.3rem; min-height: 1rem; }
+.email-feedback.ok { color: var(--success); }
+.email-feedback.warn { color: var(--danger); }
+.period-auto { font-size: 0.92rem; font-weight: 700; color: var(--accent); padding: 0.08rem 0; }
+
+/* CONFIRM SHEET */
+.overlay { display: none; position: fixed; inset: 0; background: rgba(26,26,26,0.65); z-index: 100; align-items: flex-end; justify-content: center; }
+.overlay.open { display: flex; }
+.sheet {
+  background: var(--surface);
+  border-radius: 10px 10px 0 0;
+  border-top: 3px solid var(--accent);
+  padding: 1.4rem;
+  width: 100%;
+  max-width: 520px;
+  max-height: 85vh;
+  overflow-y: auto;
+  animation: sheetup 0.2s ease;
+}
+@keyframes sheetup { from { transform: translateY(100%); } to { transform: translateY(0); } }
+.sheet h2 { font-family: 'Lora', serif; font-size: 1.1rem; font-weight: 700; margin-bottom: 0.2rem; }
+.sheet-sub { font-size: 0.8rem; color: var(--muted); margin-bottom: 0.9rem; font-weight: 500; }
+.confirm-meta {
+  background: var(--surface2);
+  border: 1.5px solid var(--border-light);
+  border-radius: 5px;
+  padding: 0.7rem 0.9rem;
+  margin-bottom: 0.85rem;
+  font-size: 0.83rem;
+  font-weight: 600;
+  line-height: 1.6;
+}
+.confirm-items { display: flex; flex-direction: column; gap: 0.4rem; margin-bottom: 1.1rem; }
+.confirm-item {
+  background: var(--bg);
+  border: 1.5px solid var(--border-light);
+  border-radius: 4px;
+  padding: 0.55rem 0.8rem;
+  font-size: 0.83rem;
+  font-weight: 600;
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+}
+.ci-detail { font-weight: 500; color: var(--muted); font-size: 0.75rem; margin-top: 0.08rem; }
+.sheet-actions { display: flex; gap: 0.5rem; }
+.btn-back {
+  background: var(--surface2);
+  border: 1.5px solid var(--border-light);
+  border-radius: 5px;
+  padding: 0.72rem 1rem;
+  font-family: 'Mulish', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  color: var(--muted);
+}
+.btn-send {
+  flex: 1;
+  background: var(--accent);
+  border: none;
+  border-radius: 5px;
+  padding: 0.72rem;
+  font-family: 'Mulish', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.12s;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.btn-send:hover { background: #a82a13; }
+.btn-send:disabled { background: var(--border-light); cursor: not-allowed; }
+
+/* SUCCESS */
+.success-screen { display: none; padding: 4rem 1.5rem; text-align: center; }
+.success-screen.visible { display: block; }
+.success-stamp {
+  display: inline-block;
+  border: 4px solid var(--success);
+  border-radius: 6px;
+  color: var(--success);
+  font-family: 'Lora', serif;
+  font-size: 1.6rem;
+  font-weight: 700;
+  padding: 0.5rem 1.2rem;
+  transform: rotate(-4deg);
+  margin-bottom: 1.25rem;
+  letter-spacing: 0.05em;
+}
+.success-screen h2 { font-family: 'Lora', serif; font-size: 1.3rem; font-weight: 700; margin-bottom: 0.5rem; }
+.success-screen p { color: var(--muted); font-size: 0.88rem; font-weight: 500; line-height: 1.6; }
+
+/* TOAST */
+.toast {
+  position: fixed;
+  bottom: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%) translateY(100px);
+  background: var(--text);
+  color: var(--bg);
+  padding: 0.65rem 1.2rem;
+  border-radius: 4px;
+  font-size: 0.83rem;
+  font-weight: 700;
+  transition: transform 0.25s ease;
+  z-index: 200;
+  white-space: nowrap;
+  border-left: 3px solid var(--accent);
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+.toast.ok { border-left-color: var(--success); }
+.toast.err { border-left-color: var(--danger); }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-inner">
+    <div class="header-left">
+      <div class="header-eyebrow">SJP · Cohort 13</div>
+      <div class="header-title">Junk <em>Kouture</em><br>Supply Request</div>
+      <div class="header-sub">Add items → review → submit once for your group</div>
+    </div>
+    <div class="cart-badge">
+      <span class="n" id="cartN">0</span>
+      <span class="l">items</span>
+    </div>
+  </div>
+</div>
+
+<div id="mainContent">
+<div class="container">
+
+  <div class="section-label">Your Cart</div>
+  <div class="cart-empty" id="cartEmpty">Nothing yet — add your first item below</div>
+  <div class="cart-items" id="cartItems"></div>
+
+  <div class="section-label">Add an Item</div>
+  <div class="form-card">
+    <div class="form-row">
+      <label>Category</label>
+      <select id="category" onchange="onCat()">
+        <option value="">— What do you need? —</option>
+        <option value="spray_paint">🎨 Spray Paint</option>
+        <option value="paint">🖌️ Multi-Purpose Paint</option>
+        <option value="wire">🔩 Wire</option>
+        <option value="tape">📦 Tape</option>
+        <option value="glue">🧲 Glue</option>
+        <option value="fasteners">🔗 Fasteners</option>
+        <option value="thread">🧵 Thread / Ribbon / Yarn</option>
+        <option value="tools">🔧 Tools</option>
+        <option value="other">✏️ Other</option>
+      </select>
+    </div>
+
+    <!-- SPRAY PAINT -->
+    <div class="sub-options" id="sub_spray_paint">
+      <div class="sub-section">
+        <label>Finish</label>
+        <div class="finish-toggle">
+          <div class="finish-btn" onclick="selFinish(this,'Gloss')">Gloss</div>
+          <div class="finish-btn" onclick="selFinish(this,'Matte')">Matte</div>
+          <div class="finish-btn" onclick="selFinish(this,'Metallic')">Metallic</div>
+          <div class="finish-btn" onclick="selFinish(this,'Satin')">Satin</div>
+          <div class="finish-btn" onclick="selFinish(this,'Flat')">Flat</div>
+        </div>
+      </div>
+      <div class="sub-section">
+        <label>Color</label>
+        <div class="color-group-label">Whites &amp; Neutrals</div><div class="color-grid" id="sg1"></div>
+        <div class="color-group-label">Blues &amp; Greens</div><div class="color-grid" id="sg2"></div>
+        <div class="color-group-label">Reds, Pinks &amp; Purples</div><div class="color-grid" id="sg3"></div>
+        <div class="color-group-label">Yellows, Oranges &amp; Browns</div><div class="color-grid" id="sg4"></div>
+        <div class="color-group-label">Metallics</div><div class="color-grid" id="sg5"></div>
+        <div class="selected-color-display" id="sprayCDisp"><span>Tap a color</span></div>
+      </div>
+      <div class="other-field" id="sprayOF">
+        <label>Don't see your color? Describe it</label>
+        <input type="text" id="sprayOther" placeholder="e.g. seafoam green, dusty rose..." />
+      </div>
+      <div class="other-trigger"><div class="pill" onclick="togOther('sprayOF',this)">+ Other color</div></div>
+      <div class="sub-section" style="margin-top:0.75rem">
+        <label>Quantity (max 3 cans)</label>
+        <div class="pill-group">
+          <div class="pill" onclick="selPill(this,'sprayQty','1')">1</div>
+          <div class="pill" onclick="selPill(this,'sprayQty','2')">2</div>
+          <div class="pill" onclick="selPill(this,'sprayQty','3')">3</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAINT -->
+    <div class="sub-options" id="sub_paint">
+      <div class="sub-section">
+        <label>Color</label>
+        <div class="color-group-label">Whites &amp; Neutrals</div><div class="color-grid" id="pg1"></div>
+        <div class="color-group-label">Blues &amp; Greens</div><div class="color-grid" id="pg2"></div>
+        <div class="color-group-label">Reds, Pinks &amp; Purples</div><div class="color-grid" id="pg3"></div>
+        <div class="color-group-label">Yellows, Oranges &amp; Browns</div><div class="color-grid" id="pg4"></div>
+        <div class="color-group-label">Metallics</div><div class="color-grid" id="pg5"></div>
+        <div class="selected-color-display" id="paintCDisp"><span>Tap a color</span></div>
+      </div>
+      <div class="other-field" id="paintOF">
+        <label>Don't see your color? Describe it</label>
+        <input type="text" id="paintOther" placeholder="e.g. forest green, midnight blue..." />
+      </div>
+      <div class="other-trigger"><div class="pill" onclick="togOther('paintOF',this)">+ Other color</div></div>
+      <div class="sub-section" style="margin-top:0.75rem">
+        <label>Size</label>
+        <div class="pill-group">
+          <div class="pill" onclick="selPill(this,'paintSize','Small (2oz)')">Small (2oz)</div>
+          <div class="pill" onclick="selPill(this,'paintSize','Medium (8oz)')">Medium (8oz)</div>
+          <div class="pill" onclick="selPill(this,'paintSize','Quart')">Quart</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- WIRE -->
+    <div class="sub-options" id="sub_wire">
+      <div class="sub-section">
+        <label>Gauge / Type</label>
+        <div class="pill-group">
+          <div class="pill" onclick="selPill(this,'wireType','Thin (18 gauge)')">Thin (18g)</div>
+          <div class="pill" onclick="selPill(this,'wireType','Medium (16 gauge)')">Medium (16g)</div>
+          <div class="pill" onclick="selPill(this,'wireType','Thick (15 gauge)')">Thick (15g)</div>
+          <div class="pill" onclick="selPill(this,'wireType','Gold Wire')">Gold Wire</div>
+          <div class="pill" onclick="selPill(this,'wireType','Thin Craft Wire')">Thin Craft</div>
+        </div>
+      </div>
+      <div class="other-field" id="wireOF">
+        <label>Other / more detail</label>
+        <input type="text" id="wireOther" placeholder="Describe the wire you need..." />
+      </div>
+      <div class="other-trigger"><div class="pill" onclick="togOther('wireOF',this)">+ Other / specify</div></div>
+      <div class="sub-section" style="margin-top:0.75rem">
+        <label>Quantity (max 3 packs)</label>
+        <div class="pill-group">
+          <div class="pill" onclick="selPill(this,'wireQty','1 pack')">1</div>
+          <div class="pill" onclick="selPill(this,'wireQty','2 packs')">2</div>
+          <div class="pill" onclick="selPill(this,'wireQty','3 packs')">3</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAPE -->
+    <div class="sub-options" id="sub_tape">
+      <div class="sub-section">
+        <label>Type — select all that apply</label>
+        <div class="pill-group">
+          <div class="pill multi" onclick="togMulti(this,'tapeType','Duct Tape')">Duct</div>
+          <div class="pill multi" onclick="togMulti(this,'tapeType','Painters Tape')">Painters</div>
+          <div class="pill multi" onclick="togMulti(this,'tapeType','Masking Tape')">Masking</div>
+          <div class="pill multi" onclick="togMulti(this,'tapeType','Double-Sided Tape')">Double-Sided</div>
+          <div class="pill multi" onclick="togMulti(this,'tapeType','Scotch Tape')">Scotch</div>
+          <div class="pill multi" onclick="togMulti(this,'tapeType','Fabric Tape')">Fabric</div>
+        </div>
+      </div>
+      <div class="other-field" id="tapeOF">
+        <label>Other tape type</label>
+        <input type="text" id="tapeOther" placeholder="e.g. foam tape, carpet tape..." />
+      </div>
+      <div class="other-trigger"><div class="pill" onclick="togOther('tapeOF',this)">+ Other type</div></div>
+      <div class="sub-section" style="margin-top:0.75rem">
+        <label>Rolls needed (max 3)</label>
+        <div class="pill-group">
+          <div class="pill" onclick="selPill(this,'tapeQty','1 roll')">1</div>
+          <div class="pill" onclick="selPill(this,'tapeQty','2 rolls')">2</div>
+          <div class="pill" onclick="selPill(this,'tapeQty','3 rolls')">3</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- GLUE -->
+    <div class="sub-options" id="sub_glue">
+      <div class="sub-section">
+        <label>Type — select all that apply</label>
+        <div class="pill-group">
+          <div class="pill multi" onclick="togMulti(this,'glueType','Hot Glue Sticks')">Hot Glue Sticks</div>
+          <div class="pill multi" onclick="togMulti(this,'glueType','Hot Glue Gun')">Hot Glue Gun</div>
+          <div class="pill multi" onclick="togMulti(this,'glueType','Elmers Glue')">Elmer's</div>
+          <div class="pill multi" onclick="togMulti(this,'glueType','E6000')">E6000</div>
+          <div class="pill multi" onclick="togMulti(this,'glueType','Glitter Glue')">Glitter Glue</div>
+          <div class="pill multi" onclick="togMulti(this,'glueType','Mod Podge')">Mod Podge</div>
+        </div>
+      </div>
+      <div id="glitterRow" style="display:none;margin-top:0.5rem">
+        <label>Glitter Glue Color</label>
+        <div class="pill-group">
+          <div class="pill" onclick="selPill(this,'glitterC','Gold')">Gold</div>
+          <div class="pill" onclick="selPill(this,'glitterC','Silver')">Silver</div>
+          <div class="pill" onclick="selPill(this,'glitterC','Teal')">Teal</div>
+          <div class="pill" onclick="selPill(this,'glitterC','White')">White</div>
+          <div class="pill" onclick="selPill(this,'glitterC','Multi')">Multi</div>
+        </div>
+      </div>
+      <div class="other-field" id="glueOF">
+        <label>Other glue type</label>
+        <input type="text" id="glueOther" placeholder="e.g. super glue, rubber cement..." />
+      </div>
+      <div class="other-trigger"><div class="pill" onclick="togOther('glueOF',this)">+ Other type</div></div>
+    </div>
+
+    <!-- FASTENERS -->
+    <div class="sub-options" id="sub_fasteners">
+      <div class="sub-section">
+        <label>Type — select all that apply</label>
+        <div class="pill-group">
+          <div class="pill multi" onclick="togMulti(this,'fastType','Zip Ties')">Zip Ties</div>
+          <div class="pill multi" onclick="togMulti(this,'fastType','Velcro')">Velcro</div>
+          <div class="pill multi" onclick="togMulti(this,'fastType','Staples')">Staples</div>
+          <div class="pill multi" onclick="togMulti(this,'fastType','Silver Eyelets')">Silver Eyelets</div>
+          <div class="pill multi" onclick="togMulti(this,'fastType','Elastic Band')">Elastic Band</div>
+          <div class="pill multi" onclick="togMulti(this,'fastType','Sewing Needles')">Sewing Needles</div>
+        </div>
+      </div>
+      <div class="other-field" id="fastOF">
+        <label>Other fastener</label>
+        <input type="text" id="fastOther" placeholder="e.g. snaps, grommets, binder clips..." />
+      </div>
+      <div class="other-trigger"><div class="pill" onclick="togOther('fastOF',this)">+ Other type</div></div>
+    </div>
+
+    <!-- THREAD -->
+    <div class="sub-options" id="sub_thread">
+      <div class="sub-section">
+        <label>Type</label>
+        <div class="pill-group">
+          <div class="pill" onclick="selPill(this,'threadType','Thread')">Thread</div>
+          <div class="pill" onclick="selPill(this,'threadType','Ribbon')">Ribbon</div>
+          <div class="pill" onclick="selPill(this,'threadType','Yarn')">Yarn</div>
+          <div class="pill" onclick="selPill(this,'threadType','Elastic')">Elastic</div>
+        </div>
+      </div>
+      <div class="other-field" id="threadOF">
+        <label>Other type</label>
+        <input type="text" id="threadOther" placeholder="e.g. twine, cord, lace..." />
+      </div>
+      <div class="other-trigger"><div class="pill" onclick="togOther('threadOF',this)">+ Other type</div></div>
+      <div class="sub-section" style="margin-top:0.75rem">
+        <label>Color</label>
+        <input type="text" id="threadColor" placeholder="e.g. navy blue, white, gold..." />
+      </div>
+    </div>
+
+    <!-- TOOLS -->
+    <div class="sub-options" id="sub_tools">
+      <div class="sub-section">
+        <label>Tool needed — select all that apply</label>
+        <div class="pill-group">
+          <div class="pill multi" onclick="togMulti(this,'toolsType','Needle Nose Pliers')">Needle Nose Pliers</div>
+          <div class="pill multi" onclick="togMulti(this,'toolsType','Hammer')">Hammer</div>
+          <div class="pill multi" onclick="togMulti(this,'toolsType','Screwdrivers')">Screwdrivers</div>
+          <div class="pill multi" onclick="togMulti(this,'toolsType','Crochet Hook')">Crochet Hook</div>
+          <div class="pill multi" onclick="togMulti(this,'toolsType','Bolt Cutters')">Bolt Cutters</div>
+          <div class="pill multi" onclick="togMulti(this,'toolsType','Extension Cord')">Extension Cord</div>
+        </div>
+      </div>
+      <div class="other-field" id="toolsOF">
+        <label>Other tool</label>
+        <input type="text" id="toolsOther" placeholder="e.g. drill, utility knife, staple gun..." />
+      </div>
+      <div class="other-trigger"><div class="pill" onclick="togOther('toolsOF',this)">+ Other tool</div></div>
+    </div>
+
+    <!-- OTHER -->
+    <div class="sub-options" id="sub_other">
+      <div class="sub-section">
+        <label>Describe what you need</label>
+        <textarea id="otherDesc" placeholder="Be specific — color, size, quantity, what it's for..."></textarea>
+      </div>
+    </div>
+
+    <hr class="div">
+    <div class="form-row">
+      <label>Reference link (optional)</label>
+      <input type="text" id="itemLink" placeholder="Home Depot, Amazon link, etc." />
+    </div>
+  </div>
+
+  <button class="btn-add" onclick="addToCart()">+ Add to Cart</button>
+
+  <div class="section-label">Your Group</div>
+  <div class="info-card">
+    <div class="form-row">
+      <label>Country</label>
+      <select id="country" onchange="onCountry()">
+        <option value="">— Select your country —</option>
+        <option data-period="6">Afghanistan</option>
+        <option data-period="6">Cambodia</option>
+        <option data-period="6">China</option>
+        <option data-period="5">Cuba</option>
+        <option data-period="6">El Salvador</option>
+        <option data-period="5">India</option>
+        <option data-period="5">Indonesia</option>
+        <option data-period="5">Kenya</option>
+        <option data-period="5">Mexico</option>
+        <option data-period="5">Mozambique</option>
+        <option data-period="5">New Zealand</option>
+        <option data-period="5">Nigeria</option>
+        <option data-period="6">Philippines</option>
+        <option data-period="6">Rwanda</option>
+        <option data-period="6">Vietnam</option>
+      </select>
+    </div>
+    <div id="periodRow" style="display:none;margin-bottom:0.9rem">
+      <label>Period (auto-set)</label>
+      <div class="period-auto" id="periodVal"></div>
+    </div>
+    <hr class="div">
+    <div class="form-row">
+      <label>Your school email</label>
+      <input type="email" id="replyEmail" placeholder="yourname@pausd.us" oninput="checkEmail()" autocomplete="email" inputmode="email" />
+      <div class="email-feedback" id="emailFb"></div>
+    </div>
+  </div>
+
+  <button class="btn-submit" onclick="openConfirm()">Review &amp; Submit →</button>
+  <p class="submit-hint">You'll review everything before it sends.</p>
+</div>
+</div>
+
+<!-- Confirm sheet -->
+<div class="overlay" id="confirmOverlay">
+  <div class="sheet">
+    <h2>Does this look right?</h2>
+    <p class="sheet-sub">Check everything before sending — goes straight to Mr. Tinsley.</p>
+    <div class="confirm-meta" id="confirmMeta"></div>
+    <div class="confirm-items" id="confirmItems"></div>
+    <div class="sheet-actions">
+      <button class="btn-back" onclick="closeConfirm()">← Edit</button>
+      <button class="btn-send" id="sendBtn" onclick="submitOrder()">Looks good — send it</button>
+    </div>
+  </div>
+</div>
+
+<!-- Success -->
+<div class="success-screen" id="successScreen">
+  <div class="success-stamp">SUBMITTED</div>
+  <h2>Request received.</h2>
+  <p>Mr. Tinsley has your list.<br>Check your email for a confirmation.<br><br>Now go make something wild.</p>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const SUPABASE_URL = https://pizuvyfvevdwmbqcwanf.supabase.co;
+const SUPABASE_KEY = sb_publishable_cMdLHYS2k6kfTKCSKTnEFQ_xCSf4O2d;
+const EMAILJS_SERVICE_ID = service_v7bchw7;
+const EMAILJS_TEMPLATE_ID = Template_2z2no3n;
+const EMAILJS_PUBLIC_KEY = t9UIpuX-5wgc4RPno;
+
+const colorData = {
+  1:[{n:'Flat White',h:'#f5f5f5'},{n:'Gloss White',h:'#ffffff',b:1},{n:'Off White',h:'#ede8df'},{n:'Light Grey',h:'#c8c8c8'},{n:'Grey',h:'#888888'},{n:'Dark Grey',h:'#444444'},{n:'Black',h:'#1a1a1a'}],
+  2:[{n:'Brilliant Blue',h:'#1a5fb4'},{n:'Lagoon Teal',h:'#2d8c8c'},{n:'Teal',h:'#008080'},{n:'Sapphire Blue',h:'#0f3d8c'},{n:'Midnight Blue',h:'#1a1a5e'},{n:'Light Blue',h:'#7ec8e3'},{n:'Forest Green',h:'#228b22'},{n:'Dark Green',h:'#1a4d1a'},{n:'Green',h:'#3a8c3a'},{n:'Lime',h:'#7ec850'}],
+  3:[{n:'Gloss Red',h:'#cc1111'},{n:'Flat Red',h:'#a31111'},{n:'Berry Pink',h:'#c45080'},{n:'Candy Pink',h:'#f06090'},{n:'Hot Pink',h:'#ff69b4'},{n:'Purple',h:'#6a0dad'},{n:'Lavender',h:'#967bb6'}],
+  4:[{n:'Sun Yellow',h:'#f5c518'},{n:'Ham Yellow',h:'#e8b84b'},{n:'Orange',h:'#e86828'},{n:'Warm Camel',h:'#c6854e'},{n:'Brown',h:'#6b3a2a'},{n:'Rust',h:'#b5401c'}],
+  5:[{n:'Gold',h:'#cfab3c'},{n:'Silver',h:'#a8a9ad'},{n:'Chrome',h:'#d4d4d4',b:1},{n:'Bronze',h:'#8c5e28'},{n:'Copper',h:'#b87333'}]
+};
+
+const cart=[], sel={}, multi={};
+let sprayC=null, paintC=null;
+
+function buildGrid(id,group,type){
+  const el=document.getElementById(id); if(!el) return; el.innerHTML='';
+  group.forEach(c=>{
+    const s=document.createElement('div'); s.className='color-swatch'; s.style.backgroundColor=c.h; s.title=c.n;
+    if(c.b) s.style.boxShadow='inset 0 0 0 1px #bbb';
+    s.onclick=()=>pickColor(s,c,type); el.appendChild(s);
+  });
+}
+function initGrids(){[1,2,3,4,5].forEach(i=>{buildGrid('sg'+i,colorData[i],'spray');buildGrid('pg'+i,colorData[i],'paint');});}
+
+function pickColor(el,c,type){
+  const scope=type==='spray'?'#sub_spray_paint':'#sub_paint';
+  document.querySelectorAll(scope+' .color-swatch').forEach(s=>s.classList.remove('selected'));
+  el.classList.add('selected');
+  const d=document.getElementById(type==='spray'?'sprayCDisp':'paintCDisp');
+  d.innerHTML=`<div class="sel-color-dot" style="background:${c.h}${c.b?';box-shadow:inset 0 0 0 1px #bbb':''}"></div><span>${c.n}</span>`;
+  if(type==='spray') sprayC=c; else paintC=c;
+}
+
+function selPill(el,key,val){
+  el.closest('.pill-group').querySelectorAll('.pill:not(.multi)').forEach(p=>p.classList.remove('selected'));
+  el.classList.add('selected'); sel[key]=val;
+}
+function togMulti(el,key,val){
+  el.classList.toggle('selected');
+  if(!multi[key]) multi[key]=new Set();
+  multi[key][el.classList.contains('selected')?'add':'delete'](val);
+  if(key==='glueType') document.getElementById('glitterRow').style.display=multi['glueType']?.has('Glitter Glue')?'block':'none';
+}
+function selFinish(el,val){
+  el.closest('.finish-toggle').querySelectorAll('.finish-btn').forEach(b=>b.classList.remove('selected'));
+  el.classList.add('selected'); sel['sprayFinish']=val;
+}
+function togOther(rowId,btn){
+  const row=document.getElementById(rowId), show=row.classList.toggle('visible');
+  btn.textContent=show?'− Hide':'+ Other'; btn.classList.toggle('selected',show);
+}
+function onCat(){
+  const v=document.getElementById('category').value;
+  document.querySelectorAll('.sub-options').forEach(el=>el.classList.remove('visible'));
+  if(v){const s=document.getElementById('sub_'+v);if(s)s.classList.add('visible');}
+}
+function onCountry(){
+  const opt=document.getElementById('country').selectedOptions[0];
+  const p=opt?.dataset?.period;
+  document.getElementById('periodRow').style.display=p?'block':'none';
+  if(p) document.getElementById('periodVal').textContent=p+'th Period';
+}
+function checkEmail(){
+  const v=document.getElementById('replyEmail').value.trim(), fb=document.getElementById('emailFb');
+  if(!v){fb.textContent='';fb.className='email-feedback';return false;}
+  if(v.endsWith('@pausd.us')){fb.textContent='✓ Looks good';fb.className='email-feedback ok';return true;}
+  if(v.includes('@')){fb.textContent='Use your @pausd.us school email';fb.className='email-feedback warn';return false;}
+  fb.textContent='Enter your full school email'; fb.className='email-feedback warn'; return false;
+}
+
+function buildItem(cat){
+  const icons={spray_paint:'🎨',paint:'🖌️',wire:'🔩',tape:'📦',glue:'🧲',fasteners:'🔗',thread:'🧵',tools:'🔧',other:'✏️'};
+  let name='',detail='';
+  if(cat==='spray_paint'){
+    const cn=sprayC?.n||document.getElementById('sprayOther').value.trim(); if(!cn) return null;
+    name='Spray Paint — '+cn; detail=[sel['sprayFinish'],sel['sprayQty']?'×'+sel['sprayQty']:''].filter(Boolean).join(', ');
+  } else if(cat==='paint'){
+    const cn=paintC?.n||document.getElementById('paintOther').value.trim(); if(!cn) return null;
+    name='Paint — '+cn; detail=sel['paintSize']||'';
+  } else if(cat==='wire'){
+    const t=sel['wireType']||document.getElementById('wireOther').value.trim(); if(!t) return null;
+    name='Wire — '+t; detail=sel['wireQty']||'';
+  } else if(cat==='tape'){
+    const types=[...(multi['tapeType']||[])],other=document.getElementById('tapeOther').value.trim();
+    if(other) types.push(other); if(!types.length) return null;
+    name='Tape — '+types.join(', '); detail=sel['tapeQty']||'';
+  } else if(cat==='glue'){
+    const types=[...(multi['glueType']||[])],other=document.getElementById('glueOther').value.trim();
+    if(other) types.push(other); if(!types.length) return null;
+    name='Glue — '+types.join(', '); detail=sel['glitterC']?'Glitter: '+sel['glitterC']:'';
+  } else if(cat==='fasteners'){
+    const types=[...(multi['fastType']||[])],other=document.getElementById('fastOther').value.trim();
+    if(other) types.push(other); if(!types.length) return null;
+    name='Fasteners — '+types.join(', ');
+  } else if(cat==='thread'){
+    const t=sel['threadType']||document.getElementById('threadOther').value.trim(); if(!t) return null;
+    name=t; const col=document.getElementById('threadColor').value.trim(); detail=col?'Color: '+col:'';
+  } else if(cat==='tools'){
+    const types=[...(multi['toolsType']||[])],other=document.getElementById('toolsOther').value.trim();
+    if(other) types.push(other); if(!types.length) return null;
+    name='Tools — '+types.join(', ');
+  } else if(cat==='other'){
+    const d=document.getElementById('otherDesc').value.trim(); if(!d) return null;
+    name=d.length>60?d.slice(0,60)+'…':d;
+  }
+  return {icon:icons[cat]||'📦',name,detail,category:cat,id:Date.now()+Math.random()};
+}
+
+function addToCart(){
+  const cat=document.getElementById('category').value;
+  if(!cat){toast('Pick a category first.','err');return;}
+  const item=buildItem(cat); if(!item){toast('Fill in the required details.','err');return;}
+  item.link=document.getElementById('itemLink').value.trim();
+  cart.push(item); saveSession(); renderCart(); resetForm();
+  toast('Added to cart.','ok');
+}
+function removeFromCart(id){const i=cart.findIndex(x=>x.id===id);if(i>-1){cart.splice(i,1);saveSession();renderCart();}}
+function renderCart(){
+  const c=document.getElementById('cartItems'),e=document.getElementById('cartEmpty');
+  document.getElementById('cartN').textContent=cart.length;
+  if(!cart.length){e.style.display='block';c.innerHTML='';return;}
+  e.style.display='none'; c.innerHTML='';
+  cart.forEach(item=>{
+    const el=document.createElement('div'); el.className='cart-item';
+    el.innerHTML=`<div class="cart-item-icon">${item.icon}</div><div class="cart-item-body"><div class="cart-item-name">${item.name}</div><div class="cart-item-detail">${[item.detail,item.link].filter(Boolean).join(' · ')||'&nbsp;'}</div></div><button class="cart-item-remove" onclick="removeFromCart(${item.id})">✕</button>`;
+    c.appendChild(el);
+  });
+}
+function resetForm(){
+  document.getElementById('category').value='';
+  document.querySelectorAll('.sub-options').forEach(el=>el.classList.remove('visible'));
+  document.querySelectorAll('.pill').forEach(p=>p.classList.remove('selected'));
+  document.querySelectorAll('.finish-btn').forEach(b=>b.classList.remove('selected'));
+  document.querySelectorAll('.color-swatch').forEach(s=>s.classList.remove('selected'));
+  document.querySelectorAll('.other-field').forEach(r=>r.classList.remove('visible'));
+  ['itemLink','otherDesc','threadColor','sprayOther','paintOther','wireOther','tapeOther','glueOther','fastOther','threadOther','toolsOther'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('sprayCDisp').innerHTML='<span>Tap a color</span>';
+  document.getElementById('paintCDisp').innerHTML='<span>Tap a color</span>';
+  document.getElementById('glitterRow').style.display='none';
+  sprayC=null; paintC=null;
+  Object.keys(sel).forEach(k=>delete sel[k]); Object.keys(multi).forEach(k=>delete multi[k]);
+}
+function saveSession(){try{sessionStorage.setItem('jk_cart',JSON.stringify(cart));}catch(e){}}
+function loadSession(){try{const s=sessionStorage.getItem('jk_cart');if(s){JSON.parse(s).forEach(i=>cart.push(i));renderCart();}}catch(e){}}
+
+function openConfirm(){
+  if(!cart.length){toast('Add at least one item first.','err');return;}
+  const country=document.getElementById('country').value;
+  const email=document.getElementById('replyEmail').value.trim();
+  if(!country){toast('Select your country.','err');return;}
+  if(!email.endsWith('@pausd.us')){toast('Enter your @pausd.us email.','err');return;}
+  const period=document.getElementById('country').selectedOptions[0]?.dataset?.period||'?';
+  document.getElementById('confirmMeta').innerHTML=`<strong>${country}</strong> · Period ${period}<br><span style="color:var(--muted)">${email}</span>`;
+  const cont=document.getElementById('confirmItems'); cont.innerHTML='';
+  cart.forEach(item=>{
+    const el=document.createElement('div'); el.className='confirm-item';
+    el.innerHTML=`<span>${item.icon}</span><div><div>${item.name}</div>${item.detail?`<div class="ci-detail">${item.detail}</div>`:''}</div>`;
+    cont.appendChild(el);
+  });
+  document.getElementById('sendBtn').disabled=false;
+  document.getElementById('sendBtn').textContent='Looks good — send it';
+  document.getElementById('confirmOverlay').classList.add('open');
+}
+function closeConfirm(){document.getElementById('confirmOverlay').classList.remove('open');}
+
+async function submitOrder(){
+  const country=document.getElementById('country').value;
+  const email=document.getElementById('replyEmail').value.trim();
+  const period=document.getElementById('country').selectedOptions[0]?.dataset?.period||'?';
+  const btn=document.getElementById('sendBtn'); btn.disabled=true; btn.textContent='Sending…';
+  const sid='sub_'+Date.now();
+  const rows=cart.map(item=>({submission_id:sid,period,country,reply_email:email,category:item.category,item_name:item.name,item_detail:item.detail||'',link:item.link||'',status:'pending',denial_reason:'',oos_note:''}));
+  try{
+    const res=await fetch(SUPABASE_URL+'/rest/v1/requests',{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Prefer':'return=minimal'},body:JSON.stringify(rows)});
+    if(!res.ok) throw new Error();
+    if(EMAILJS_PUBLIC_KEY!=='YOUR_EMAILJS_PUBLIC_KEY'){
+      const itemList=cart.map(i=>'• '+i.name+(i.detail?' — '+i.detail:'')).join('\n');
+      await emailjs.send(EMAILJS_SERVICE_ID,EMAILJS_TEMPLATE_ID,{to_email:email,country,period,item_list:itemList,item_count:cart.length},EMAILJS_PUBLIC_KEY);
+    }
+    sessionStorage.removeItem('jk_cart');
+    document.getElementById('confirmOverlay').classList.remove('open');
+    document.getElementById('mainContent').style.display='none';
+    document.getElementById('successScreen').classList.add('visible');
+  }catch(e){
+    toast('Something went wrong. Try again.','err');
+    btn.disabled=false; btn.textContent='Looks good — send it';
+  }
+}
+
+function toast(msg,type=''){
+  const t=document.getElementById('toast'); t.textContent=msg;
+  t.className='toast'+(type?' '+type:''); t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2800);
+}
+
+initGrids(); loadSession();
+</script>
+<script src="https://cdn.emailjs.com/sdk/3.2.0/email.min.js"></script>
+</body>
+</html>
