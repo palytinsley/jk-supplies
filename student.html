@@ -935,7 +935,7 @@ function openConfirm(){
   const country=document.getElementById('country').value;
   const email=document.getElementById('replyEmail').value.trim();
   if(!country){toast('Select your country.','err');return;}
-  if(!email.endsWith('@pausd.us')){toast('Enter your @pausd.us email.','err');return;}
+ if(!email.endsWith('@pausd.us') && !email.endsWith('@pausd.org')){toast('Enter your @pausd.us email.','err');return;}
   const period=document.getElementById('country').selectedOptions[0]?.dataset?.period||'?';
   document.getElementById('confirmMeta').innerHTML=`<strong>${country}</strong> · Period ${period}<br><span style="color:var(--muted)">${email}</span>`;
   const cont=document.getElementById('confirmItems'); cont.innerHTML='';
