@@ -850,7 +850,7 @@ function onCountry(){
 function checkEmail(){
   const v=document.getElementById('replyEmail').value.trim(), fb=document.getElementById('emailFb');
   if(!v){fb.textContent='';fb.className='email-feedback';return false;}
-  if(v.endsWith('@pausd.us')){fb.textContent='✓ Looks good';fb.className='email-feedback ok';return true;}
+  if(v.endsWith('@pausd.us') || v.endsWith('@pausd.org')){fb.textContent='✓ Looks good';fb.className='email-feedback ok';return true;}
   if(v.includes('@')){fb.textContent='Use your @pausd.us school email';fb.className='email-feedback warn';return false;}
   fb.textContent='Enter your full school email'; fb.className='email-feedback warn'; return false;
 }
