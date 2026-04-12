@@ -992,8 +992,10 @@ initGrids(); loadSession();
 
 <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
 <script>
-  emailjs.init('t9UIpuX-5wgc4RPno');
+  (function(){
+    emailjs.init('t9UIpuX-5wgc4RPno');
+    console.log("EmailJS initialized");
+  })();
 </script>
-
 </body>
 </html>
