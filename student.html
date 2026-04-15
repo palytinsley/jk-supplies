@@ -776,18 +776,15 @@ hr.div { border: none; border-top: 1px solid var(--border-light); margin: 0.9rem
 <div class="success-screen" id="successScreen">
   <div class="success-stamp">SUBMITTED</div>
   <h2>Request received.</h2>
-  <p id="confirmId" style="font-family:'Space Mono',monospace;font-size:0.8rem;font-weight:700;color:var(--accent);margin-bottom:0.75rem"></p>
   <p>Mr. Tinsley has your list.<br>Check your email for a confirmation.<br><br>Now go make something wild.</p>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
-const SUPABASE_URL = 'https://pizuvyfvevdwmbqcwanf.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBpenV2eWZ2ZXZkd21icWN3YW5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYwMTA3NzUsImV4cCI6MjA5MTU4Njc3NX0.FQox6MV8XrbeB_dVoWsZcnOfGtzfheEFpbxAOIadmLY';
-const EMAILJS_SERVICE_ID = 'service_v7bchw7';
-const EMAILJS_TEMPLATE_ID = 'template_gsncn3g';
-const EMAILJS_PUBLIC_KEY = 't9UIpuX-5wgc4RPno';
+const SUPABASE_URL = 'YOUR_SUPABASE_URL';
+const SUPABASE_KEY = 'YOUR_SUPABASE_ANON_KEY';
+
 
 const colorData = {
   1:[{n:'Flat White',h:'#f5f5f5'},{n:'Gloss White',h:'#ffffff',b:1},{n:'Off White',h:'#ede8df'},{n:'Light Grey',h:'#c8c8c8'},{n:'Grey',h:'#888888'},{n:'Dark Grey',h:'#444444'},{n:'Black',h:'#1a1a1a'}],
@@ -851,7 +848,7 @@ function onCountry(){
 function checkEmail(){
   const v=document.getElementById('replyEmail').value.trim(), fb=document.getElementById('emailFb');
   if(!v){fb.textContent='';fb.className='email-feedback';return false;}
-  if(v.endsWith('@pausd.us') || v.endsWith('@pausd.org')){fb.textContent='✓ Looks good';fb.className='email-feedback ok';return true;}
+  if(v.endsWith('@pausd.us')){fb.textContent='✓ Looks good';fb.className='email-feedback ok';return true;}
   if(v.includes('@')){fb.textContent='Use your @pausd.us school email';fb.className='email-feedback warn';return false;}
   fb.textContent='Enter your full school email'; fb.className='email-feedback warn'; return false;
 }
@@ -936,7 +933,7 @@ function openConfirm(){
   const country=document.getElementById('country').value;
   const email=document.getElementById('replyEmail').value.trim();
   if(!country){toast('Select your country.','err');return;}
- if(!email.endsWith('@pausd.us') && !email.endsWith('@pausd.org')){toast('Enter your @pausd.us email.','err');return;}
+  if(!email.endsWith('@pausd.us')){toast('Enter your @pausd.us email.','err');return;}
   const period=document.getElementById('country').selectedOptions[0]?.dataset?.period||'?';
   document.getElementById('confirmMeta').innerHTML=`<strong>${country}</strong> · Period ${period}<br><span style="color:var(--muted)">${email}</span>`;
   const cont=document.getElementById('confirmItems'); cont.innerHTML='';
@@ -952,26 +949,15 @@ function openConfirm(){
 function closeConfirm(){document.getElementById('confirmOverlay').classList.remove('open');}
 
 async function submitOrder(){
-  if(window.__submitting) return;
-  if(!cart || cart.length===0){toast('Add at least one item first.','err');return;}
-  if(!navigator.onLine){toast('No internet connection — try again.','err');return;}
-  window.__submitting=true;
   const country=document.getElementById('country').value;
   const email=document.getElementById('replyEmail').value.trim();
   const period=document.getElementById('country').selectedOptions[0]?.dataset?.period||'?';
   const btn=document.getElementById('sendBtn'); btn.disabled=true; btn.textContent='Sending…';
-  const sid='JK-'+Date.now().toString().slice(-6);
-  const fullSid='sub_'+Date.now();
-  const rows=(cart||[]).map(item=>({submission_id:fullSid,period,country,reply_email:email,category:item.category,item_name:item.name,item_detail:(item.detail||'').trim(),link:(item.link||'').trim(),status:'pending',denial_reason:'',oos_note:''}));
+  const sid='sub_'+Date.now();
+  const rows=cart.map(item=>({submission_id:sid,period,country,reply_email:email,category:item.category,item_name:item.name,item_detail:item.detail||'',link:item.link||'',status:'pending',denial_reason:'',oos_note:''}));
   try{
     const res=await fetch(SUPABASE_URL+'/rest/v1/requests',{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Prefer':'return=minimal'},body:JSON.stringify(rows)});
     if(!res.ok) throw new Error('Supabase failed');
-    if(window.emailjs){
-      try{
-        const itemList=(cart||[]).map(i=>'• '+i.name+(i.detail?' — '+i.detail:'')).join('\n');
-        await emailjs.send(EMAILJS_SERVICE_ID,EMAILJS_TEMPLATE_ID,{to_email:email,country,period,item_list:itemList,item_count:(cart||[]).length});
-      }catch(emailErr){console.error('EmailJS error:',emailErr);}
-    }
     sessionStorage.removeItem('jk_cart');
     cart.length=0;
     document.getElementById('confirmOverlay').classList.remove('open');
@@ -993,14 +979,6 @@ function toast(msg,type=''){
 }
 
 initGrids(); loadSession();
-</script>
-
-<script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
-<script>
-  (function(){
-    emailjs.init('t9UIpuX-5wgc4RPno');
-    console.log("EmailJS initialized");
-  })();
 </script>
 </body>
 </html>
