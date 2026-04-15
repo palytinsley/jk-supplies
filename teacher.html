@@ -161,6 +161,26 @@ body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-s
 .btn-gmail:hover { background: #1558b0; }
 .email-close { display: block; width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 0.72rem; font-family: 'Space Mono', monospace; font-size: 0.65rem; cursor: pointer; margin-top: 0.9rem; text-transform: uppercase; color: var(--muted); }
 
+/* NOTIFY BANNER */
+.notify-banner { background: var(--red-bg); border: 1.5px solid var(--accent); border-radius: 8px; padding: 0.7rem 1rem; margin-bottom: 0.85rem; display: flex; align-items: center; gap: 0.75rem; }
+.notify-banner-text { flex: 1; font-size: 0.8rem; font-weight: 600; color: var(--accent); }
+.btn-notify { font-family: 'Space Mono', monospace; font-size: 0.62rem; font-weight: 700; padding: 0.4rem 0.85rem; background: var(--accent); color: #fff; border: none; border-radius: 5px; cursor: pointer; text-transform: uppercase; white-space: nowrap; transition: background 0.15s; }
+.btn-notify:hover { background: #a82d14; }
+.btn-notify:disabled { background: var(--border); color: var(--muted); cursor: not-allowed; }
+
+/* DENIED ITEMS — collapsed at bottom */
+.denied-section { margin-top: 0.25rem; border-top: 1px dashed var(--border); }
+.denied-toggle { font-family: 'Space Mono', monospace; font-size: 0.58rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); padding: 0.45rem 0.9rem; cursor: pointer; display: flex; align-items: center; gap: 0.4rem; }
+.denied-toggle:hover { color: var(--accent); }
+.denied-items-list { display: none; }
+.denied-items-list.open { display: block; }
+.req-item.denied-row { opacity: 0.65; background: var(--red-bg); }
+
+/* CHRONOLOGICAL VIEW */
+.view-toggle { display: flex; gap: 0.35rem; margin-bottom: 0.75rem; }
+.view-btn { font-family: 'Space Mono', monospace; font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; padding: 0.3rem 0.75rem; border: 1.5px solid var(--border); border-radius: 20px; background: var(--surface); color: var(--muted); cursor: pointer; transition: all 0.15s; }
+.view-btn.active { background: var(--text); color: #fff; border-color: var(--text); }
+
 /* LOADING / EMPTY */
 .loading { text-align: center; padding: 3rem 1rem; color: var(--muted); font-family: 'Space Mono', monospace; font-size: 0.75rem; }
 .spinner { width: 22px; height: 22px; border: 2px solid var(--border); border-top-color: var(--text); border-radius: 50%; animation: spin 0.6s linear infinite; margin: 0 auto 0.65rem; }
@@ -241,24 +261,32 @@ body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-s
 <!-- Email Modal -->
 <div class="email-modal-bg" id="emailModal">
   <div class="email-card">
-    <h3>Send Purchase Emails</h3>
-    <p class="email-card-sub">One pre-filled Gmail per group. Just tap and hit Send.</p>
+    <h3>Send Shopping Update</h3>
+    <p class="email-card-sub" id="emailCard_sub">Review before sending.</p>
     <div id="emailGroups"></div>
-    <button class="email-close" onclick="closeEmailModal()">Close</button>
+    <div style="display:flex;gap:0.5rem;margin-top:0.9rem">
+      <button class="email-close" style="flex:1;margin:0" onclick="closeEmailModal()">Cancel</button>
+      <button id="emailSendBtn" style="flex:2;background:var(--green);color:#fff;border:none;border-radius:8px;padding:0.72rem;font-family:'Space Mono',monospace;font-size:0.68rem;font-weight:700;cursor:pointer;text-transform:uppercase;">Send All Emails</button>
+    </div>
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
-const SUPABASE_URL = 'https://pizuvyfvevdwmbqcwanf.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBpenV2eWZ2ZXZkd21icWN3YW5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYwMTA3NzUsImV4cCI6MjA5MTU4Njc3NX0.FQox6MV8XrbeB_dVoWsZcnOfGtzfheEFpbxAOIadmLY';
+const SUPABASE_URL = 'YOUR_SUPABASE_URL';
+const SUPABASE_KEY = 'YOUR_SUPABASE_ANON_KEY';
+const EMAILJS_SERVICE_ID = 'service_v7bchw7';
+const EMAILJS_DENIAL_TEMPLATE_ID = 'template_di08r5w';
+const EMAILJS_COMPLETED_TEMPLATE_ID = 'template_gsncn3g';
+const EMAILJS_PUBLIC_KEY = 't9UIpuX-5wgc4RPno';
 
 let allRequests = [];
 let mode = 'reviewer';
 let filter = 'all';
 let denyTargetId = null, denyReason = '';
 let oosTargetId = null;
+let reviewView = 'grouped'; // 'grouped' or 'chrono'
 const grabbed = new Set(); // purchased or oos
 
 const aisles = [
@@ -364,32 +392,146 @@ function render() {
 
 function renderReviewer(main) {
   const reqs = filteredRequests();
+
+  // Notify banner — unnotified denials across ALL requests
+  const unnotified = allRequests.filter(r => r.status === 'denied' && !r.denial_notified);
+  const notifyBanner = unnotified.length > 0
+    ? `<div class="notify-banner">
+        <div class="notify-banner-text">${unnotified.length} denial${unnotified.length>1?'s':''} not yet sent to students</div>
+        <button class="btn-notify" id="notifyBtn" onclick="notifyDenials()">Notify Students</button>
+      </div>` : '';
+
+  // View toggle
+  const viewToggle = `<div class="view-toggle">
+    <div class="view-btn ${reviewView==='grouped'?'active':''}" onclick="setReviewView('grouped',this)">By Country</div>
+    <div class="view-btn ${reviewView==='chrono'?'active':''}" onclick="setReviewView('chrono',this)">Chronological</div>
+  </div>`;
+
+  let html = stats() + notifyBanner + viewToggle;
+
+  if (reviewView === 'chrono') {
+    // Flat chronological list
+    const sorted = [...reqs].sort((a,b) => new Date(a.created_at) - new Date(b.created_at));
+    if (!sorted.length) { html += '<div class="loading">No requests match this filter.</div>'; main.innerHTML = html; return; }
+    sorted.forEach(item => {
+      const pc = item.period === '5' ? 'p5' : 'p6';
+      const denialNote = item.status === 'denied' && item.denial_reason ? `<div class="req-note">Denied: ${item.denial_reason}${item.denial_notified?' · notified':' · not notified'}</div>` : '';
+      const linkHtml = item.link ? `<a class="req-link" href="${item.link}" target="_blank">↗ Reference</a>` : '';
+      let actions = '';
+      if (item.status === 'pending') {
+        actions = `<div class="req-actions"><button class="btn-approve" onclick="approve('${item.id}')">✓ OK</button><button class="btn-deny" onclick="openDenyModal('${item.id}','${esc(item.item_name)}')">✕ Deny</button></div>`;
+      } else {
+        actions = `<div class="req-actions"><span class="sbadge s-${item.status}">${item.status==='outofstock'?'OOS':item.status}</span></div>`;
+      }
+      html += `<div class="sub-group">
+        <div class="sub-head">
+          <div class="sub-country">${item.country}</div>
+          <span class="pbadge ${pc}">Per. ${item.period}</span>
+          <span class="sub-email">${item.reply_email}</span>
+        </div>
+        <div class="req-item">
+          <div class="req-icon">${catIcon[item.category]||'📦'}</div>
+          <div class="req-body"><div class="req-name">${item.item_name}</div><div class="req-detail">${item.item_detail||''}</div>${linkHtml}${denialNote}</div>
+          ${actions}
+        </div>
+      </div>`;
+    });
+    main.innerHTML = html;
+    return;
+  }
+
+  // Grouped view
   const groups = {};
   reqs.forEach(r => {
     if (!groups[r.submission_id]) groups[r.submission_id] = { country: r.country, period: r.period, email: r.reply_email, items: [] };
     groups[r.submission_id].items.push(r);
   });
   const sorted = Object.values(groups).sort((a,b) => a.period !== b.period ? a.period.localeCompare(b.period) : a.country.localeCompare(b.country));
-  let html = stats();
   if (!sorted.length) { html += '<div class="loading">No requests match this filter.</div>'; main.innerHTML = html; return; }
+
   sorted.forEach(g => {
     const pc = g.period === '5' ? 'p5' : 'p6';
+    const activeItems = g.items.filter(i => i.status !== 'denied');
+    const deniedItems = g.items.filter(i => i.status === 'denied');
+
     html += `<div class="sub-group"><div class="sub-head"><div class="sub-country">${g.country}</div><span class="pbadge ${pc}">Per. ${g.period}</span><span class="sub-email">${g.email}</span></div>`;
-    g.items.forEach(item => {
-      const denialNote = item.status === 'denied' && item.denial_reason ? `<div class="req-note">Denied: ${item.denial_reason}</div>` : '';
+
+    // Active items first
+    activeItems.forEach(item => {
       const oosNote = item.status === 'outofstock' && item.oos_note ? `<div class="req-note">Got instead: ${item.oos_note}</div>` : '';
       const linkHtml = item.link ? `<a class="req-link" href="${item.link}" target="_blank">↗ Reference</a>` : '';
       let actions = '';
       if (item.status === 'pending') {
         actions = `<div class="req-actions"><button class="btn-approve" onclick="approve('${item.id}')">✓ OK</button><button class="btn-deny" onclick="openDenyModal('${item.id}','${esc(item.item_name)}')">✕ Deny</button></div>`;
       } else {
-        actions = `<div class="req-actions"><span class="sbadge s-${item.status}">${item.status === 'outofstock' ? 'OOS' : item.status}</span></div>`;
+        actions = `<div class="req-actions"><span class="sbadge s-${item.status}">${item.status==='outofstock'?'OOS':item.status}</span></div>`;
       }
-      html += `<div class="req-item"><div class="req-icon">${catIcon[item.category]||'📦'}</div><div class="req-body"><div class="req-name">${item.item_name}</div><div class="req-detail">${item.item_detail||''}</div>${linkHtml}${denialNote}${oosNote}</div>${actions}</div>`;
+      html += `<div class="req-item"><div class="req-icon">${catIcon[item.category]||'📦'}</div><div class="req-body"><div class="req-name">${item.item_name}</div><div class="req-detail">${item.item_detail||''}</div>${linkHtml}${oosNote}</div>${actions}</div>`;
     });
+
+    // Denied items collapsed at bottom
+    if (deniedItems.length) {
+      const gid = g.country.replace(/\s/g,'_');
+      const notifiedAll = deniedItems.every(i => i.denial_notified);
+      html += `<div class="denied-section">
+        <div class="denied-toggle" onclick="toggleDenied('denied_${gid}')">
+          ▸ ${deniedItems.length} denied${notifiedAll?' (notified)':' (not yet notified)'}
+        </div>
+        <div class="denied-items-list" id="denied_${gid}">`;
+      deniedItems.forEach(item => {
+        const denialNote = item.denial_reason ? `<div class="req-note">Reason: ${item.denial_reason}${item.denial_notified?' · ✓ notified':''}</div>` : '';
+        html += `<div class="req-item denied-row"><div class="req-icon">${catIcon[item.category]||'📦'}</div><div class="req-body"><div class="req-name">${item.item_name}</div><div class="req-detail">${item.item_detail||''}</div>${denialNote}</div><div class="req-actions"><span class="sbadge s-denied">denied</span></div></div>`;
+      });
+      html += `</div></div>`;
+    }
+
     html += '</div>';
   });
   main.innerHTML = html;
+}
+
+function toggleDenied(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.classList.toggle('open');
+  const toggle = el.previousElementSibling;
+  if (toggle) toggle.textContent = toggle.textContent.replace('▸','▾').replace('▾','▸');
+}
+
+function setReviewView(v, el) {
+  reviewView = v;
+  document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  render();
+}
+
+async function notifyDenials() {
+  const unnotified = allRequests.filter(r => r.status === 'denied' && !r.denial_notified);
+  if (!unnotified.length) return;
+  const btn = document.getElementById('notifyBtn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Sending…'; }
+  let sent = 0, failed = 0;
+  for (const item of unnotified) {
+    try {
+      if (window.emailjs) {
+        await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_DENIAL_TEMPLATE_ID, {
+          to_email: item.reply_email,
+          country: item.country,
+          period: item.period,
+          item_name: item.item_name,
+          denial_reason: item.denial_reason
+        });
+      }
+      await patch(item.id, { denial_notified: true });
+      item.denial_notified = true;
+      sent++;
+    } catch(e) {
+      console.error('Notify error for', item.item_name, e);
+      failed++;
+    }
+  }
+  render();
+  showToast(failed > 0 ? `Sent ${sent}, ${failed} failed — check console` : `${sent} denial email${sent>1?'s':''} sent`);
 }
 
 function renderShopper(main) {
@@ -472,11 +614,12 @@ async function confirmDeny() {
   const custom=document.getElementById('denyCustom').value.trim(), reason=custom||denyReason;
   if (!reason){showToast('Pick or write a reason.');return;}
   try {
-    await patch(denyTargetId,{status:'denied',denial_reason:reason});
+    await patch(denyTargetId,{status:'denied',denial_reason:reason,denial_notified:false});
     const item=allRequests.find(r=>r.id==denyTargetId);
-    item.status='denied'; item.denial_reason=reason;
-    closeDenyModal(); render(); showToast('Denied');
-  } catch(e){showToast('Error');}
+    item.status='denied'; item.denial_reason=reason; item.denial_notified=false;
+    closeDenyModal(); render();
+    showToast('Denied — use Notify Students to email');
+  } catch(e){console.error(e); showToast('Error');}
 }
 
 // ===== OOS =====
@@ -515,44 +658,78 @@ function toggleGrab(id) {
 }
 
 // ===== Email =====
-function openEmailModal() {
+async function openEmailModal() {
+  // Build groups from approved/oos items only — denied handled separately via notify
   const groups = {};
-  allRequests.filter(r => ['approved','denied','outofstock','purchased'].includes(r.status)).forEach(r => {
+  allRequests.filter(r => r.status === 'approved' || r.status === 'outofstock').forEach(r => {
     if (!groups[r.submission_id]) groups[r.submission_id] = {country:r.country,period:r.period,email:r.reply_email,items:[]};
     groups[r.submission_id].items.push(r);
   });
 
+  const groupList = Object.values(groups).sort((a,b)=>a.country.localeCompare(b.country));
+  if (!groupList.length) {
+    showToast('No approved items to email yet.');
+    return;
+  }
+
+  // Build preview modal first
   let html = '';
-  Object.values(groups).sort((a,b)=>a.country.localeCompare(b.country)).forEach(g => {
+  groupList.forEach((g, idx) => {
     const purch = g.items.filter(i => grabbed.has(i.id) && i.status==='approved');
-    const denied = g.items.filter(i => i.status==='denied');
     const oos = g.items.filter(i => i.status==='outofstock');
     const pending = g.items.filter(i => i.status==='approved' && !grabbed.has(i.id));
-
-    const subj = encodeURIComponent(`Junk Kouture Supply Update — ${g.country}`);
-    const lines = [`Hi ${g.country} group,\n\nHere's your supply request update:\n`];
-    if (purch.length) { lines.push('PURCHASED:'); purch.forEach(i=>lines.push(`  ✓ ${i.item_name}${i.item_detail?' — '+i.item_detail:''}`)); lines.push(''); }
-    if (oos.length) { lines.push('OUT OF STOCK:'); oos.forEach(i=>lines.push(`  ~ ${i.item_name}${i.oos_note?' (got instead: '+i.oos_note+')':''}`)); lines.push(''); }
-    if (denied.length) { lines.push('NOT PURCHASING:'); denied.forEach(i=>lines.push(`  ✗ ${i.item_name} — ${i.denial_reason}`)); lines.push(''); }
-    if (pending.length) { lines.push('STILL WORKING ON:'); pending.forEach(i=>lines.push(`  ○ ${i.item_name}`)); lines.push(''); }
-    lines.push('Questions? Find me at PRIME or before/after class.\n\n— Mr. Tinsley');
-    const body = encodeURIComponent(lines.join('\n'));
-    const href = `mailto:${g.email}?subject=${subj}&body=${body}`;
-
-    html += `<div class="eg"><div class="eg-head"><span class="eg-country">${g.country} · Per. ${g.period}</span><span class="eg-email">${g.email}</span></div>
+    html += `<div class="eg">
+      <div class="eg-head"><span class="eg-country">${g.country} · Per. ${g.period}</span><span class="eg-email">${g.email}</span></div>
       <div class="eg-items">
         ${purch.map(i=>`<div class="ep">✓ ${i.item_name}</div>`).join('')}
         ${oos.map(i=>`<div class="eo">~ ${i.item_name}${i.oos_note?' ('+i.oos_note+')':''}</div>`).join('')}
-        ${denied.map(i=>`<div class="ed">✗ ${i.item_name}</div>`).join('')}
-        ${pending.map(i=>`<div>○ ${i.item_name}</div>`).join('')}
+        ${pending.map(i=>`<div style="color:var(--muted)">○ ${i.item_name} (not yet grabbed)</div>`).join('')}
       </div>
-      <a class="btn-gmail" href="${href}">Open in Gmail →</a></div>`;
+    </div>`;
   });
 
-  if (!html) html = '<div style="text-align:center;color:var(--muted);font-size:0.85rem;padding:1rem">No groups to email yet.</div>';
   document.getElementById('emailGroups').innerHTML = html;
+  document.getElementById('emailCard_sub').textContent = `${groupList.length} group${groupList.length>1?'s':''} will receive a shopping update email.`;
   document.getElementById('emailModal').classList.add('open');
+  document.getElementById('emailSendBtn').onclick = () => sendCompletedEmails(groupList);
 }
+
+async function sendCompletedEmails(groupList) {
+  const btn = document.getElementById('emailSendBtn');
+  btn.disabled = true; btn.textContent = 'Sending…';
+  let sent = 0, failed = 0;
+
+  for (const g of groupList) {
+    const purch = g.items.filter(i => grabbed.has(i.id) && i.status==='approved');
+    const oos = g.items.filter(i => i.status==='outofstock');
+    const pending = g.items.filter(i => i.status==='approved' && !grabbed.has(i.id));
+
+    const lines = [];
+    if (purch.length) { lines.push('PURCHASED:'); purch.forEach(i=>lines.push(`  ✓ ${i.item_name}${i.item_detail?' — '+i.item_detail:''}`)); lines.push(''); }
+    if (oos.length) { lines.push('OUT OF STOCK:'); oos.forEach(i=>lines.push(`  ~ ${i.item_name}${i.oos_note?' (got instead: '+i.oos_note+')':''}`)); lines.push(''); }
+    if (pending.length) { lines.push('STILL WORKING ON:'); pending.forEach(i=>lines.push(`  ○ ${i.item_name}`)); lines.push(''); }
+    const itemSummary = lines.join('\n');
+
+    try {
+      if (window.emailjs) {
+        await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_COMPLETED_TEMPLATE_ID, {
+          to_email: g.email,
+          country: g.country,
+          period: g.period,
+          item_summary: itemSummary
+        });
+      }
+      sent++;
+    } catch(e) {
+      console.error('Completed email error for', g.country, e);
+      failed++;
+    }
+  }
+
+  closeEmailModal();
+  showToast(failed > 0 ? `Sent ${sent}, ${failed} failed — check console` : `${sent} email${sent>1?'s':''} sent`);
+}
+
 function closeEmailModal() { document.getElementById('emailModal').classList.remove('open'); }
 
 function esc(s) { return (s||'').replace(/'/g,"\\'").replace(/"/g,'&quot;'); }
@@ -563,6 +740,13 @@ function showToast(msg) {
 
 load();
 setInterval(load, 60000);
+</script>
+<script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+<script>
+  (function(){
+    emailjs.init('t9UIpuX-5wgc4RPno');
+    console.log('EmailJS initialized (teacher)');
+  })();
 </script>
 </body>
 </html>
