@@ -1,0 +1,32 @@
+{
+  "name": "Junk Kouture Shopper Dashboard",
+  "short_name": "JK Dashboard",
+  "description": "Teacher dashboard for reviewing and shopping Junk Kouture supply requests.",
+  "id": "./teacher.html",
+  "start_url": "./teacher.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#fcf9f8",
+  "theme_color": "#004ac6",
+  "icons": [
+    {
+      "src": "icons/app-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/app-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/app-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
