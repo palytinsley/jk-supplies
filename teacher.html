@@ -347,6 +347,9 @@ button { -webkit-tap-highlight-color: transparent; }
 .shop-cb { width: 46px; height: 46px; border-radius: var(--radius-sm); flex-shrink: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; margin-top: 0.05rem; font-size: 1rem; background: var(--surface3); color: transparent; box-shadow: inset 0 0 0 2px rgba(115,118,134,0.18); }
 .shop-cb.chk { background: var(--green); box-shadow: none; color: #fff; font-weight: 800; }
 .shop-cb.oos-cb { background: rgba(255,255,255,0.45); box-shadow: inset 0 0 0 2px rgba(138,84,0,0.26); color: var(--yellow); font-weight: 800; }
+.shop-cb .ui-icon { width: 1.35rem; height: 1.35rem; opacity: 0.78; }
+.shop-cb.chk .ui-icon { filter: brightness(0) invert(1); opacity: 1; }
+.shop-cb.oos-cb .ui-icon { opacity: 1; }
 .shop-body { flex: 1; min-width: 0; }
 .shop-name { font-family: var(--headline); font-weight: 700; font-size: 1.08rem; line-height: 1.2; letter-spacing: 0; }
 .shop-meta { font-size: 0.86rem; color: var(--muted); margin-top: 0.25rem; line-height: 1.45; font-weight: 500; }
@@ -1524,7 +1527,7 @@ function renderShopper(main) {
       const links = [...new Map(group.rows.filter(r => r.link).map(r => [r.link, r.link])).values()];
       const linksHtml = links.length ? ` · ${links.map((link,idx) => `<a href="${link}" target="_blank" style="color:var(--blue)">link${links.length>1?' '+(idx+1):''}</a>`).join(' · ')}` : '';
       html += `<div class="shop-item" id="shop_${group.domId}">
-        <div class="shop-cb" onclick="toggleGrab('${idsArg(ids)}')"></div>
+        <div class="shop-cb" onclick="toggleGrab('${idsArg(ids)}')" aria-label="Mark purchased">${icon('square')}</div>
         <div class="shop-body">
           <div class="shop-name">${group.item_name}${group.rows.length>1?` <span style="color:var(--muted);font-family:var(--mono);font-size:0.72rem;">×${group.rows.length}</span>`:''}</div>
           <div class="shop-meta">${group.item_detail||''}${linksHtml}</div>
@@ -1560,8 +1563,12 @@ function renderShopHistory(rows) {
       purchasedIds.length ? `<button class="btn-oos" onclick="undoPurchase('${idsArg(purchasedIds)}')">${icon('arrow-back-up')}Undo purchase</button>` : '',
       oosIds.length ? `<button class="btn-oos active-oos" onclick="unOos('${idsArg(oosIds)}')">${icon('arrow-back-up')}Undo OOS</button>` : ''
     ].join('');
+    const cbAction = purchasedIds.length
+      ? `onclick="undoPurchase('${idsArg(purchasedIds)}')" aria-label="Undo purchase"`
+      : `onclick="unOos('${idsArg(oosIds)}')" aria-label="Undo out of stock"`;
+    const cbIcon = isOos ? icon('alert-triangle') : icon('square-check');
     html += `<div class="shop-item ${isOos?'oos':'grabbed'}">
-      <div class="${isOos?'shop-cb oos-cb':'shop-cb chk'}">${isOos?'~':'✓'}</div>
+      <div class="${isOos?'shop-cb oos-cb':'shop-cb chk'}" ${cbAction}>${cbIcon}</div>
       <div class="shop-body">
         <div class="shop-name">${group.item_name}${group.rows.length>1?` <span style="color:var(--muted);font-family:var(--mono);font-size:0.72rem;">×${group.rows.length}</span>`:''}</div>
         <div class="shop-meta">${group.item_detail||''}${linksHtml}</div>
