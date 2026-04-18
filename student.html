@@ -47,6 +47,31 @@ body {
 }
 button, input, select, textarea { font: inherit; }
 button, .pill, .finish-btn, .color-swatch { -webkit-tap-highlight-color: transparent; }
+.ui-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  flex: 0 0 auto;
+  display: inline-block;
+  vertical-align: middle;
+}
+.btn-add, .btn-submit, .step-back, .btn-back, .btn-send, .cart-item-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+.btn-submit .ui-icon, .btn-send .ui-icon { filter: brightness(0) invert(1); }
+.btn-add .ui-icon, .step-back .ui-icon, .btn-back .ui-icon, .cart-item-remove .ui-icon { opacity: 0.78; }
+.input-with-icon { position: relative; }
+.input-with-icon .ui-icon {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  opacity: 0.5;
+  pointer-events: none;
+}
+.input-with-icon input { padding-left: 2.8rem; }
 
 /* HEADER */
 .header {
@@ -130,6 +155,7 @@ button, .pill, .finish-btn, .color-swatch { -webkit-tap-highlight-color: transpa
   outline: 1px solid var(--ghost);
   backdrop-filter: var(--blur);
 }
+.cart-badge .ui-icon { width: 1.1rem; height: 1.1rem; margin-bottom: 0.18rem; opacity: 0.72; }
 .cart-badge .n { font-size: 1.22rem; font-weight: 800; }
 .cart-badge .l { font-size: 0.5rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); margin-top: 0.16rem; }
 
@@ -669,11 +695,12 @@ hr.div { border: none; height: 0.8rem; margin: 0.25rem 0; }
 <div class="header">
   <div class="header-inner">
     <div class="header-left">
-      <div class="header-eyebrow">SJP · Cohort 13</div>
+      <div class="header-eyebrow">SJP · Cohort 12</div>
       <div class="header-title">Junk <em>Kouture</em><br>Supply Request</div>
       <div class="header-sub">Add items → review → submit once for your group</div>
     </div>
     <div class="cart-badge">
+      <img class="ui-icon" src="icons/shopping-cart.svg" alt="" aria-hidden="true">
       <span class="n" id="cartN">0</span>
       <span class="l">items</span>
     </div>
@@ -938,13 +965,16 @@ hr.div { border: none; height: 0.8rem; margin: 0.25rem 0; }
     <hr class="div">
     <div class="form-row">
       <label>Reference link (optional)</label>
-      <input type="text" id="itemLink" placeholder="Home Depot, Amazon link, etc." />
+      <div class="input-with-icon">
+        <img class="ui-icon" src="icons/link.svg" alt="" aria-hidden="true">
+        <input type="text" id="itemLink" placeholder="Home Depot, Amazon link, etc." />
+      </div>
     </div>
   </div>
 
-  <button class="btn-add" onclick="addToCart()">+ Add to Cart</button>
+  <button class="btn-add" onclick="addToCart()"><img class="ui-icon" src="icons/plus.svg" alt="" aria-hidden="true">Add to Cart</button>
   <div class="step-nav">
-    <button class="btn-submit" onclick="goGroupStep()">Next: Group Info →</button>
+    <button class="btn-submit" onclick="goGroupStep()"><img class="ui-icon" src="icons/arrow-right.svg" alt="" aria-hidden="true">Next: Group Info</button>
   </div>
   </div>
 
@@ -985,8 +1015,8 @@ hr.div { border: none; height: 0.8rem; margin: 0.25rem 0; }
   </div>
 
   <div class="step-nav">
-    <button class="step-back" onclick="showStep(1)">← Items</button>
-    <button class="btn-submit" onclick="openConfirm()">Review &amp; Submit →</button>
+    <button class="step-back" onclick="showStep(1)"><img class="ui-icon" src="icons/arrow-left.svg" alt="" aria-hidden="true">Items</button>
+    <button class="btn-submit" onclick="openConfirm()"><img class="ui-icon" src="icons/check.svg" alt="" aria-hidden="true">Review &amp; Submit</button>
   </div>
   <p class="submit-hint">You'll review everything before it sends.</p>
   </div>
@@ -1001,8 +1031,8 @@ hr.div { border: none; height: 0.8rem; margin: 0.25rem 0; }
     <div class="confirm-meta" id="confirmMeta"></div>
     <div class="confirm-items" id="confirmItems"></div>
     <div class="sheet-actions">
-      <button class="btn-back" onclick="closeConfirm()">← Edit</button>
-      <button class="btn-send" id="sendBtn" onclick="submitOrder()">Looks good — send it</button>
+      <button class="btn-back" onclick="closeConfirm()"><img class="ui-icon" src="icons/arrow-left.svg" alt="" aria-hidden="true">Edit</button>
+      <button class="btn-send" id="sendBtn" onclick="submitOrder()"><img class="ui-icon" src="icons/check.svg" alt="" aria-hidden="true">Looks good — send it</button>
     </div>
   </div>
 </div>
@@ -1016,7 +1046,7 @@ hr.div { border: none; height: 0.8rem; margin: 0.25rem 0; }
   <div class="success-id" id="confirmId"></div>
   <div class="success-next">
     <div class="success-next-note">Your first request is already submitted. Use this only if you forgot something or need to add more items.</div>
-    <button class="btn-submit" onclick="startAnotherRequest()">Start another request</button>
+    <button class="btn-submit" onclick="startAnotherRequest()"><img class="ui-icon" src="icons/plus.svg" alt="" aria-hidden="true">Start another request</button>
   </div>
   <p style="margin-top:1rem">Check your email for a confirmation.<br>Now go make something wild.</p>
 </div>
@@ -1039,6 +1069,10 @@ const cart=[], sel={}, multi={};
 let sprayC=null, paintC=null;
 let validationOverrideKey='';
 window.__submitting = false;
+
+function uiIcon(name){
+  return `<img class="ui-icon" src="icons/${name}.svg" alt="" aria-hidden="true">`;
+}
 
 function buildGrid(id,group,type){
   const el=document.getElementById(id); if(!el) return; el.innerHTML='';
@@ -1203,7 +1237,7 @@ function renderCart(){
   e.style.display='none'; c.innerHTML='';
   cart.forEach(item=>{
     const el=document.createElement('div'); el.className='cart-item';
-    el.innerHTML=`<div class="cart-item-icon">${item.icon}</div><div class="cart-item-body"><div class="cart-item-name">${item.name}</div><div class="cart-item-detail">${[item.detail,item.link].filter(Boolean).join(' · ')||'&nbsp;'}</div></div><button class="cart-item-remove" onclick="removeFromCart(${item.id})">✕</button>`;
+    el.innerHTML=`<div class="cart-item-icon">${item.icon}</div><div class="cart-item-body"><div class="cart-item-name">${item.name}</div><div class="cart-item-detail">${[item.detail,item.link].filter(Boolean).join(' · ')||'&nbsp;'}</div></div><button class="cart-item-remove" onclick="removeFromCart(${item.id})" aria-label="Remove item"><img class="ui-icon" src="icons/x.svg" alt="" aria-hidden="true"></button>`;
     c.appendChild(el);
   });
 }
@@ -1273,7 +1307,7 @@ function openConfirm(){
     cont.appendChild(el);
   });
   document.getElementById('sendBtn').disabled=false;
-  document.getElementById('sendBtn').textContent='Looks good — send it';
+  document.getElementById('sendBtn').innerHTML=uiIcon('check')+'Looks good — send it';
   document.getElementById('stepChip1').classList.remove('active');
   document.getElementById('stepChip2').classList.remove('active');
   document.getElementById('stepChip3').classList.add('active');
@@ -1285,7 +1319,7 @@ async function submitOrder(){
   if(window.__submitting) return;
   window.__submitting=true;
   const btn=document.getElementById('sendBtn');
-  btn.disabled=true; btn.textContent='Sending…';
+  btn.disabled=true; btn.innerHTML=uiIcon('check')+'Sending...';
   try{
     const country=document.getElementById('country').value;
     const email=document.getElementById('replyEmail').value.trim();
@@ -1323,7 +1357,7 @@ async function submitOrder(){
   }finally{
     window.__submitting=false;
     if(!document.getElementById('successScreen').classList.contains('visible')){
-      btn.disabled=false; btn.textContent='Looks good — send it';
+      btn.disabled=false; btn.innerHTML=uiIcon('check')+'Looks good — send it';
     }
   }
 }
