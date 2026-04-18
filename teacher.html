@@ -54,6 +54,32 @@ body {
 button, input, textarea { font: inherit; }
 button { -webkit-tap-highlight-color: transparent; }
 :focus-visible { outline: 3px solid rgba(37,99,235,0.28); outline-offset: 2px; }
+.ui-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  flex: 0 0 auto;
+  display: inline-block;
+  vertical-align: middle;
+}
+.mode-btn, .btn-approve, .btn-deny, .btn-oos, .btn-done, .btn-mok, .btn-notify,
+.batch-btn, #emailSendBtn, #emailResendBtn, .select-box {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+.mode-btn.active .ui-icon,
+.batch-btn.primary .ui-icon,
+.btn-mok .ui-icon,
+.btn-done .ui-icon,
+.btn-notify .ui-icon,
+#emailSendBtn .ui-icon,
+#emailResendBtn .ui-icon {
+  filter: brightness(0) invert(1);
+}
+.btn-approve .ui-icon, .btn-deny .ui-icon, .btn-oos .ui-icon, .batch-btn .ui-icon, .mode-btn .ui-icon {
+  opacity: 0.8;
+}
 
 /* HEADER */
 .header {
@@ -209,7 +235,12 @@ button { -webkit-tap-highlight-color: transparent; }
   border-radius: 999px;
   text-transform: uppercase;
   white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
 }
+.pbadge .ui-icon, .sbadge .ui-icon { width: 0.95rem; height: 0.95rem; }
 .pbadge.p5 { background: var(--blue-bg); color: var(--accent); }
 .pbadge.p6 { background: var(--yellow-bg); color: var(--yellow); }
 .sub-email { font-size: 0.74rem; color: var(--muted); font-family: var(--mono); }
@@ -320,7 +351,8 @@ button { -webkit-tap-highlight-color: transparent; }
 .shop-name { font-family: var(--headline); font-weight: 700; font-size: 1.08rem; line-height: 1.2; letter-spacing: 0; }
 .shop-meta { font-size: 0.86rem; color: var(--muted); margin-top: 0.25rem; line-height: 1.45; font-weight: 500; }
 .shop-sub-note { font-size: 0.82rem; color: var(--yellow); margin-top: 0.32rem; font-weight: 700; }
-.shop-tag { display: inline-block; font-size: 0.66rem; font-family: var(--mono); font-weight: 700; text-transform: uppercase; padding: 0.24rem 0.5rem; border-radius: 999px; margin-top: 0.45rem; line-height: 1.3; }
+.shop-tag { display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.66rem; font-family: var(--mono); font-weight: 700; text-transform: uppercase; padding: 0.24rem 0.5rem; border-radius: 999px; margin-top: 0.45rem; line-height: 1.3; }
+.shop-tag .ui-icon { width: 0.95rem; height: 0.95rem; }
 .shop-actions { display: flex; flex-direction: column; gap: 0.3rem; flex-shrink: 0; align-items: flex-end; }
 .btn-oos { font-family: var(--headline); font-size: 0.62rem; font-weight: 700; letter-spacing: 0.07em; padding: 0.62rem 0.7rem; min-height: 42px; border-radius: var(--radius-sm); border: 0; background: var(--yellow-bg); color: var(--yellow); cursor: pointer; text-transform: uppercase; transition: all 0.15s; white-space: nowrap; }
 .btn-oos:hover { background: var(--yellow); color: #fff; }
@@ -387,6 +419,71 @@ button { -webkit-tap-highlight-color: transparent; }
 .view-toggle { display: flex; gap: 0.45rem; margin-bottom: 0.9rem; }
 .view-btn { font-family: var(--headline); font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; padding: 0.56rem 0.85rem; min-height: 42px; border: 0; border-radius: var(--radius-sm); background: var(--surface3); color: var(--muted); cursor: pointer; transition: all 0.15s; }
 .view-btn.active { background: var(--text); color: #fff; }
+
+/* BATCH / HISTORY */
+.select-box {
+  width: 2.2rem;
+  height: 2.2rem;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: var(--surface3);
+  color: transparent;
+  cursor: pointer;
+  flex-shrink: 0;
+  box-shadow: inset 0 0 0 2px rgba(115,118,134,0.18);
+  font-family: var(--headline);
+  font-weight: 700;
+}
+.select-box .ui-icon { width: 1.15rem; height: 1.15rem; opacity: 0.75; }
+.select-box.checked {
+  background: var(--accent);
+  color: #fff;
+  box-shadow: none;
+}
+.select-box.checked .ui-icon { filter: brightness(0) invert(1); opacity: 1; }
+.batch-tools {
+  background: rgba(255,255,255,0.88);
+  backdrop-filter: blur(18px);
+  border-radius: var(--radius-lg);
+  padding: 0.65rem;
+  margin-bottom: 0.9rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  box-shadow: var(--shadow-soft);
+}
+.batch-count {
+  flex: 1 1 100%;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+.batch-btn {
+  border: 0;
+  border-radius: var(--radius-sm);
+  min-height: 42px;
+  padding: 0.56rem 0.78rem;
+  background: var(--surface3);
+  color: var(--muted);
+  cursor: pointer;
+  font-family: var(--headline);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+.batch-btn.primary { background: linear-gradient(135deg, var(--accent), var(--blue)); color: #fff; }
+.batch-btn.danger { background: var(--red-bg); color: var(--red); }
+.batch-btn.warn { background: var(--yellow-bg); color: var(--yellow); }
+.history-empty {
+  padding: 0.85rem;
+  color: var(--muted);
+  font-size: 0.84rem;
+  font-weight: 600;
+}
 
 /* LOADING / EMPTY */
 .loading { text-align: center; padding: 3.5rem 1rem; color: var(--muted); font-family: var(--headline); font-size: 0.86rem; font-weight: 700; line-height: 1.55; }
@@ -550,13 +647,13 @@ button { -webkit-tap-highlight-color: transparent; }
 <div id="appShell" style="display:none;">
 <div class="header">
   <div>
-    <div class="header-title">Junk Kouture Dashboard</div>
+    <div class="header-title">Junk Kouture Shopper Dashboard</div>
     <div class="header-sub" id="lastRefresh">Loading...</div>
   </div>
   <div class="mode-toggle">
-    <button class="mode-btn active" id="btnReview" onclick="setMode('reviewer')">Review</button>
-    <button class="mode-btn" id="btnShop" onclick="setMode('shopper')">Shop</button>
-    <button class="mode-btn" id="btnRefresh" onclick="manualRefresh()">Refresh</button>
+    <button class="mode-btn active" id="btnReview" onclick="setMode('reviewer')"><img class="ui-icon" src="icons/clipboard-list.svg" alt="" aria-hidden="true">Review</button>
+    <button class="mode-btn" id="btnShop" onclick="setMode('shopper')"><img class="ui-icon" src="icons/shopping-cart.svg" alt="" aria-hidden="true">Shop</button>
+    <button class="mode-btn" id="btnRefresh" onclick="manualRefresh()"><img class="ui-icon" src="icons/refresh.svg" alt="" aria-hidden="true">Refresh</button>
 	<button class="mode-btn" id="btnLogout" onclick="signOutTeacher()">Logout</button>
   </div>
 </div>
@@ -579,7 +676,7 @@ button { -webkit-tap-highlight-color: transparent; }
     <div class="done-label"><span id="handledCt">0</span> of <span id="totalShopCt">0</span> items handled · <span id="remainingCt">0</span> remaining</div>
     <div class="prog-track"><div class="prog-fill" id="progFill" style="width:0%"></div></div>
   </div>
-  <button class="btn-done" onclick="openEmailModal()">Done — Email Groups</button>
+  <button class="btn-done" onclick="openEmailModal()"><img class="ui-icon" src="icons/mail.svg" alt="" aria-hidden="true">Done — Email Groups</button>
 </div>
 
 <!-- Deny Modal -->
@@ -597,7 +694,7 @@ button { -webkit-tap-highlight-color: transparent; }
     <textarea class="deny-custom" id="denyCustom" placeholder="Or write a custom reason…"></textarea>
     <div class="modal-btns">
       <button class="btn-mc" onclick="closeDenyModal()">Cancel</button>
-      <button class="btn-mok" onclick="confirmDeny()">Deny Item</button>
+      <button class="btn-mok" onclick="confirmDeny()"><img class="ui-icon" src="icons/x.svg" alt="" aria-hidden="true">Deny Item</button>
     </div>
   </div>
 </div>
@@ -612,7 +709,7 @@ button { -webkit-tap-highlight-color: transparent; }
     <textarea class="oos-note-input" id="oosNote" placeholder="e.g. Got navy blue instead of midnight blue, or couldn't find 16g so grabbed 18g…"></textarea>
     <div class="modal-btns">
       <button class="btn-mc" onclick="closeOosModal()">Cancel</button>
-      <button class="btn-mok" style="background:var(--yellow);color:#fff" onclick="confirmOos()">Mark Out of Stock</button>
+      <button class="btn-mok" style="background:var(--yellow);color:#fff" onclick="confirmOos()"><img class="ui-icon" src="icons/alert-triangle.svg" alt="" aria-hidden="true">Mark Out of Stock</button>
     </div>
   </div>
 </div>
@@ -625,8 +722,8 @@ button { -webkit-tap-highlight-color: transparent; }
     <div id="emailGroups"></div>
     <div style="display:flex;gap:0.5rem;margin-top:0.9rem">
       <button class="email-close" style="flex:1;margin:0" onclick="closeEmailModal()">Cancel</button>
-      <button id="emailSendBtn" style="flex:2;">Send All Emails</button>
-      <button id="emailResendBtn" style="display:none;flex:2;">Resend Sent</button>
+      <button id="emailSendBtn" style="flex:2;"><img class="ui-icon" src="icons/mail.svg" alt="" aria-hidden="true">Send All Emails</button>
+      <button id="emailResendBtn" style="display:none;flex:2;"><img class="ui-icon" src="icons/mail.svg" alt="" aria-hidden="true">Resend Sent</button>
     </div>
   </div>
 </div>
@@ -657,6 +754,10 @@ let activeSaveCount = 0;
 let emailBatchInProgress = false;
 let authMode = 'login';
 let recoverySessionReady = false;
+let selectedReviewIds = new Set();
+let reviewHistoryOpen = false;
+let shopHistoryOpen = false;
+let denyTargetIds = [];
 
 // Change these order numbers to match the in-store walking path.
 const aisles = [
@@ -669,6 +770,10 @@ const aisles = [
 ];
 
 const catIcon = { spray_paint:'🎨', paint:'🖌️', wire:'🔩', tape:'📦', glue:'🧲', fasteners:'🔗', thread:'🧵', tools:'🔧', other:'✏️' };
+
+function icon(name) {
+  return `<img class="ui-icon" src="icons/${name}.svg" alt="" aria-hidden="true">`;
+}
 
 function authHeaders(extra = {}) {
   if (!currentSession?.access_token) throw new Error('not authenticated');
@@ -1015,6 +1120,7 @@ async function load(isAuto = false) {
 
 function setFilter(f, el) {
   filter = f;
+  selectedReviewIds.clear();
   document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
   el.classList.add('active');
   render();
@@ -1022,13 +1128,14 @@ function setFilter(f, el) {
 
 function setMode(m) {
   mode = m;
+  selectedReviewIds.clear();
   document.getElementById('btnReview').classList.toggle('active', m === 'reviewer');
   document.getElementById('btnShop').classList.toggle('active', m === 'shopper');
   document.getElementById('doneBar').style.display = m === 'shopper' ? 'flex' : 'none';
   const fb = document.getElementById('filterBar');
   if (m === 'shopper') {
     fb.innerHTML = `
-      <div class="chip active" onclick="setFilter('all',this)">All Approved</div>
+      <div class="chip active" onclick="setFilter('all',this)">All Shopping</div>
       <div class="chip p5" onclick="setFilter('5',this)">Per. 5</div>
       <div class="chip p6" onclick="setFilter('6',this)">Per. 6</div>`;
     filter = 'all';
@@ -1075,17 +1182,105 @@ function render() {
   mode === 'reviewer' ? renderReviewer(main) : renderShopper(main);
 }
 
+function reviewActiveRows(reqs) {
+  return reqs.filter(r => !r.purchased && (r.status === 'pending' || r.status === 'approved'));
+}
+
+function reviewHistoryRows(reqs) {
+  return reqs.filter(r => r.purchased || r.status === 'denied' || r.status === 'outofstock');
+}
+
+function pruneSelection(visibleRows) {
+  const visible = new Set(visibleRows.map(r => String(r.id)));
+  selectedReviewIds = new Set([...selectedReviewIds].filter(id => visible.has(String(id))));
+}
+
+function rowSelected(id) {
+  return selectedReviewIds.has(String(id));
+}
+
+function renderSelectBox(item) {
+  const checked = rowSelected(item.id);
+  return `<button class="select-box ${checked?'checked':''}" onclick="toggleReviewSelection('${item.id}')" aria-label="Select ${esc(item.item_name)}">${icon(checked?'square-check':'square')}</button>`;
+}
+
+function selectedRows() {
+  const ids = new Set([...selectedReviewIds].map(String));
+  return allRequests.filter(r => ids.has(String(r.id)));
+}
+
+function renderBatchTools(visibleRows) {
+  const selectedCount = selectedReviewIds.size;
+  return `<div class="batch-tools">
+    <button class="batch-btn" onclick="selectAllVisible('${idsArg(visibleRows.map(r=>r.id))}')">${icon('square')}Select all visible</button>
+    <button class="batch-btn" onclick="clearReviewSelection()">${icon('square')}Clear selection</button>
+    ${selectedCount ? `<div class="batch-count">${selectedCount} selected</div>
+      <button class="batch-btn primary" onclick="batchApproveSelected()">${icon('check')}Approve selected</button>
+      <button class="batch-btn danger" onclick="openBatchDenyModal()">${icon('x')}Deny selected</button>
+      <button class="batch-btn warn" onclick="resetSelectedToPending()">${icon('arrow-back-up')}Reset to pending</button>` : ''}
+  </div>`;
+}
+
+function reviewActions(item) {
+  if (item.status === 'pending') {
+    return `<div class="req-actions"><button class="btn-approve" onclick="approve('${item.id}')">${icon('check')}OK</button><button class="btn-deny" onclick="openDenyModal('${item.id}','${esc(item.item_name)}')">${icon('x')}Deny</button></div>`;
+  }
+  return `<div class="req-actions"><span class="sbadge s-${item.status}">${item.status}</span><button class="btn-oos" onclick="resetToPending('${item.id}')">${icon('arrow-back-up')}Reset to pending</button></div>`;
+}
+
+function historyActions(item) {
+  if (item.purchased) return `<div class="req-actions"><span class="sbadge s-purchased">${icon('shopping-cart-check')}purchased</span><button class="btn-oos" onclick="undoPurchase('${item.id}')">${icon('arrow-back-up')}Undo purchase</button></div>`;
+  if (item.status === 'outofstock') return `<div class="req-actions"><span class="sbadge s-outofstock">${icon('alert-triangle')}OOS</span><button class="btn-oos" onclick="unOos('${item.id}')">${icon('arrow-back-up')}Undo OOS</button></div>`;
+  if (item.status === 'denied') return `<div class="req-actions"><span class="sbadge s-denied">${icon('x')}denied</span><button class="btn-oos" onclick="resetToPending('${item.id}')">${icon('arrow-back-up')}Reset to pending</button></div>`;
+  return `<div class="req-actions"><span class="sbadge s-${item.status}">${item.status}</span></div>`;
+}
+
+function renderReqRow(item, opts = {}) {
+  const linkHtml = item.link ? `<a class="req-link" href="${item.link}" target="_blank">↗ Reference</a>` : '';
+  const denialNote = item.status === 'denied' && item.denial_reason ? `<div class="req-note">Reason: ${item.denial_reason}${item.denial_notified?' · ✓ notified':''}</div>` : '';
+  const oosNote = item.status === 'outofstock' && item.oos_note ? `<div class="req-note">Got instead: ${item.oos_note}</div>` : '';
+  const purchasedWhen = item.purchased_at ? `<div class="req-note" style="color:var(--blue)">Purchased ${new Date(item.purchased_at).toLocaleString([], {month:'short', day:'numeric', hour:'numeric', minute:'2-digit'})}</div>` : '';
+  const meta = opts.meta ? `<div class="req-detail">${opts.meta}</div>` : '';
+  return `<div class="req-item ${opts.className||''}">
+    ${opts.selectable ? renderSelectBox(item) : `<div class="req-icon">${catIcon[item.category]||'📦'}</div>`}
+    <div class="req-body">
+      <div class="req-name">${item.item_name}</div>
+      <div class="req-detail">${item.item_detail||''}</div>
+      ${meta}${linkHtml}${denialNote}${oosNote}${purchasedWhen}
+    </div>
+    ${opts.actions || reviewActions(item)}
+  </div>`;
+}
+
+function renderHistorySection(label, rows, open, toggleFnName, emptyText) {
+  let html = `<div class="sub-group" style="margin-top:1rem">
+    <div class="denied-toggle" onclick="${toggleFnName}()">${icon('clock')}${open?'▾':'▸'} ${label} (${rows.length})</div>
+    <div class="denied-items-list ${open?'open':''}">`;
+  if (!rows.length) html += `<div class="history-empty">${emptyText}</div>`;
+  rows.forEach(item => {
+    const pc = item.period === '5' ? 'p5' : 'p6';
+    html += renderReqRow(item, {
+      className: item.status === 'denied' ? 'denied-row' : '',
+      meta: `${item.country} · Per. ${item.period} · ${item.reply_email}`,
+      actions: historyActions(item)
+    });
+  });
+  html += '</div></div>';
+  return html;
+}
+
 function renderReviewer(main) {
   const reqs = filteredRequests();
-  const actionableReqs = reqs.filter(r => !r.purchased);
-  const purchasedReqs = reqs.filter(r => r.purchased);
+  const activeReqs = reviewActiveRows(reqs);
+  const historyReqs = reviewHistoryRows(reqs);
+  pruneSelection(activeReqs);
 
   // Notify banner — unnotified denials across ALL requests
   const unnotified = allRequests.filter(r => r.status === 'denied' && !r.denial_notified);
-  const notifyBanner = unnotified.length > 0
+      const notifyBanner = unnotified.length > 0
     ? `<div class="notify-banner">
         <div class="notify-banner-text">${unnotified.length} denial${unnotified.length>1?'s':''} not yet sent to students</div>
-        <button class="btn-notify" id="notifyBtn" onclick="notifyDenials()">Notify Students</button>
+        <button class="btn-notify" id="notifyBtn" onclick="notifyDenials()">${icon('mail')}Notify Students</button>
       </div>` : '';
 
   // View toggle
@@ -1094,133 +1289,66 @@ function renderReviewer(main) {
     <div class="view-btn ${reviewView==='chrono'?'active':''}" onclick="setReviewView('chrono',this)">Chronological</div>
   </div>`;
 
-  let html = stats(actionableReqs) + notifyBanner + viewToggle;
+  let html = stats(reqs) + notifyBanner + viewToggle + renderBatchTools(activeReqs);
 
   if (reviewView === 'chrono') {
     // Flat chronological list
-    const sorted = [...actionableReqs].sort((a,b) => new Date(a.created_at) - new Date(b.created_at));
+    const sorted = [...activeReqs].sort((a,b) => new Date(a.created_at) - new Date(b.created_at));
     if (!sorted.length) {
-      html += '<div class="loading">No actionable requests match this filter.</div>';
-      html += purchasedArchive(purchasedReqs);
+      html += '<div class="loading">No active review rows match this filter.</div>';
+      html += renderHistorySection('History', historyReqs, reviewHistoryOpen, 'toggleReviewHistory', 'No history rows match this filter.');
       main.innerHTML = html;
       return;
     }
     sorted.forEach(item => {
       const pc = item.period === '5' ? 'p5' : 'p6';
-      const denialNote = item.status === 'denied' && item.denial_reason ? `<div class="req-note">Denied: ${item.denial_reason}${item.denial_notified?' · notified':' · not notified'}</div>` : '';
-      const linkHtml = item.link ? `<a class="req-link" href="${item.link}" target="_blank">↗ Reference</a>` : '';
-      let actions = '';
-      if (item.status === 'pending') {
-        actions = `<div class="req-actions"><button class="btn-approve" onclick="approve('${item.id}')">✓ OK</button><button class="btn-deny" onclick="openDenyModal('${item.id}','${esc(item.item_name)}')">✕ Deny</button></div>`;
-      } else {
-        actions = `<div class="req-actions"><span class="sbadge s-${item.status}">${item.status==='outofstock'?'OOS':item.status}</span></div>`;
-      }
       html += `<div class="sub-group">
         <div class="sub-head">
           <div class="sub-country">${item.country}</div>
           <span class="pbadge ${pc}">Per. ${item.period}</span>
           <span class="sub-email">${item.reply_email}</span>
         </div>
-        <div class="req-item">
-          <div class="req-icon">${catIcon[item.category]||'📦'}</div>
-          <div class="req-body"><div class="req-name">${item.item_name}</div><div class="req-detail">${item.item_detail||''}</div>${linkHtml}${denialNote}</div>
-          ${actions}
-        </div>
+        ${renderReqRow(item, { selectable: true, actions: reviewActions(item) })}
       </div>`;
     });
-    html += purchasedArchive(purchasedReqs);
+    html += renderHistorySection('History', historyReqs, reviewHistoryOpen, 'toggleReviewHistory', 'No history rows match this filter.');
     main.innerHTML = html;
     return;
   }
 
   // Grouped view
   const groups = {};
-  actionableReqs.forEach(r => {
+  activeReqs.forEach(r => {
     if (!groups[r.submission_id]) groups[r.submission_id] = { country: r.country, period: r.period, email: r.reply_email, items: [] };
     groups[r.submission_id].items.push(r);
   });
   const sorted = Object.values(groups).sort((a,b) => a.period !== b.period ? a.period.localeCompare(b.period) : a.country.localeCompare(b.country));
   if (!sorted.length) {
-    html += '<div class="loading">No actionable requests match this filter.</div>';
-    html += purchasedArchive(purchasedReqs);
+    html += '<div class="loading">No active review rows match this filter.</div>';
+    html += renderHistorySection('History', historyReqs, reviewHistoryOpen, 'toggleReviewHistory', 'No history rows match this filter.');
     main.innerHTML = html;
     return;
   }
 
   sorted.forEach(g => {
     const pc = g.period === '5' ? 'p5' : 'p6';
-    const activeItems = g.items.filter(i => i.status !== 'denied');
-    const deniedItems = g.items.filter(i => i.status === 'denied');
-
     html += `<div class="sub-group"><div class="sub-head"><div class="sub-country">${g.country}</div><span class="pbadge ${pc}">Per. ${g.period}</span><span class="sub-email">${g.email}</span></div>`;
-
-    // Active items first
-    activeItems.forEach(item => {
-      const oosNote = item.status === 'outofstock' && item.oos_note ? `<div class="req-note">Got instead: ${item.oos_note}</div>` : '';
-      const linkHtml = item.link ? `<a class="req-link" href="${item.link}" target="_blank">↗ Reference</a>` : '';
-      let actions = '';
-      if (item.status === 'pending') {
-        actions = `<div class="req-actions"><button class="btn-approve" onclick="approve('${item.id}')">✓ OK</button><button class="btn-deny" onclick="openDenyModal('${item.id}','${esc(item.item_name)}')">✕ Deny</button></div>`;
-      } else {
-        actions = `<div class="req-actions"><span class="sbadge s-${item.status}">${item.status==='outofstock'?'OOS':item.status}</span></div>`;
-      }
-      html += `<div class="req-item"><div class="req-icon">${catIcon[item.category]||'📦'}</div><div class="req-body"><div class="req-name">${item.item_name}</div><div class="req-detail">${item.item_detail||''}</div>${linkHtml}${oosNote}</div>${actions}</div>`;
+    g.items.forEach(item => {
+      html += renderReqRow(item, { selectable: true, actions: reviewActions(item) });
     });
-
-    // Denied items collapsed at bottom
-    if (deniedItems.length) {
-      const gid = g.country.replace(/\s/g,'_');
-      const notifiedAll = deniedItems.every(i => i.denial_notified);
-      html += `<div class="denied-section">
-        <div class="denied-toggle" onclick="toggleDenied('denied_${gid}')">
-          ▸ ${deniedItems.length} denied${notifiedAll?' (notified)':' (not yet notified)'}
-        </div>
-        <div class="denied-items-list" id="denied_${gid}">`;
-      deniedItems.forEach(item => {
-        const denialNote = item.denial_reason ? `<div class="req-note">Reason: ${item.denial_reason}${item.denial_notified?' · ✓ notified':''}</div>` : '';
-        html += `<div class="req-item denied-row"><div class="req-icon">${catIcon[item.category]||'📦'}</div><div class="req-body"><div class="req-name">${item.item_name}</div><div class="req-detail">${item.item_detail||''}</div>${denialNote}</div><div class="req-actions"><span class="sbadge s-denied">denied</span></div></div>`;
-      });
-      html += `</div></div>`;
-    }
-
     html += '</div>';
   });
-  html += purchasedArchive(purchasedReqs);
+  html += renderHistorySection('History', historyReqs, reviewHistoryOpen, 'toggleReviewHistory', 'No history rows match this filter.');
   main.innerHTML = html;
 }
 
-function purchasedArchive(items) {
-  const sorted = [...items].sort((a,b) => new Date(a.purchased_at || a.created_at || 0) - new Date(b.purchased_at || b.created_at || 0));
-  let html = `<div class="sub-group" style="margin-top:1rem">
-    <div class="denied-toggle" onclick="togglePurchasedArchive()">
-      ${purchasedArchiveOpen?'▾':'▸'} Purchased Archive (${sorted.length}) · reference only
-    </div>
-    <div class="denied-items-list ${purchasedArchiveOpen?'open':''}" id="purchasedArchive">`;
-  if (!sorted.length) {
-    html += '<div class="req-item"><div class="req-body"><div class="req-detail">No purchased items match this filter.</div></div></div>';
-  }
-  sorted.forEach(item => {
-    const pc = item.period === '5' ? 'p5' : 'p6';
-    const linkHtml = item.link ? `<a class="req-link" href="${item.link}" target="_blank">↗ Reference</a>` : '';
-    const purchasedWhen = item.purchased_at ? `<div class="req-note" style="color:var(--blue)">Purchased ${new Date(item.purchased_at).toLocaleString([], {month:'short', day:'numeric', hour:'numeric', minute:'2-digit'})}</div>` : '';
-    html += `<div class="req-item">
-      <div class="req-icon">${catIcon[item.category]||'📦'}</div>
-      <div class="req-body">
-        <div class="req-name">${item.item_name}</div>
-        <div class="req-detail">${item.item_detail||''}</div>
-        <div class="req-detail">${item.country} · Per. ${item.period} · ${item.reply_email}</div>
-        ${linkHtml}
-        ${purchasedWhen}
-      </div>
-      <div class="req-actions"><span class="pbadge ${pc}">Per. ${item.period}</span><span class="sbadge s-purchased">purchased</span></div>
-    </div>`;
-  });
-  html += '</div></div>';
-  return html;
+function toggleReviewHistory() {
+  reviewHistoryOpen = !reviewHistoryOpen;
+  render();
 }
 
-function togglePurchasedArchive() {
-  purchasedArchiveOpen = !purchasedArchiveOpen;
+function toggleShopHistory() {
+  shopHistoryOpen = !shopHistoryOpen;
   render();
 }
 
@@ -1234,8 +1362,61 @@ function toggleDenied(id) {
 
 function setReviewView(v, el) {
   reviewView = v;
+  selectedReviewIds.clear();
   document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
   el.classList.add('active');
+  render();
+}
+
+function toggleReviewSelection(id) {
+  const key = String(id);
+  if (selectedReviewIds.has(key)) selectedReviewIds.delete(key);
+  else selectedReviewIds.add(key);
+  render();
+}
+
+function selectAllVisible(ids) {
+  String(ids || '').split(',').filter(Boolean).forEach(id => selectedReviewIds.add(String(id)));
+  render();
+}
+
+function clearReviewSelection() {
+  selectedReviewIds.clear();
+  render();
+}
+
+async function batchApproveSelected() {
+  const rows = selectedRows();
+  if (!rows.length) return;
+  try {
+    const result = await patchRows(rows, {status:'approved',denial_reason:'',denial_notified:false}, 'Batch approve failed');
+    result.okRows.forEach(item => { item.status='approved'; item.denial_reason=''; item.denial_notified=false; });
+    selectedReviewIds.clear();
+    render();
+    showToast(result.failed ? `Approved ${result.ok}, ${result.failed} failed.` : `${result.ok} approved`);
+  } catch(e) {
+    logError('Batch approve failed', e);
+    showToast(friendlyError(e, 'Save failed. Selected items were not approved.'));
+  }
+}
+
+function openBatchDenyModal() {
+  const rows = selectedRows();
+  if (!rows.length) return;
+  denyTargetIds = rows.map(r => r.id);
+  denyTargetId = null;
+  denyReason = '';
+  document.getElementById('denyItemLabel').textContent = `${rows.length} selected item${rows.length>1?'s':''}`;
+  document.getElementById('denyCustom').value = '';
+  document.querySelectorAll('.deny-opt').forEach(o=>o.classList.remove('sel'));
+  document.getElementById('denyModal').classList.add('open');
+}
+
+async function resetSelectedToPending() {
+  const rows = selectedRows();
+  if (!rows.length) return;
+  await resetRowsToPending(rows);
+  selectedReviewIds.clear();
   render();
 }
 
@@ -1243,7 +1424,7 @@ async function notifyDenials() {
   const unnotified = allRequests.filter(r => r.status === 'denied' && !r.denial_notified);
   if (!unnotified.length) return;
   const btn = document.getElementById('notifyBtn');
-  if (btn) { btn.disabled = true; btn.textContent = 'Sending…'; }
+  if (btn) { btn.disabled = true; btn.innerHTML = `${icon('mail')}Sending...`; }
   emailBatchInProgress = true;
   let sent = 0, failed = 0, saveFailed = 0;
   try {
@@ -1311,64 +1492,87 @@ function groupedShopItems(rows) {
 }
 
 function renderShopper(main) {
-  const approved = allRequests.filter(r => {
+  const shopperRows = allRequests.filter(r => {
     if (r.status !== 'approved' && r.status !== 'outofstock') return false;
-    if (r.status === 'outofstock') return true; // keep visible
-    if (filter === '5') return r.period === '5';
-    if (filter === '6') return r.period === '6';
-    return true;
-  }).filter(r => {
     if (filter === '5') return r.period === '5';
     if (filter === '6') return r.period === '6';
     return true;
   });
+  const actionable = shopperRows.filter(r => r.status === 'approved' && !r.purchased);
+  const handled = shopperRows.filter(r => r.purchased || r.status === 'outofstock');
 
-  const grouped = groupedShopItems(approved);
+  const grouped = groupedShopItems(actionable);
   const active = aisles
     .filter(a => grouped.some(g => a.cats.includes(g.category)))
     .sort((a,b) => a.order - b.order);
   let html = '';
   if (!active.length) {
-    html = '<div class="loading">No approved items yet.<br><br>Approve some requests in Review mode first.</div>';
-    main.innerHTML = html; updateProgress([]); return;
+    html = '<div class="loading">No active shopping items.<br><br>Approve requests in Review mode, or check Handled / History below.</div>';
+    html += renderShopHistory(handled);
+    main.innerHTML = html; updateProgress(shopperRows); return;
   }
 
   active.forEach(aisle => {
     const items = grouped.filter(g => aisle.cats.includes(g.category));
-    const remaining = items.filter(g => g.rows.some(i => !i.purchased && i.status !== 'outofstock')).length;
+    const remaining = items.length;
     html += `<div class="aisle"><div class="aisle-hd"><span class="aisle-icon">${aisle.icon}</span><span class="aisle-name">${aisle.name}</span><span class="aisle-ct">${remaining} left</span></div><hr class="aisle-hr">`;
     items.forEach(group => {
       const ids = group.rows.map(r => r.id);
-      const activeRows = group.rows.filter(r => r.status !== 'outofstock');
-      const isGrabbed = activeRows.length > 0 && activeRows.every(r => r.purchased);
-      const isOos = group.rows.every(r => r.status === 'outofstock');
-      const mixedOos = !isOos && group.rows.some(r => r.status === 'outofstock');
-      const cbClass = isOos ? 'shop-cb oos-cb' : (isGrabbed ? 'shop-cb chk' : 'shop-cb');
-      const cbContent = isOos ? '~' : (isGrabbed ? '✓' : '');
-      const oosNotes = [...new Set(group.rows.filter(r => r.oos_note).map(r => r.oos_note))];
-      const oosNoteHtml = oosNotes.length ? `<div class="shop-sub-note">Alt: ${oosNotes.join('; ')}</div>` : '';
-      const itemClass = isGrabbed ? 'shop-item grabbed' : (isOos ? 'shop-item oos' : 'shop-item');
-      const oosBtn = !isOos ? `<button class="btn-oos" onclick="openOosModal('${idsArg(ids)}','${esc(group.item_name)}')">${mixedOos?'Mark All OOS':'Out of Stock'}</button>` : `<button class="btn-oos active-oos" onclick="unOos('${idsArg(ids)}')">Undo OOS</button>`;
       const countries = [...new Map(group.rows.map(r => [r.submission_id, `Per. ${r.period} · ${r.country}`])).values()];
       const pColor = group.rows.some(r => r.period === '5') && group.rows.some(r => r.period === '6') ? 'var(--surface3)' : (group.rows[0].period === '5' ? 'var(--blue-bg)' : 'var(--yellow-bg)');
       const pText = group.rows.some(r => r.period === '5') && group.rows.some(r => r.period === '6') ? 'var(--muted)' : (group.rows[0].period === '5' ? 'var(--accent)' : 'var(--yellow)');
       const links = [...new Map(group.rows.filter(r => r.link).map(r => [r.link, r.link])).values()];
       const linksHtml = links.length ? ` · ${links.map((link,idx) => `<a href="${link}" target="_blank" style="color:var(--blue)">link${links.length>1?' '+(idx+1):''}</a>`).join(' · ')}` : '';
-      html += `<div class="${itemClass}" id="shop_${group.domId}">
-        <div class="${cbClass}" onclick="toggleGrab('${idsArg(ids)}')">${cbContent}</div>
+      html += `<div class="shop-item" id="shop_${group.domId}">
+        <div class="shop-cb" onclick="toggleGrab('${idsArg(ids)}')"></div>
         <div class="shop-body">
           <div class="shop-name">${group.item_name}${group.rows.length>1?` <span style="color:var(--muted);font-family:var(--mono);font-size:0.72rem;">×${group.rows.length}</span>`:''}</div>
           <div class="shop-meta">${group.item_detail||''}${linksHtml}</div>
-          ${oosNoteHtml}
           <span class="shop-tag" style="background:${pColor};color:${pText}">${group.rows.length} request${group.rows.length>1?'s':''} · ${countries.join(' · ')}</span>
         </div>
-        <div class="shop-actions">${oosBtn}</div>
+        <div class="shop-actions"><button class="btn-oos" onclick="openOosModal('${idsArg(ids)}','${esc(group.item_name)}')">${icon('alert-triangle')}Out of Stock</button></div>
       </div>`;
     });
     html += '</div>';
   });
+  html += renderShopHistory(handled);
   main.innerHTML = html;
-  updateProgress(approved);
+  updateProgress(shopperRows);
+}
+
+function renderShopHistory(rows) {
+  const grouped = groupedShopItems(rows);
+  let html = `<div class="sub-group" style="margin-top:1rem">
+    <div class="denied-toggle" onclick="toggleShopHistory()">${shopHistoryOpen?'▾':'▸'} Handled / History (${rows.length})</div>
+    <div class="denied-items-list ${shopHistoryOpen?'open':''}">`;
+  if (!grouped.length) html += '<div class="history-empty">No handled shopping items yet.</div>';
+  grouped.forEach(group => {
+    const ids = group.rows.map(r => r.id);
+    const purchasedIds = group.rows.filter(r => r.purchased).map(r => r.id);
+    const oosIds = group.rows.filter(r => r.status === 'outofstock').map(r => r.id);
+    const isOos = group.rows.every(r => r.status === 'outofstock');
+    const oosNotes = [...new Set(group.rows.filter(r => r.oos_note).map(r => r.oos_note))];
+    const oosNoteHtml = oosNotes.length ? `<div class="shop-sub-note">Alt: ${oosNotes.join('; ')}</div>` : '';
+    const countries = [...new Map(group.rows.map(r => [r.submission_id, `Per. ${r.period} · ${r.country}`])).values()];
+    const links = [...new Map(group.rows.filter(r => r.link).map(r => [r.link, r.link])).values()];
+    const linksHtml = links.length ? ` · ${links.map((link,idx) => `<a href="${link}" target="_blank" style="color:var(--blue)">link${links.length>1?' '+(idx+1):''}</a>`).join(' · ')}` : '';
+    const action = [
+      purchasedIds.length ? `<button class="btn-oos" onclick="undoPurchase('${idsArg(purchasedIds)}')">${icon('arrow-back-up')}Undo purchase</button>` : '',
+      oosIds.length ? `<button class="btn-oos active-oos" onclick="unOos('${idsArg(oosIds)}')">${icon('arrow-back-up')}Undo OOS</button>` : ''
+    ].join('');
+    html += `<div class="shop-item ${isOos?'oos':'grabbed'}">
+      <div class="${isOos?'shop-cb oos-cb':'shop-cb chk'}">${isOos?'~':'✓'}</div>
+      <div class="shop-body">
+        <div class="shop-name">${group.item_name}${group.rows.length>1?` <span style="color:var(--muted);font-family:var(--mono);font-size:0.72rem;">×${group.rows.length}</span>`:''}</div>
+        <div class="shop-meta">${group.item_detail||''}${linksHtml}</div>
+        ${oosNoteHtml}
+        <span class="shop-tag" style="background:${isOos?'var(--yellow-bg)':'var(--green-bg)'};color:${isOos?'var(--yellow)':'var(--green)'}">${icon(isOos?'alert-triangle':'shopping-cart-check')}${isOos?'out of stock':'purchased'} · ${countries.join(' · ')}</span>
+      </div>
+      <div class="shop-actions">${action}</div>
+    </div>`;
+  });
+  html += '</div></div>';
+  return html;
 }
 
 function updateProgress(shopItems) {
@@ -1376,7 +1580,7 @@ function updateProgress(shopItems) {
   const purchased = shopItems.filter(i => i.status === 'approved' && i.purchased).length;
   const oos = shopItems.filter(i => i.status === 'outofstock').length;
   const handled = purchased + oos;
-  const remaining = Math.max(total - handled, 0);
+  const remaining = shopItems.filter(i => i.status === 'approved' && !i.purchased).length;
   document.getElementById('handledCt').textContent = handled;
   document.getElementById('totalShopCt').textContent = total;
   document.getElementById('remainingCt').textContent = remaining;
@@ -1386,8 +1590,9 @@ function updateProgress(shopItems) {
 // ===== Actions =====
 async function approve(id) {
   try {
-    await patch(id, {status:'approved'});
-    allRequests.find(r=>r.id==id).status='approved';
+    await patch(id, {status:'approved',denial_reason:'',denial_notified:false});
+    const item = allRequests.find(r=>r.id==id);
+    item.status='approved'; item.denial_reason=''; item.denial_notified=false;
     render();
     showToast('Approved');
   } catch(e) {
@@ -1397,13 +1602,13 @@ async function approve(id) {
 }
 
 function openDenyModal(id, name) {
-  denyTargetId=id; denyReason='';
+  denyTargetId=id; denyTargetIds=[]; denyReason='';
   document.getElementById('denyItemLabel').textContent=name;
   document.getElementById('denyCustom').value='';
   document.querySelectorAll('.deny-opt').forEach(o=>o.classList.remove('sel'));
   document.getElementById('denyModal').classList.add('open');
 }
-function closeDenyModal() { document.getElementById('denyModal').classList.remove('open'); denyTargetId=null; }
+function closeDenyModal() { document.getElementById('denyModal').classList.remove('open'); denyTargetId=null; denyTargetIds=[]; }
 function pickDenyReason(el, reason) {
   document.querySelectorAll('.deny-opt').forEach(o=>o.classList.remove('sel'));
   el.classList.add('sel'); denyReason=reason; document.getElementById('denyCustom').value='';
@@ -1411,16 +1616,34 @@ function pickDenyReason(el, reason) {
 async function confirmDeny() {
   const custom=document.getElementById('denyCustom').value.trim(), reason=custom||denyReason;
   if (!reason){showToast('Pick or write a reason.');return;}
+  const rows = denyTargetIds.length ? rowsFromIds(idsArg(denyTargetIds)) : rowsFromIds(String(denyTargetId));
   try {
-    await patch(denyTargetId,{status:'denied',denial_reason:reason,denial_notified:false});
-    const item=allRequests.find(r=>r.id==denyTargetId);
-    item.status='denied'; item.denial_reason=reason; item.denial_notified=false;
+    const result = await patchRows(rows,{status:'denied',denial_reason:reason,denial_notified:false,purchased:false,purchased_at:null}, 'Deny save failed');
+    result.okRows.forEach(item => { item.status='denied'; item.denial_reason=reason; item.denial_notified=false; item.purchased=false; item.purchased_at=null; });
+    selectedReviewIds.clear();
     closeDenyModal(); render();
-    showToast('Denied — use Notify Students to email');
+    showToast(result.failed ? `Denied ${result.ok}, ${result.failed} failed.` : (rows.length > 1 ? `${result.ok} denied — use Notify Students to email` : 'Denied — use Notify Students to email'));
   } catch(e){
     logError('Deny save failed', e);
     showToast(friendlyError(e, 'Save failed. Item was not denied.'));
   }
+}
+
+async function resetRowsToPending(rows) {
+  if (!rows.length) return;
+  try {
+    const result = await patchRows(rows, {status:'pending',denial_reason:'',denial_notified:false,purchased:false,purchased_at:null,oos_note:''}, 'Reset to pending failed');
+    result.okRows.forEach(item => { item.status='pending'; item.denial_reason=''; item.denial_notified=false; item.purchased=false; item.purchased_at=null; item.oos_note=''; });
+    render();
+    showToast(result.failed ? `Reset ${result.ok}, ${result.failed} failed.` : `${result.ok} reset to pending`);
+  } catch(e) {
+    logError('Reset to pending failed', e);
+    showToast(friendlyError(e, 'Save failed. Items were not reset.'));
+  }
+}
+
+async function resetToPending(ids) {
+  await resetRowsToPending(rowsFromIds(ids));
 }
 
 // ===== OOS =====
@@ -1454,6 +1677,19 @@ async function unOos(id) {
   } catch(e){
     logError('Undo OOS save failed', e);
     showToast(friendlyError(e, 'Save failed. OOS was not restored.'));
+  }
+}
+
+async function undoPurchase(id) {
+  const rows=rowsFromIds(id);
+  try {
+    const result = await patchRows(rows, {status:'approved',purchased:false,purchased_at:null}, 'Undo purchase failed');
+    result.okRows.forEach(item => { item.status='approved'; item.purchased=false; item.purchased_at=null; });
+    render();
+    showToast(result.failed ? `Undo purchase: ${result.ok} saved, ${result.failed} failed.` : `${result.ok} restored to shopping list`);
+  } catch(e){
+    logError('Undo purchase failed', e);
+    showToast(friendlyError(e, 'Save failed. Purchase was not undone.'));
   }
 }
 
@@ -1525,14 +1761,14 @@ async function openEmailModal() {
   document.getElementById('emailModal').classList.add('open');
   const sendBtn = document.getElementById('emailSendBtn');
   const resendBtn = document.getElementById('emailResendBtn');
-  sendBtn.textContent = unsentGroups.length ? 'Send New Emails' : 'All Sent';
+  sendBtn.innerHTML = `${icon('mail')}${unsentGroups.length ? 'Send New Emails' : 'All Sent'}`;
   sendBtn.disabled = unsentGroups.length === 0;
   sendBtn.style.background = unsentGroups.length ? 'var(--green)' : 'var(--border)';
   sendBtn.style.color = unsentGroups.length ? '#fff' : 'var(--muted)';
   sendBtn.onclick = () => sendCompletedEmails(unsentGroups);
   resendBtn.style.display = sentGroups.length ? 'block' : 'none';
   resendBtn.disabled = false;
-  resendBtn.textContent = sentGroups.length === groupList.length ? 'Resend All' : 'Resend Sent';
+  resendBtn.innerHTML = `${icon('mail')}${sentGroups.length === groupList.length ? 'Resend All' : 'Resend Sent'}`;
   resendBtn.onclick = () => sendCompletedEmails(sentGroups, true);
 }
 
@@ -1542,7 +1778,7 @@ async function sendCompletedEmails(groupList, isResend = false) {
   const resendBtn = document.getElementById('emailResendBtn');
   btn.disabled = true; resendBtn.disabled = true;
   const activeBtn = isResend ? resendBtn : btn;
-  activeBtn.textContent = 'Sending…';
+  activeBtn.innerHTML = `${icon('mail')}Sending...`;
   emailBatchInProgress = true;
   let sent = 0, failed = 0, marked = 0, markFailed = 0;
 
