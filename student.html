@@ -52,7 +52,7 @@ button, .pill, .finish-btn, .color-swatch { -webkit-tap-highlight-color: transpa
 .header {
   position: relative;
   overflow: hidden;
-  padding: 1.1rem 1rem 2rem;
+  padding: 0.75rem 1rem 0.95rem;
   background: rgba(252,249,248,0.82);
   backdrop-filter: var(--blur);
   box-shadow: 0 24px 52px -42px rgba(28,27,27,0.55);
@@ -60,8 +60,8 @@ button, .pill, .finish-btn, .color-swatch { -webkit-tap-highlight-color: transpa
 .header::before {
   content: '';
   position: absolute;
-  inset: auto -15% -40% 18%;
-  height: 13rem;
+  inset: auto -15% -72% 24%;
+  height: 8.5rem;
   background: linear-gradient(135deg, rgba(165,25,0,0.14), rgba(255,218,211,0.42));
   transform: rotate(-5deg);
   border-radius: 8px;
@@ -93,32 +93,32 @@ button, .pill, .finish-btn, .color-swatch { -webkit-tap-highlight-color: transpa
   font-weight: 800;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  margin-bottom: 1.2rem;
+  margin-bottom: 0.55rem;
 }
 .header-title {
   font-family: var(--headline);
-  font-size: clamp(2.7rem, 14vw, 5.2rem);
+  font-size: clamp(1.9rem, 8.8vw, 3.25rem);
   font-weight: 800;
   color: var(--text);
-  line-height: 0.94;
+  line-height: 0.98;
   letter-spacing: 0;
 }
 .header-title em { font-style: normal; color: var(--primary); }
 .header-sub {
-  margin-top: 1rem;
+  margin-top: 0.5rem;
   max-width: 22rem;
-  font-size: 1rem;
+  font-size: 0.88rem;
   color: var(--muted);
   font-weight: 600;
-  line-height: 1.65;
+  line-height: 1.42;
 }
 .cart-badge {
   background: rgba(255,255,255,0.8);
   color: var(--primary);
   font-family: var(--headline);
   font-weight: 800;
-  min-width: 4.4rem;
-  height: 4.4rem;
+  min-width: 3.45rem;
+  height: 3.45rem;
   border-radius: var(--radius-lg);
   display: flex;
   flex-direction: column;
@@ -130,18 +130,18 @@ button, .pill, .finish-btn, .color-swatch { -webkit-tap-highlight-color: transpa
   outline: 1px solid var(--ghost);
   backdrop-filter: var(--blur);
 }
-.cart-badge .n { font-size: 1.55rem; font-weight: 800; }
-.cart-badge .l { font-size: 0.58rem; text-transform: uppercase; letter-spacing: 0.14em; color: var(--muted); margin-top: 0.2rem; }
+.cart-badge .n { font-size: 1.22rem; font-weight: 800; }
+.cart-badge .l { font-size: 0.5rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); margin-top: 0.16rem; }
 
 /* CONTAINER */
-.container { max-width: 720px; margin: 0 auto; padding: 1rem 1rem 2.5rem; }
+.container { max-width: 720px; margin: 0 auto; padding: 0.55rem 1rem 2.5rem; }
 .step-track {
   position: sticky;
   top: 0.7rem;
   z-index: 30;
   display: flex;
   gap: 0.45rem;
-  margin: -1.45rem 0 1.25rem;
+  margin: -0.25rem 0 1rem;
   padding: 0.45rem;
   border-radius: var(--radius-lg);
   background: rgba(252,249,248,0.86);
@@ -255,9 +255,8 @@ button, .pill, .finish-btn, .color-swatch { -webkit-tap-highlight-color: transpa
   box-shadow: var(--shadow-soft);
   outline: 1px solid rgba(143,112,106,0.08);
 }
-.form-card::before,
 .info-card::before {
-  content: 'Item 01';
+  content: 'Group Details';
   display: inline-flex;
   width: fit-content;
   align-items: center;
@@ -274,7 +273,6 @@ button, .pill, .finish-btn, .color-swatch { -webkit-tap-highlight-color: transpa
   letter-spacing: 0.18em;
   text-transform: uppercase;
 }
-.info-card::before { content: 'Group Details'; }
 .form-row { margin-bottom: 1rem; }
 .form-row:last-child { margin-bottom: 0; }
 
@@ -659,8 +657,8 @@ hr.div { border: none; height: 0.8rem; margin: 0.25rem 0; }
 .toast.err { background: rgba(186,26,26,0.94); }
 
 @media (min-width: 720px) {
-  .header { padding: 1.6rem 1.5rem 2.6rem; }
-  .container { padding-top: 1.35rem; }
+  .header { padding: 0.95rem 1.5rem 1.35rem; }
+  .container { padding-top: 0.8rem; }
   .form-card, .info-card { padding: 1.65rem; }
   .sheet { border-radius: var(--radius-lg); margin-bottom: 1rem; }
 }
@@ -671,7 +669,7 @@ hr.div { border: none; height: 0.8rem; margin: 0.25rem 0; }
 <div class="header">
   <div class="header-inner">
     <div class="header-left">
-      <div class="header-eyebrow">SJP · Cohort 12</div>
+      <div class="header-eyebrow">SJP · Cohort 13</div>
       <div class="header-title">Junk <em>Kouture</em><br>Supply Request</div>
       <div class="header-sub">Add items → review → submit once for your group</div>
     </div>
