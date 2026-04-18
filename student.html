@@ -106,35 +106,21 @@ button, .pill, .finish-btn, .color-swatch { -webkit-tap-highlight-color: transpa
 }
 .header-left { max-width: 28rem; }
 .sjp-logo {
-  height: 32px;
+  height: clamp(48px, 6vw, 64px);
   width: auto;
   display: block;
-  margin-bottom: 0.35rem;
+  margin-bottom: 0.25rem;
   opacity: 0.95;
   filter: drop-shadow(0 10px 18px rgba(28,27,27,0.12));
 }
-.header-eyebrow {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.38rem;
-  width: fit-content;
-  min-height: 2rem;
-  padding: 0.42rem 0.72rem;
-  border-radius: var(--radius-sm);
-  background: var(--primary);
-  color: #fff;
-  box-shadow: var(--shadow-red);
+.sjp-cohort {
   font-family: var(--headline);
-  font-size: 0.68rem;
+  font-size: 0.7rem;
   font-weight: 800;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  margin-bottom: 0.55rem;
-}
-.header-eyebrow-logo {
-  height: 17px;
-  width: auto;
-  opacity: 0.95;
+  color: var(--muted);
+  margin-bottom: 0.6rem;
 }
 .header-title {
   font-family: var(--headline);
@@ -730,8 +716,8 @@ hr.div { border: none; height: 0.8rem; margin: 0.25rem 0; }
 <div class="header">
   <div class="header-inner">
     <div class="header-left">
-      <img src="icons/SJPLogo_Red.png" class="sjp-logo" alt="SJP">
-      <div class="header-eyebrow"><img src="icons/SJPLogo_Red.png" class="header-eyebrow-logo" alt="" aria-hidden="true">SJP · Cohort 12</div>
+      <img src="icons/SJPLogo_Red.png" class="sjp-logo" alt="Social Justice Pathway logo">
+      <div class="sjp-cohort">Cohort 12</div>
       <div class="header-title">Junk <em>Kouture</em><br>Supply Request</div>
       <div class="header-sub">Add items → review → submit once for your group</div>
     </div>
