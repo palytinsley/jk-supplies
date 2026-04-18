@@ -450,7 +450,7 @@ button { -webkit-tap-highlight-color: transparent; }
   box-shadow: inset 0 -2px 0 rgba(115,118,134,0.2);
 }
 #loginEmail:focus, #loginPassword:focus { background: var(--surface); box-shadow: inset 0 -3px 0 var(--accent); outline: none; }
-#loginBtn {
+#loginBtn, #resetPasswordBtn {
   width: 100%;
   min-height: 56px;
   background: linear-gradient(135deg, var(--accent), var(--blue));
@@ -466,8 +466,23 @@ button { -webkit-tap-highlight-color: transparent; }
   cursor: pointer;
   box-shadow: var(--shadow-blue);
 }
-#loginBtn:disabled { opacity: 0.65; cursor: wait; }
-#authMsg { min-height: 1.1rem; margin-top: 0.75rem; font-size: 0.82rem; color: var(--red); font-weight: 700; }
+#loginBtn:disabled, #resetPasswordBtn:disabled { opacity: 0.65; cursor: wait; }
+#forgotBtn, #resetBackBtn {
+  width: 100%;
+  margin-top: 0.75rem;
+  border: 0;
+  background: transparent;
+  color: var(--accent);
+  font-family: var(--headline);
+  font-size: 0.76rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+}
+#resetForm { display: none; }
+#authMsg { min-height: 1.1rem; margin-top: 0.75rem; font-size: 0.82rem; color: var(--red); font-weight: 700; line-height: 1.45; }
+#authMsg.ok { color: var(--green); }
 
 @media (min-width: 760px) {
   .header { padding: 1rem 1.4rem; }
@@ -498,17 +513,35 @@ button { -webkit-tap-highlight-color: transparent; }
     <div class="auth-title">Junk Kouture<br>Dashboard</div>
     <div class="auth-sub">Review requests, approve supplies, and move through the shopping list with a clean operational view.</div>
 
-    <div class="auth-field">
-      <label for="loginEmail">Email</label>
-      <input id="loginEmail" type="email" autocomplete="username" />
+    <div id="loginForm">
+      <div class="auth-field">
+        <label for="loginEmail">Email</label>
+        <input id="loginEmail" type="email" autocomplete="username" />
+      </div>
+
+      <div class="auth-field">
+        <label for="loginPassword">Password</label>
+        <input id="loginPassword" type="password" autocomplete="current-password" />
+      </div>
+
+      <button id="loginBtn">Sign In</button>
+      <button id="forgotBtn" type="button">Forgot password?</button>
     </div>
 
-    <div class="auth-field">
-      <label for="loginPassword">Password</label>
-      <input id="loginPassword" type="password" autocomplete="current-password" />
-    </div>
+    <div id="resetForm">
+      <div class="auth-field">
+        <label for="newPassword">New password</label>
+        <input id="newPassword" type="password" autocomplete="new-password" />
+      </div>
 
-    <button id="loginBtn">Sign In</button>
+      <div class="auth-field">
+        <label for="confirmPassword">Confirm new password</label>
+        <input id="confirmPassword" type="password" autocomplete="new-password" />
+      </div>
+
+      <button id="resetPasswordBtn" type="button">Update Password</button>
+      <button id="resetBackBtn" type="button">Back to sign in</button>
+    </div>
 
     <div id="authMsg"></div>
   </div>
@@ -608,6 +641,7 @@ const EMAILJS_SERVICE_ID = 'service_v7bchw7';
 const EMAILJS_DENIAL_TEMPLATE_ID = 'template_di08r5w';
 const EMAILJS_COMPLETED_TEMPLATE_ID = 'template_gsncn3g';
 const EMAILJS_PUBLIC_KEY = 't9UIpuX-5wgc4RPno';
+const PASSWORD_RESET_REDIRECT = 'https://palytinsley.github.io/jk-supplies/teacher.html';
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let allRequests = [];
@@ -621,6 +655,8 @@ let currentSession = null;
 let refreshTimer = null;
 let activeSaveCount = 0;
 let emailBatchInProgress = false;
+let authMode = 'login';
+let recoverySessionReady = false;
 
 // Change these order numbers to match the in-store walking path.
 const aisles = [
@@ -659,6 +695,40 @@ function friendlyError(err, fallback = 'Something went wrong.') {
   return fallback;
 }
 
+function emailLooksValid(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+function setAuthMessage(message = '', ok = false) {
+  const msg = document.getElementById('authMsg');
+  msg.textContent = message;
+  msg.classList.toggle('ok', !!ok);
+}
+
+function hasRecoveryUrl() {
+  const params = new URLSearchParams(window.location.search);
+  const hash = new URLSearchParams((window.location.hash || '').replace(/^#/, ''));
+  return params.get('type') === 'recovery'
+    || hash.get('type') === 'recovery'
+    || params.has('code')
+    || hash.has('access_token')
+    || hash.has('refresh_token');
+}
+
+function cleanRecoveryUrl() {
+  if (!window.history?.replaceState) return;
+  const clean = window.location.origin + window.location.pathname;
+  window.history.replaceState({}, document.title, clean);
+}
+
+function setAuthMode(nextMode, message = '', ok = false, canReset = true) {
+  authMode = nextMode;
+  document.getElementById('loginForm').style.display = nextMode === 'login' ? 'block' : 'none';
+  document.getElementById('resetForm').style.display = nextMode === 'recovery' ? 'block' : 'none';
+  document.getElementById('resetPasswordBtn').disabled = nextMode === 'recovery' && !canReset;
+  setAuthMessage(message, ok);
+}
+
 async function fetchAll() {
   const res = await fetch(`${SUPABASE_URL}/rest/v1/requests?order=created_at.asc`, {
     headers: authHeaders()
@@ -693,16 +763,21 @@ async function patchRows(rows, data, context) {
 function showLogin(message = '') {
   currentSession = null;
   allRequests = [];
+  recoverySessionReady = false;
   if (refreshTimer) {
     clearInterval(refreshTimer);
     refreshTimer = null;
   }
   document.getElementById('appShell').style.display = 'none';
   document.getElementById('authScreen').style.display = 'flex';
-  document.getElementById('authMsg').textContent = message;
+  document.getElementById('loginPassword').value = '';
+  document.getElementById('newPassword').value = '';
+  document.getElementById('confirmPassword').value = '';
+  setAuthMode('login', message);
 }
 
 function showApp(session) {
+  if (authMode === 'recovery') return;
   currentSession = session;
   document.getElementById('authScreen').style.display = 'none';
   document.getElementById('appShell').style.display = 'block';
@@ -710,14 +785,29 @@ function showApp(session) {
   if (!refreshTimer) refreshTimer = setInterval(autoRefresh, 60000);
 }
 
+function showRecovery(message = 'Set a new password for your teacher account.', canReset = true) {
+  currentSession = null;
+  allRequests = [];
+  if (refreshTimer) {
+    clearInterval(refreshTimer);
+    refreshTimer = null;
+  }
+  document.getElementById('appShell').style.display = 'none';
+  document.getElementById('authScreen').style.display = 'flex';
+  document.getElementById('newPassword').value = '';
+  document.getElementById('confirmPassword').value = '';
+  recoverySessionReady = !!canReset;
+  setAuthMode('recovery', message, false, canReset);
+}
+
 async function signInTeacher() {
+  if (authMode !== 'login') return;
   const email = document.getElementById('loginEmail').value.trim();
   const password = document.getElementById('loginPassword').value;
-  const msg = document.getElementById('authMsg');
   const btn = document.getElementById('loginBtn');
-  msg.textContent = '';
+  setAuthMessage('');
   if (!email || !password) {
-    msg.textContent = 'Enter your email and password.';
+    setAuthMessage('Enter your email and password.');
     return;
   }
   btn.disabled = true;
@@ -726,17 +816,101 @@ async function signInTeacher() {
     const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
     if (error) {
       logError('Login failed', error);
-      msg.textContent = error.message || 'Login failed.';
+      setAuthMessage(error.message || 'Login failed.');
       return;
     }
     showApp(data.session);
   } catch(e) {
     logError('Login failed', e);
-    msg.textContent = friendlyError(e, 'Login failed. Check your connection and try again.');
+    setAuthMessage(friendlyError(e, 'Login failed. Check your connection and try again.'));
   } finally {
     btn.disabled = false;
     btn.textContent = 'Sign In';
   }
+}
+
+async function sendPasswordReset() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const btn = document.getElementById('forgotBtn');
+  setAuthMessage('');
+  if (!email) {
+    setAuthMessage('Enter your email first, then tap Forgot password.');
+    return;
+  }
+  if (!emailLooksValid(email)) {
+    setAuthMessage('Enter a valid email address.');
+    return;
+  }
+  btn.disabled = true;
+  btn.textContent = 'Sending...';
+  try {
+    const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
+      redirectTo: PASSWORD_RESET_REDIRECT
+    });
+    if (error) {
+      logError('Password reset email failed', error);
+      setAuthMessage(error.message || 'Could not send reset email.');
+      return;
+    }
+    setAuthMessage('Check your email for a reset link.', true);
+  } catch(e) {
+    logError('Password reset email failed', e);
+    setAuthMessage(friendlyError(e, 'Could not send reset email. Try again.'));
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Forgot password?';
+  }
+}
+
+async function updateTeacherPassword() {
+  const password = document.getElementById('newPassword').value;
+  const confirm = document.getElementById('confirmPassword').value;
+  const btn = document.getElementById('resetPasswordBtn');
+  setAuthMessage('');
+  if (!recoverySessionReady) {
+    setAuthMessage('This reset link is invalid or expired. Request a new reset email.');
+    return;
+  }
+  if (!password) {
+    setAuthMessage('Enter a new password.');
+    return;
+  }
+  if (password.length < 8) {
+    setAuthMessage('Use at least 8 characters for the new password.');
+    return;
+  }
+  if (password !== confirm) {
+    setAuthMessage('Passwords do not match.');
+    return;
+  }
+  btn.disabled = true;
+  btn.textContent = 'Saving...';
+  try {
+    const { error } = await supabaseClient.auth.updateUser({ password });
+    if (error) {
+      logError('Password update failed', error);
+      setAuthMessage(error.message || 'Could not update password.');
+      return;
+    }
+    document.getElementById('newPassword').value = '';
+    document.getElementById('confirmPassword').value = '';
+    cleanRecoveryUrl();
+    try { await supabaseClient.auth.signOut(); } catch(e) { logError('Sign out after password reset failed', e); }
+    showLogin('Password updated. You can now sign in.');
+    setAuthMessage('Password updated. You can now sign in.', true);
+  } catch(e) {
+    logError('Password update failed', e);
+    setAuthMessage(friendlyError(e, 'Could not update password. The reset link may have expired.'));
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Update Password';
+  }
+}
+
+function backToLoginFromRecovery() {
+  cleanRecoveryUrl();
+  supabaseClient.auth.signOut().catch(e => logError('Recovery sign out failed', e));
+  showLogin();
 }
 
 async function signOutTeacher() {
@@ -751,27 +925,57 @@ async function signOutTeacher() {
 
 async function initAuth() {
   document.getElementById('loginBtn').addEventListener('click', signInTeacher);
+  document.getElementById('forgotBtn').addEventListener('click', sendPasswordReset);
+  document.getElementById('resetPasswordBtn').addEventListener('click', updateTeacherPassword);
+  document.getElementById('resetBackBtn').addEventListener('click', backToLoginFromRecovery);
   document.getElementById('loginPassword').addEventListener('keydown', e => {
     if (e.key === 'Enter') signInTeacher();
   });
+  document.getElementById('confirmPassword').addEventListener('keydown', e => {
+    if (e.key === 'Enter') updateTeacherPassword();
+  });
   document.getElementById('authScreen').style.display = 'flex';
-  document.getElementById('authMsg').textContent = 'Checking session...';
+  setAuthMessage('Checking session...');
+  const recoveryFromUrl = hasRecoveryUrl();
 
-  try {
-    const { data, error } = await supabaseClient.auth.getSession();
-    if (error) logError('Session check failed', error);
-    if (data?.session) showApp(data.session);
-    else showLogin();
-  } catch(e) {
-    logError('Session check failed', e);
-    showLogin('Could not check your session. Please sign in.');
-  }
-
-  supabaseClient.auth.onAuthStateChange((_event, session) => {
+  supabaseClient.auth.onAuthStateChange((event, session) => {
+    if (event === 'PASSWORD_RECOVERY') {
+      recoverySessionReady = !!session;
+      showRecovery(session
+        ? 'Set a new password for your teacher account.'
+        : 'This reset link is invalid or expired. Request a new reset email.',
+        !!session);
+      return;
+    }
+    if (hasRecoveryUrl() && session) {
+      recoverySessionReady = true;
+      showRecovery('Set a new password for your teacher account.', true);
+      return;
+    }
+    if (authMode === 'recovery') return;
     if (session?.access_token === currentSession?.access_token) return;
     if (session) showApp(session);
     else showLogin();
   });
+
+  try {
+    const { data, error } = await supabaseClient.auth.getSession();
+    if (error) logError('Session check failed', error);
+    if (authMode === 'recovery') return;
+    if (recoveryFromUrl) {
+      if (data?.session) {
+        recoverySessionReady = true;
+        showRecovery('Set a new password for your teacher account.', true);
+      } else {
+        showRecovery('This reset link is invalid or expired. Request a new reset email.', false);
+      }
+    } else if (data?.session) showApp(data.session);
+    else showLogin();
+  } catch(e) {
+    logError('Session check failed', e);
+    if (recoveryFromUrl) showRecovery('This reset link is invalid or expired. Request a new reset email.', false);
+    else showLogin('Could not check your session. Please sign in.');
+  }
 }
 
 function isRefreshBlocked() {
