@@ -4,193 +4,517 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>JK Dashboard</title>
-<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg: #f4f1ec;
+  --bg: #fcf9f8;
   --surface: #ffffff;
-  --surface2: #edeae4;
-  --border: #ddd8ce;
-  --text: #1a1510;
-  --muted: #7a6f62;
-  --accent: #c8391a;
-  --blue: #1a6bc8;
-  --green: #1a7a3c;
-  --green-bg: #e8f5ee;
-  --red-bg: #fdf0ed;
-  --yellow: #b8780a;
-  --yellow-bg: #fdf5e6;
-  --teal: #1a7a6c;
-  --teal-bg: #e6f5f3;
-  --purple: #5a3bbf;
-  --purple-bg: #efecfa;
+  --surface2: #f6f3f2;
+  --surface3: #f0eded;
+  --surface4: #e5e2e1;
+  --surface-bright: #fffdfb;
+  --border: rgba(115,118,134,0.15);
+  --text: #1c1b1b;
+  --muted: #5d606c;
+  --muted-soft: #80838d;
+  --accent: #004ac6;
+  --blue: #2563eb;
+  --blue-bg: #dbe1ff;
+  --green: #00714d;
+  --green-bg: #dffbea;
+  --red: #ba1a1a;
+  --red-bg: #ffdad6;
+  --yellow: #8a5400;
+  --yellow-bg: #ffddb8;
+  --teal: #006c49;
+  --teal-bg: #6cf8bb;
+  --purple: #4452a6;
+  --purple-bg: #eeefff;
+  --radius-sm: 8px;
+  --radius-md: 8px;
+  --radius-lg: 8px;
+  --shadow-soft: 0 18px 46px -34px rgba(28,27,27,0.42);
+  --shadow-float: 0 18px 60px -30px rgba(28,27,27,0.5);
+  --shadow-blue: 0 18px 42px -22px rgba(37,99,235,0.45);
+  --headline: 'Space Grotesk', sans-serif;
+  --body: 'Inter', sans-serif;
+  --mono: 'SFMono-Regular','Cascadia Mono','Consolas',monospace;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; }
+html { background: var(--bg); }
+body {
+  background:
+    radial-gradient(circle at 7% -12%, rgba(219,225,255,0.9), transparent 32rem),
+    linear-gradient(180deg, var(--surface-bright) 0%, var(--bg) 21rem, #f4f0ec 100%);
+  color: var(--text);
+  font-family: var(--body);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+button, input, textarea { font: inherit; }
+button { -webkit-tap-highlight-color: transparent; }
+:focus-visible { outline: 3px solid rgba(37,99,235,0.28); outline-offset: 2px; }
 
 /* HEADER */
-.header { background: var(--text); color: #fff; padding: 0.85rem 1.25rem; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; }
-.header-title { font-family: 'Space Mono', monospace; font-size: 0.88rem; font-weight: 700; color: #ffc840; }
-.header-sub { font-size: 0.65rem; color: #888; margin-top: 0.1rem; font-family: 'Space Mono', monospace; }
-.mode-toggle { display: flex; background: #2a2a2a; border-radius: 8px; padding: 0.2rem; gap: 0.2rem; }
-.mode-btn { font-family: 'Space Mono', monospace; font-size: 0.6rem; font-weight: 700; letter-spacing: 0.05em; padding: 0.38rem 0.7rem; border: none; border-radius: 6px; cursor: pointer; background: transparent; color: #666; text-transform: uppercase; transition: all 0.15s; white-space: nowrap; }
-.mode-btn.active { background: #ffc840; color: #000; }
+.header {
+  background: rgba(252,249,248,0.88);
+  color: var(--text);
+  padding: 0.85rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.9rem;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  backdrop-filter: blur(20px);
+  box-shadow: 0 18px 42px -38px rgba(28,27,27,0.72);
+}
+.header-title {
+  font-family: var(--headline);
+  font-size: clamp(1.05rem, 4vw, 1.45rem);
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: 0;
+  line-height: 1;
+}
+.header-title::before {
+  content: 'OPS';
+  display: inline-flex;
+  align-items: center;
+  height: 1.5rem;
+  margin-right: 0.45rem;
+  padding: 0 0.42rem;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(135deg, var(--accent), var(--blue));
+  color: #fff;
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  font-weight: 700;
+  vertical-align: 0.12rem;
+}
+.header-sub {
+  font-size: 0.7rem;
+  color: var(--muted);
+  margin-top: 0.28rem;
+  font-family: var(--mono);
+}
+.mode-toggle {
+  display: flex;
+  background: var(--surface3);
+  border-radius: var(--radius-lg);
+  padding: 0.25rem;
+  gap: 0.25rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.mode-toggle::-webkit-scrollbar { display: none; }
+.mode-btn {
+  font-family: var(--headline);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  padding: 0.58rem 0.72rem;
+  min-height: 42px;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  background: transparent;
+  color: var(--muted);
+  text-transform: uppercase;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.mode-btn.active {
+  background: linear-gradient(135deg, var(--accent), var(--blue));
+  color: #fff;
+  box-shadow: var(--shadow-blue);
+}
 
 /* FILTER BAR */
-.filter-bar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0.65rem 1rem; display: flex; gap: 0.4rem; overflow-x: auto; scrollbar-width: none; }
+.filter-bar {
+  background: rgba(252,249,248,0.82);
+  backdrop-filter: blur(20px);
+  padding: 0.75rem 1rem;
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+  position: sticky;
+  top: 4.55rem;
+  z-index: 40;
+}
 .filter-bar::-webkit-scrollbar { display: none; }
-.chip { font-family: 'Space Mono', monospace; font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; padding: 0.3rem 0.75rem; border: 1.5px solid var(--border); border-radius: 20px; background: var(--surface); color: var(--muted); cursor: pointer; white-space: nowrap; transition: all 0.15s; flex-shrink: 0; }
-.chip.active { background: var(--text); color: #fff; border-color: var(--text); }
-.chip.p5.active { background: var(--blue); border-color: var(--blue); }
-.chip.p6.active { background: var(--accent); border-color: var(--accent); }
+.chip {
+  font-family: var(--headline);
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 0.56rem 0.9rem;
+  min-height: 42px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--muted);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s;
+  flex-shrink: 0;
+  box-shadow: inset 0 0 0 1px var(--border);
+}
+.chip.active { background: var(--text); color: #fff; box-shadow: none; }
+.chip.p5.active { background: var(--accent); color: #fff; }
+.chip.p6.active { background: var(--yellow-bg); color: var(--yellow); }
 
 /* MAIN */
-.main { padding: 0.85rem 0.85rem 6rem; max-width: 680px; margin: 0 auto; }
+.main { padding: 1rem 0.9rem 7.5rem; max-width: 920px; margin: 0 auto; }
 
 /* STATS */
-.stats { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.4rem; margin-bottom: 0.85rem; }
-.stat { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 0.6rem 0.4rem; text-align: center; }
-.stat-n { font-family: 'Space Mono', monospace; font-size: 1.1rem; font-weight: 700; }
-.stat-l { font-size: 0.55rem; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted); margin-top: 0.1rem; }
+.stats { display: grid; grid-template-columns: repeat(5, minmax(5rem, 1fr)); gap: 0.55rem; margin-bottom: 1rem; overflow-x: auto; scrollbar-width: none; }
+.stats::-webkit-scrollbar { display: none; }
+.stat {
+  background: var(--surface2);
+  border-radius: var(--radius-lg);
+  padding: 0.8rem 0.65rem;
+  text-align: left;
+  min-width: 5.2rem;
+  box-shadow: inset 0 0 0 1px rgba(115,118,134,0.08);
+}
+.stat-n { font-family: var(--headline); font-size: 1.55rem; line-height: 0.95; font-weight: 700; letter-spacing: 0; }
+.stat-l { font-family: var(--headline); font-size: 0.58rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); margin-top: 0.34rem; font-weight: 700; }
 
 /* SUBMISSION GROUP */
-.sub-group { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; margin-bottom: 0.85rem; overflow: hidden; }
-.sub-head { padding: 0.75rem 0.9rem; display: flex; align-items: center; gap: 0.6rem; border-bottom: 1px solid var(--border); background: var(--surface2); }
-.sub-country { font-family: 'Space Mono', monospace; font-size: 0.82rem; font-weight: 700; flex: 1; }
-.pbadge { font-family: 'Space Mono', monospace; font-size: 0.58rem; font-weight: 700; padding: 0.18rem 0.45rem; border-radius: 4px; text-transform: uppercase; }
-.pbadge.p5 { background: rgba(26,107,200,0.12); color: var(--blue); }
-.pbadge.p6 { background: rgba(200,57,26,0.12); color: var(--accent); }
-.sub-email { font-size: 0.68rem; color: var(--muted); }
+.sub-group {
+  background: var(--surface2);
+  border-radius: var(--radius-lg);
+  margin-bottom: 1rem;
+  overflow: hidden;
+  padding: 0.55rem;
+  box-shadow: var(--shadow-soft);
+}
+.sub-head {
+  padding: 0.75rem 0.8rem 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  background: transparent;
+}
+.sub-country { font-family: var(--headline); font-size: 1.05rem; font-weight: 700; flex: 1; letter-spacing: 0; }
+.pbadge, .sbadge {
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  font-weight: 700;
+  padding: 0.28rem 0.52rem;
+  border-radius: 999px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.pbadge.p5 { background: var(--blue-bg); color: var(--accent); }
+.pbadge.p6 { background: var(--yellow-bg); color: var(--yellow); }
+.sub-email { font-size: 0.74rem; color: var(--muted); font-family: var(--mono); }
 
 /* REQUEST ITEM */
-.req-item { padding: 0.75rem 0.9rem; border-bottom: 1px solid var(--border); display: flex; align-items: flex-start; gap: 0.65rem; }
-.req-item:last-child { border-bottom: none; }
-.req-icon { font-size: 1rem; flex-shrink: 0; margin-top: 0.1rem; }
+.req-item {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  padding: 0.88rem;
+  margin-bottom: 0.55rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  box-shadow: inset 0 0 0 1px rgba(115,118,134,0.08);
+}
+.req-item:last-child { margin-bottom: 0; }
+.req-icon {
+  width: 2.3rem;
+  height: 2.3rem;
+  display: grid;
+  place-items: center;
+  background: var(--surface3);
+  border-radius: var(--radius-sm);
+  font-size: 1rem;
+  flex-shrink: 0;
+}
 .req-body { flex: 1; min-width: 0; }
-.req-name { font-weight: 600; font-size: 0.86rem; }
-.req-detail { font-size: 0.73rem; color: var(--muted); margin-top: 0.1rem; }
-.req-link { font-size: 0.7rem; color: var(--blue); text-decoration: none; display: block; margin-top: 0.15rem; }
-.req-note { font-size: 0.72rem; color: var(--accent); margin-top: 0.2rem; font-style: italic; }
-.req-actions { display: flex; flex-direction: column; gap: 0.35rem; flex-shrink: 0; }
-.btn-approve, .btn-deny { font-family: 'Space Mono', monospace; font-size: 0.58rem; font-weight: 700; letter-spacing: 0.04em; padding: 0.3rem 0.65rem; border-radius: 5px; border: none; cursor: pointer; transition: all 0.15s; text-transform: uppercase; white-space: nowrap; }
+.req-name { font-weight: 700; font-size: 0.96rem; line-height: 1.25; }
+.req-detail { font-size: 0.78rem; color: var(--muted); margin-top: 0.18rem; line-height: 1.45; }
+.req-link { font-size: 0.78rem; color: var(--blue); text-decoration: none; display: block; margin-top: 0.2rem; font-weight: 700; }
+.req-note { font-size: 0.76rem; color: var(--red); margin-top: 0.28rem; font-style: normal; font-weight: 600; }
+.req-actions { display: flex; flex-direction: column; gap: 0.42rem; flex-shrink: 0; }
+.btn-approve, .btn-deny {
+  font-family: var(--headline);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  padding: 0.58rem 0.78rem;
+  min-height: 42px;
+  border-radius: var(--radius-sm);
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
 .btn-approve { background: var(--green-bg); color: var(--green); }
 .btn-approve:hover { background: var(--green); color: #fff; }
-.btn-deny { background: var(--red-bg); color: var(--accent); }
-.btn-deny:hover { background: var(--accent); color: #fff; }
-.sbadge { font-family: 'Space Mono', monospace; font-size: 0.58rem; font-weight: 700; padding: 0.18rem 0.45rem; border-radius: 4px; text-transform: uppercase; white-space: nowrap; }
-.s-pending { background: var(--surface2); color: var(--muted); }
+.btn-deny { background: var(--red-bg); color: var(--red); }
+.btn-deny:hover { background: var(--red); color: #fff; }
+.s-pending { background: var(--yellow-bg); color: var(--yellow); }
 .s-approved { background: var(--green-bg); color: var(--green); }
-.s-denied { background: var(--red-bg); color: var(--accent); }
-.s-purchased { background: #dff0ff; color: var(--blue); }
+.s-denied { background: var(--red-bg); color: var(--red); }
+.s-purchased { background: var(--blue-bg); color: var(--accent); }
 .s-outofstock { background: var(--yellow-bg); color: var(--yellow); }
 
 /* DENY MODAL */
-.modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 100; align-items: flex-end; justify-content: center; }
+.modal-bg { display: none; position: fixed; inset: 0; background: rgba(28,27,27,0.42); backdrop-filter: blur(18px); z-index: 100; align-items: flex-end; justify-content: center; padding: 0 0.7rem; }
 .modal-bg.open { display: flex; }
-.modal { background: var(--surface); border-radius: 16px 16px 0 0; padding: 1.4rem; width: 100%; max-width: 520px; animation: up 0.2s ease; }
+.modal, .oos-modal { background: rgba(252,249,248,0.97); border-radius: var(--radius-lg) var(--radius-lg) 0 0; padding: 1.35rem; width: 100%; max-width: 560px; animation: up 0.2s ease; box-shadow: var(--shadow-float); }
 @keyframes up { from{transform:translateY(100%)} to{transform:translateY(0)} }
-.modal h3 { font-family: 'Space Mono', monospace; font-size: 0.82rem; margin-bottom: 0.2rem; }
-.modal-sub { font-size: 0.78rem; color: var(--muted); margin-bottom: 0.9rem; }
-.deny-opts { display: flex; flex-direction: column; gap: 0.4rem; margin-bottom: 0.75rem; }
-.deny-opt { background: var(--surface2); border: 1.5px solid var(--border); border-radius: 8px; padding: 0.65rem 0.9rem; cursor: pointer; font-size: 0.83rem; transition: all 0.15s; text-align: left; }
-.deny-opt:hover, .deny-opt.sel { border-color: var(--accent); background: var(--red-bg); color: var(--accent); }
-.deny-custom { width: 100%; background: var(--surface2); border: 1.5px solid var(--border); border-radius: 8px; padding: 0.65rem 0.9rem; font-family: 'DM Sans', sans-serif; font-size: 0.86rem; color: var(--text); outline: none; resize: none; min-height: 56px; margin-bottom: 0.75rem; }
-.deny-custom:focus { border-color: var(--accent); }
-.modal-btns { display: flex; gap: 0.5rem; }
-.btn-mc { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 0.7rem 0.9rem; font-family: 'Space Mono', monospace; font-size: 0.68rem; cursor: pointer; color: var(--muted); text-transform: uppercase; }
-.btn-mok { flex: 1; background: var(--accent); color: #fff; border: none; border-radius: 8px; padding: 0.7rem; font-family: 'Space Mono', monospace; font-size: 0.7rem; font-weight: 700; cursor: pointer; text-transform: uppercase; }
-.btn-mok:hover { background: #a82d14; }
+.modal h3, .oos-modal h3, .email-card h3 { font-family: var(--headline); font-size: 1.35rem; line-height: 1.05; margin-bottom: 0.35rem; letter-spacing: 0; }
+.modal-sub { font-size: 0.9rem; color: var(--muted); margin-bottom: 1rem; line-height: 1.45; }
+.deny-opts { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 0.8rem; }
+.deny-opt { background: var(--surface2); border: 0; border-radius: var(--radius-md); padding: 0.82rem 0.95rem; cursor: pointer; font-size: 0.9rem; font-weight: 600; transition: all 0.15s; text-align: left; color: var(--text); }
+.deny-opt:hover, .deny-opt.sel { background: var(--red-bg); color: var(--red); box-shadow: inset 0 0 0 1px rgba(186,26,26,0.22); }
+.deny-custom, .oos-note-input {
+  width: 100%;
+  background: var(--surface4);
+  border: 0;
+  border-radius: var(--radius-md);
+  padding: 0.82rem 0.95rem;
+  font-size: 0.92rem;
+  color: var(--text);
+  outline: none;
+  resize: none;
+  min-height: 76px;
+  margin-bottom: 0.85rem;
+  box-shadow: inset 0 -2px 0 rgba(115,118,134,0.2);
+}
+.deny-custom:focus, .oos-note-input:focus { box-shadow: inset 0 -3px 0 var(--accent); background: var(--surface); }
+.modal-btns { display: flex; gap: 0.65rem; }
+.btn-mc { background: var(--surface3); border: 0; border-radius: var(--radius-sm); padding: 0.86rem 1rem; min-height: 50px; font-family: var(--headline); font-size: 0.72rem; font-weight: 700; cursor: pointer; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+.btn-mok { flex: 1; background: linear-gradient(135deg, var(--accent), var(--blue)); color: #fff; border: none; border-radius: var(--radius-sm); padding: 0.86rem; min-height: 50px; font-family: var(--headline); font-size: 0.74rem; font-weight: 700; cursor: pointer; text-transform: uppercase; letter-spacing: 0.08em; box-shadow: var(--shadow-blue); }
+.btn-mok:hover { filter: brightness(1.04); }
 
 /* OOS MODAL */
-.oos-modal { background: var(--surface); border-radius: 16px 16px 0 0; padding: 1.4rem; width: 100%; max-width: 520px; animation: up 0.2s ease; }
-.oos-modal h3 { font-family: 'Space Mono', monospace; font-size: 0.82rem; margin-bottom: 0.2rem; }
-.oos-sub { font-size: 0.78rem; color: var(--muted); margin-bottom: 0.9rem; }
-.oos-note-label { font-size: 0.74rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.35rem; }
-.oos-note-input { width: 100%; background: var(--surface2); border: 1.5px solid var(--border); border-radius: 8px; padding: 0.65rem 0.9rem; font-family: 'DM Sans', sans-serif; font-size: 0.86rem; color: var(--text); outline: none; resize: none; min-height: 56px; margin-bottom: 0.75rem; }
-.oos-note-input:focus { border-color: var(--yellow); }
-.oos-hint { font-size: 0.72rem; color: var(--muted); margin-bottom: 0.75rem; }
+.oos-sub { font-size: 0.9rem; color: var(--muted); margin-bottom: 0.75rem; line-height: 1.45; }
+.oos-note-label { font-family: var(--headline); font-size: 0.72rem; font-weight: 700; color: var(--yellow); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.45rem; }
+.oos-hint { font-size: 0.84rem; color: var(--muted); margin-bottom: 0.85rem; line-height: 1.5; }
 
 /* SHOPPER MODE */
-.aisle { margin-bottom: 1.1rem; }
-.aisle-hd { display: flex; align-items: center; gap: 0.6rem; padding: 0.5rem 0; margin-bottom: 0.4rem; }
-.aisle-icon { font-size: 1.2rem; }
-.aisle-name { font-family: 'Space Mono', monospace; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; flex: 1; }
-.aisle-ct { font-family: 'Space Mono', monospace; font-size: 0.62rem; color: var(--muted); background: var(--surface); border: 1px solid var(--border); padding: 0.12rem 0.45rem; border-radius: 10px; }
-.aisle-hr { border: none; border-top: 2px solid rgba(0,0,0,0.07); margin-bottom: 0.6rem; }
+.aisle { margin-bottom: 1.25rem; background: var(--surface2); border-radius: var(--radius-lg); padding: 0.65rem; box-shadow: var(--shadow-soft); }
+.aisle-hd { display: flex; align-items: center; gap: 0.65rem; padding: 0.55rem 0.65rem 0.75rem; margin-bottom: 0; }
+.aisle-icon { font-size: 1.2rem; width: 2rem; height: 2rem; display: grid; place-items: center; background: var(--surface); border-radius: var(--radius-sm); }
+.aisle-name { font-family: var(--headline); font-size: 0.88rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; flex: 1; }
+.aisle-ct { font-family: var(--mono); font-size: 0.68rem; color: var(--accent); background: var(--blue-bg); padding: 0.28rem 0.52rem; border-radius: 999px; font-weight: 700; }
+.aisle-hr { display: none; }
 
-.shop-item { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 0.45rem; padding: 0.75rem 0.85rem; display: flex; align-items: flex-start; gap: 0.75rem; transition: opacity 0.2s; }
-.shop-item.grabbed { opacity: 0.45; }
-.shop-item.oos { opacity: 0.6; border-color: var(--yellow); background: var(--yellow-bg); }
-.shop-cb { width: 26px; height: 26px; border-radius: 6px; border: 2px solid var(--border); flex-shrink: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; margin-top: 0.05rem; font-size: 0.85rem; background: var(--surface); }
-.shop-cb.chk { background: var(--green); border-color: var(--green); color: #fff; }
-.shop-cb.oos-cb { background: var(--yellow-bg); border-color: var(--yellow); color: var(--yellow); }
+.shop-item { background: var(--surface); border-radius: var(--radius-lg); margin-bottom: 0.6rem; padding: 0.95rem; display: flex; align-items: flex-start; gap: 0.9rem; transition: opacity 0.2s, transform 0.15s, background 0.15s; box-shadow: inset 0 0 0 1px rgba(115,118,134,0.08); }
+.shop-item:last-child { margin-bottom: 0; }
+.shop-item.grabbed { opacity: 0.6; background: var(--green-bg); }
+.shop-item.oos { opacity: 0.88; background: var(--yellow-bg); }
+.shop-cb { width: 46px; height: 46px; border-radius: var(--radius-sm); flex-shrink: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; margin-top: 0.05rem; font-size: 1rem; background: var(--surface3); color: transparent; box-shadow: inset 0 0 0 2px rgba(115,118,134,0.18); }
+.shop-cb.chk { background: var(--green); box-shadow: none; color: #fff; font-weight: 800; }
+.shop-cb.oos-cb { background: rgba(255,255,255,0.45); box-shadow: inset 0 0 0 2px rgba(138,84,0,0.26); color: var(--yellow); font-weight: 800; }
 .shop-body { flex: 1; min-width: 0; }
-.shop-name { font-weight: 600; font-size: 0.88rem; }
-.shop-meta { font-size: 0.73rem; color: var(--muted); margin-top: 0.12rem; }
-.shop-sub-note { font-size: 0.72rem; color: var(--yellow); margin-top: 0.2rem; font-style: italic; }
-.shop-tag { display: inline-block; font-size: 0.62rem; font-family: 'Space Mono', monospace; font-weight: 700; text-transform: uppercase; padding: 0.12rem 0.4rem; border-radius: 4px; margin-top: 0.25rem; }
+.shop-name { font-family: var(--headline); font-weight: 700; font-size: 1.08rem; line-height: 1.2; letter-spacing: 0; }
+.shop-meta { font-size: 0.86rem; color: var(--muted); margin-top: 0.25rem; line-height: 1.45; font-weight: 500; }
+.shop-sub-note { font-size: 0.82rem; color: var(--yellow); margin-top: 0.32rem; font-weight: 700; }
+.shop-tag { display: inline-block; font-size: 0.66rem; font-family: var(--mono); font-weight: 700; text-transform: uppercase; padding: 0.24rem 0.5rem; border-radius: 999px; margin-top: 0.45rem; line-height: 1.3; }
 .shop-actions { display: flex; flex-direction: column; gap: 0.3rem; flex-shrink: 0; align-items: flex-end; }
-.btn-oos { font-family: 'Space Mono', monospace; font-size: 0.55rem; font-weight: 700; letter-spacing: 0.04em; padding: 0.28rem 0.55rem; border-radius: 5px; border: 1.5px solid var(--yellow); background: var(--yellow-bg); color: var(--yellow); cursor: pointer; text-transform: uppercase; transition: all 0.15s; white-space: nowrap; }
+.btn-oos { font-family: var(--headline); font-size: 0.62rem; font-weight: 700; letter-spacing: 0.07em; padding: 0.62rem 0.7rem; min-height: 42px; border-radius: var(--radius-sm); border: 0; background: var(--yellow-bg); color: var(--yellow); cursor: pointer; text-transform: uppercase; transition: all 0.15s; white-space: nowrap; }
 .btn-oos:hover { background: var(--yellow); color: #fff; }
 .btn-oos.active-oos { background: var(--yellow); color: #fff; }
 
 /* DONE BAR */
-.done-bar { position: fixed; bottom: 0; left: 0; right: 0; background: var(--surface); border-top: 2px solid var(--border); padding: 0.85rem 1.25rem; display: flex; align-items: center; gap: 0.75rem; z-index: 50; }
+.done-bar { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(252,249,248,0.9); backdrop-filter: blur(20px); padding: 0.95rem 1rem; display: flex; align-items: center; gap: 0.85rem; z-index: 50; box-shadow: 0 -14px 44px -30px rgba(28,27,27,0.72); }
 .done-prog { flex: 1; }
-.done-label { font-size: 0.68rem; color: var(--muted); margin-bottom: 0.3rem; font-family: 'Space Mono', monospace; }
-.prog-track { background: var(--surface2); border-radius: 4px; height: 6px; overflow: hidden; }
-.prog-fill { height: 100%; background: var(--green); border-radius: 4px; transition: width 0.3s ease; }
-.btn-done { background: var(--text); color: #ffc840; border: none; border-radius: 8px; padding: 0.72rem 1.1rem; font-family: 'Space Mono', monospace; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.04em; cursor: pointer; text-transform: uppercase; white-space: nowrap; flex-shrink: 0; }
-.btn-done:hover { background: #333; }
+.done-label { font-size: 0.74rem; color: var(--muted); margin-bottom: 0.38rem; font-family: var(--mono); font-weight: 700; }
+.prog-track { background: var(--surface4); border-radius: 999px; height: 8px; overflow: hidden; }
+.prog-fill { height: 100%; background: linear-gradient(135deg, var(--accent), var(--blue)); border-radius: 999px; transition: width 0.3s ease; }
+.btn-done { background: linear-gradient(135deg, var(--accent), var(--blue)); color: #fff; border: none; border-radius: var(--radius-sm); padding: 0.95rem 1rem; min-height: 56px; font-family: var(--headline); font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em; cursor: pointer; text-transform: uppercase; white-space: nowrap; flex-shrink: 0; box-shadow: var(--shadow-blue); }
+.btn-done:hover { filter: brightness(1.04); }
 
 /* EMAIL MODAL */
-.email-modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 200; align-items: center; justify-content: center; padding: 1rem; }
+.email-modal-bg { display: none; position: fixed; inset: 0; background: rgba(28,27,27,0.42); backdrop-filter: blur(18px); z-index: 200; align-items: center; justify-content: center; padding: 1rem; }
 .email-modal-bg.open { display: flex; }
-.email-card { background: var(--surface); border-radius: 14px; padding: 1.4rem; width: 100%; max-width: 480px; max-height: 85vh; overflow-y: auto; }
-.email-card h3 { font-family: 'Space Mono', monospace; font-size: 0.85rem; margin-bottom: 0.25rem; }
-.email-card-sub { font-size: 0.78rem; color: var(--muted); margin-bottom: 1rem; }
-.eg { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 0.65rem; overflow: hidden; }
-.eg-head { padding: 0.65rem 0.9rem; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); background: var(--surface); }
-.eg-country { font-family: 'Space Mono', monospace; font-size: 0.72rem; font-weight: 700; }
+.email-card { background: rgba(252,249,248,0.97); border-radius: var(--radius-lg); padding: 1.35rem; width: 100%; max-width: 560px; max-height: 85vh; overflow-y: auto; box-shadow: var(--shadow-float); }
+.email-card-sub { font-size: 0.9rem; color: var(--muted); margin-bottom: 1rem; line-height: 1.45; }
+.eg { background: var(--surface2); border-radius: var(--radius-lg); margin-bottom: 0.75rem; overflow: hidden; padding: 0.45rem; }
+.eg-head { padding: 0.65rem 0.7rem; display: flex; align-items: center; justify-content: space-between; gap: 0.7rem; background: var(--surface); border-radius: var(--radius-md); }
+.eg-country { font-family: var(--headline); font-size: 0.86rem; font-weight: 700; }
 .eg-email { font-size: 0.68rem; color: var(--muted); }
-.eg-items { padding: 0.45rem 0.9rem; font-size: 0.78rem; line-height: 1.9; }
+.eg-items { padding: 0.6rem 0.7rem 0.25rem; font-size: 0.82rem; line-height: 1.9; font-weight: 600; }
 .eg-items .ep { color: var(--green); }
-.eg-items .ed { color: var(--accent); text-decoration: line-through; }
+.eg-items .ed { color: var(--red); text-decoration: line-through; }
 .eg-items .eo { color: var(--yellow); }
-.btn-gmail { display: block; width: 100%; background: #1a73e8; color: #fff; text-align: center; padding: 0.6rem; border-radius: 7px; font-family: 'Space Mono', monospace; font-size: 0.65rem; font-weight: 700; text-decoration: none; margin-top: 0.4rem; text-transform: uppercase; letter-spacing: 0.04em; transition: background 0.15s; }
-.btn-gmail:hover { background: #1558b0; }
-.email-close { display: block; width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 0.72rem; font-family: 'Space Mono', monospace; font-size: 0.65rem; cursor: pointer; margin-top: 0.9rem; text-transform: uppercase; color: var(--muted); }
+.btn-gmail { display: block; width: 100%; background: linear-gradient(135deg, var(--accent), var(--blue)); color: #fff; text-align: center; padding: 0.8rem; border-radius: var(--radius-sm); font-family: var(--headline); font-size: 0.7rem; font-weight: 700; text-decoration: none; margin-top: 0.5rem; text-transform: uppercase; letter-spacing: 0.08em; transition: filter 0.15s; }
+.btn-gmail:hover { filter: brightness(1.04); }
+.email-close { display: block; width: 100%; background: var(--surface3); border: 0; border-radius: var(--radius-sm); padding: 0.86rem; font-family: var(--headline); font-size: 0.7rem; font-weight: 700; cursor: pointer; margin-top: 0.9rem; text-transform: uppercase; color: var(--muted); letter-spacing: 0.08em; }
+#emailSendBtn, #emailResendBtn {
+  border: none !important;
+  border-radius: var(--radius-sm) !important;
+  padding: 0.86rem !important;
+  min-height: 50px !important;
+  color: #fff !important;
+  font-family: var(--headline) !important;
+  font-size: 0.7rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase !important;
+  cursor: pointer !important;
+  box-shadow: none !important;
+}
+#emailSendBtn { background: linear-gradient(135deg, var(--accent), var(--blue)) !important; }
+#emailResendBtn { background: var(--yellow) !important; }
 
 /* NOTIFY BANNER */
-.notify-banner { background: var(--red-bg); border: 1.5px solid var(--accent); border-radius: 8px; padding: 0.7rem 1rem; margin-bottom: 0.85rem; display: flex; align-items: center; gap: 0.75rem; }
-.notify-banner-text { flex: 1; font-size: 0.8rem; font-weight: 600; color: var(--accent); }
-.btn-notify { font-family: 'Space Mono', monospace; font-size: 0.62rem; font-weight: 700; padding: 0.4rem 0.85rem; background: var(--accent); color: #fff; border: none; border-radius: 5px; cursor: pointer; text-transform: uppercase; white-space: nowrap; transition: background 0.15s; }
-.btn-notify:hover { background: #a82d14; }
+.notify-banner { background: var(--red-bg); border-radius: var(--radius-lg); padding: 0.8rem 0.9rem; margin-bottom: 0.9rem; display: flex; align-items: center; gap: 0.75rem; }
+.notify-banner-text { flex: 1; font-size: 0.86rem; font-weight: 700; color: var(--red); line-height: 1.35; }
+.btn-notify { font-family: var(--headline); font-size: 0.68rem; font-weight: 700; padding: 0.62rem 0.85rem; min-height: 42px; background: var(--red); color: #fff; border: none; border-radius: var(--radius-sm); cursor: pointer; text-transform: uppercase; white-space: nowrap; transition: background 0.15s; letter-spacing: 0.08em; }
+.btn-notify:hover { filter: brightness(1.04); }
 .btn-notify:disabled { background: var(--border); color: var(--muted); cursor: not-allowed; }
 
 /* DENIED ITEMS — collapsed at bottom */
-.denied-section { margin-top: 0.25rem; border-top: 1px dashed var(--border); }
-.denied-toggle { font-family: 'Space Mono', monospace; font-size: 0.58rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); padding: 0.45rem 0.9rem; cursor: pointer; display: flex; align-items: center; gap: 0.4rem; }
-.denied-toggle:hover { color: var(--accent); }
+.denied-section { margin-top: 0.35rem; }
+.denied-toggle { font-family: var(--headline); font-size: 0.66rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); padding: 0.7rem 0.75rem; cursor: pointer; display: flex; align-items: center; gap: 0.4rem; }
+.denied-toggle:hover { color: var(--red); }
 .denied-items-list { display: none; }
 .denied-items-list.open { display: block; }
-.req-item.denied-row { opacity: 0.65; background: var(--red-bg); }
+.req-item.denied-row { opacity: 0.78; background: rgba(255,218,214,0.5); }
 
 /* CHRONOLOGICAL VIEW */
-.view-toggle { display: flex; gap: 0.35rem; margin-bottom: 0.75rem; }
-.view-btn { font-family: 'Space Mono', monospace; font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; padding: 0.3rem 0.75rem; border: 1.5px solid var(--border); border-radius: 20px; background: var(--surface); color: var(--muted); cursor: pointer; transition: all 0.15s; }
-.view-btn.active { background: var(--text); color: #fff; border-color: var(--text); }
+.view-toggle { display: flex; gap: 0.45rem; margin-bottom: 0.9rem; }
+.view-btn { font-family: var(--headline); font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; padding: 0.56rem 0.85rem; min-height: 42px; border: 0; border-radius: var(--radius-sm); background: var(--surface3); color: var(--muted); cursor: pointer; transition: all 0.15s; }
+.view-btn.active { background: var(--text); color: #fff; }
 
 /* LOADING / EMPTY */
-.loading { text-align: center; padding: 3rem 1rem; color: var(--muted); font-family: 'Space Mono', monospace; font-size: 0.75rem; }
-.spinner { width: 22px; height: 22px; border: 2px solid var(--border); border-top-color: var(--text); border-radius: 50%; animation: spin 0.6s linear infinite; margin: 0 auto 0.65rem; }
+.loading { text-align: center; padding: 3.5rem 1rem; color: var(--muted); font-family: var(--headline); font-size: 0.86rem; font-weight: 700; line-height: 1.55; }
+.spinner { width: 24px; height: 24px; border: 3px solid var(--surface4); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.6s linear infinite; margin: 0 auto 0.75rem; }
 @keyframes spin { to { transform: rotate(360deg); } }
-.toast { position: fixed; top: 72px; left: 50%; transform: translateX(-50%) translateY(-80px); background: var(--text); color: #fff; padding: 0.6rem 1.1rem; border-radius: 8px; font-size: 0.8rem; font-weight: 500; transition: transform 0.3s ease; z-index: 300; white-space: nowrap; }
+.toast { position: fixed; top: 86px; left: 50%; transform: translateX(-50%) translateY(-100px); background: rgba(28,27,27,0.93); color: #fff; padding: 0.78rem 1.05rem; border-radius: var(--radius-sm); font-size: 0.86rem; font-weight: 700; transition: transform 0.3s ease; z-index: 300; white-space: nowrap; box-shadow: var(--shadow-float); backdrop-filter: blur(20px); }
 .toast.show { transform: translateX(-50%) translateY(0); }
+
+/* AUTH */
+#authScreen {
+  min-height: 100vh;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+.auth-card {
+  width: 100%;
+  max-width: 430px;
+  background: rgba(255,255,255,0.86);
+  backdrop-filter: blur(20px);
+  border-radius: var(--radius-lg);
+  padding: 1.35rem;
+  box-shadow: var(--shadow-float);
+}
+.auth-kicker {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.8rem;
+  padding: 0.32rem 0.58rem;
+  border-radius: var(--radius-sm);
+  background: var(--blue-bg);
+  color: var(--accent);
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  margin-bottom: 0.9rem;
+}
+.auth-title { font-family: var(--headline); font-size: 2.05rem; line-height: 0.98; font-weight: 700; letter-spacing: 0; margin-bottom: 0.6rem; }
+.auth-sub { font-size: 0.93rem; color: var(--muted); line-height: 1.55; margin-bottom: 1rem; font-weight: 500; }
+.auth-field { margin-bottom: 0.85rem; }
+.auth-field label {
+  display: block;
+  font-family: var(--headline);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  margin-bottom: 0.42rem;
+}
+#loginEmail, #loginPassword {
+  width: 100%;
+  min-height: 52px;
+  padding: 0.85rem 0.95rem;
+  border: 0;
+  border-radius: var(--radius-md);
+  background: var(--surface4);
+  color: var(--text);
+  box-shadow: inset 0 -2px 0 rgba(115,118,134,0.2);
+}
+#loginEmail:focus, #loginPassword:focus { background: var(--surface); box-shadow: inset 0 -3px 0 var(--accent); outline: none; }
+#loginBtn {
+  width: 100%;
+  min-height: 56px;
+  background: linear-gradient(135deg, var(--accent), var(--blue));
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 0.9rem;
+  font-family: var(--headline);
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  box-shadow: var(--shadow-blue);
+}
+#loginBtn:disabled { opacity: 0.65; cursor: wait; }
+#authMsg { min-height: 1.1rem; margin-top: 0.75rem; font-size: 0.82rem; color: var(--red); font-weight: 700; }
+
+@media (min-width: 760px) {
+  .header { padding: 1rem 1.4rem; }
+  .filter-bar { top: 4.75rem; padding-inline: calc((100vw - 920px) / 2 + 0.9rem); }
+  .main { padding-top: 1.25rem; }
+  .modal-bg { align-items: center; }
+  .modal, .oos-modal { border-radius: var(--radius-lg); }
+  .done-bar { justify-content: center; }
+  .done-bar > * { max-width: 920px; }
+}
+
+@media (max-width: 560px) {
+  .header { align-items: flex-start; flex-direction: column; }
+  .mode-toggle { width: 100%; }
+  .mode-btn { flex: 1; }
+  .req-item, .shop-item { gap: 0.68rem; }
+  .req-actions, .shop-actions { width: auto; }
+  .btn-approve, .btn-deny, .btn-oos { padding-inline: 0.62rem; }
+  .done-bar { flex-direction: column; align-items: stretch; }
+  .btn-done { width: 100%; }
+}
 </style>
 </head>
 <body>
+<div id="authScreen" style="display:none;">
+  <div class="auth-card">
+    <div class="auth-kicker">Teacher Access</div>
+    <div class="auth-title">Junk Kouture<br>Dashboard</div>
+    <div class="auth-sub">Review requests, approve supplies, and move through the shopping list with a clean operational view.</div>
 
+    <div class="auth-field">
+      <label for="loginEmail">Email</label>
+      <input id="loginEmail" type="email" autocomplete="username" />
+    </div>
+
+    <div class="auth-field">
+      <label for="loginPassword">Password</label>
+      <input id="loginPassword" type="password" autocomplete="current-password" />
+    </div>
+
+    <button id="loginBtn">Sign In</button>
+
+    <div id="authMsg"></div>
+  </div>
+</div>
+
+<div id="appShell" style="display:none;">
 <div class="header">
   <div>
     <div class="header-title">Junk Kouture Dashboard</div>
@@ -199,6 +523,8 @@ body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-s
   <div class="mode-toggle">
     <button class="mode-btn active" id="btnReview" onclick="setMode('reviewer')">Review</button>
     <button class="mode-btn" id="btnShop" onclick="setMode('shopper')">Shop</button>
+    <button class="mode-btn" id="btnRefresh" onclick="manualRefresh()">Refresh</button>
+	<button class="mode-btn" id="btnLogout" onclick="signOutTeacher()">Logout</button>
   </div>
 </div>
 
@@ -217,7 +543,7 @@ body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-s
 
 <div class="done-bar" id="doneBar" style="display:none">
   <div class="done-prog">
-    <div class="done-label"><span id="grabbedCt">0</span> / <span id="totalAppr">0</span> handled</div>
+    <div class="done-label"><span id="handledCt">0</span> of <span id="totalShopCt">0</span> items handled · <span id="remainingCt">0</span> remaining</div>
     <div class="prog-track"><div class="prog-fill" id="progFill" style="width:0%"></div></div>
   </div>
   <button class="btn-done" onclick="openEmailModal()">Done — Email Groups</button>
@@ -266,20 +592,23 @@ body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-s
     <div id="emailGroups"></div>
     <div style="display:flex;gap:0.5rem;margin-top:0.9rem">
       <button class="email-close" style="flex:1;margin:0" onclick="closeEmailModal()">Cancel</button>
-      <button id="emailSendBtn" style="flex:2;background:var(--green);color:#fff;border:none;border-radius:8px;padding:0.72rem;font-family:'Space Mono',monospace;font-size:0.68rem;font-weight:700;cursor:pointer;text-transform:uppercase;">Send All Emails</button>
+      <button id="emailSendBtn" style="flex:2;">Send All Emails</button>
+      <button id="emailResendBtn" style="display:none;flex:2;">Resend Sent</button>
     </div>
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-const SUPABASE_URL = 'https://pizuvyfvevdwmbqcwanf.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBpenV2eWZ2ZXZkd21icWN3YW5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYwMTA3NzUsImV4cCI6MjA5MTU4Njc3NX0.FQox6MV8XrbeB_dVoWsZcnOfGtzfheEFpbxAOIadmLY';
+const SUPABASE_URL = 'https://ywdigsbpvtjsjhliuwrm.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_CSLa84XRVDj2D_cEl72TpQ_43T7e6qr';
 const EMAILJS_SERVICE_ID = 'service_v7bchw7';
 const EMAILJS_DENIAL_TEMPLATE_ID = 'template_di08r5w';
 const EMAILJS_COMPLETED_TEMPLATE_ID = 'template_gsncn3g';
 const EMAILJS_PUBLIC_KEY = 't9UIpuX-5wgc4RPno';
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let allRequests = [];
 let mode = 'reviewer';
@@ -287,8 +616,13 @@ let filter = 'all';
 let denyTargetId = null, denyReason = '';
 let oosTargetId = null;
 let reviewView = 'grouped'; // 'grouped' or 'chrono'
-const grabbed = new Set(); // purchased or oos
+let purchasedArchiveOpen = false;
+let currentSession = null;
+let refreshTimer = null;
+let activeSaveCount = 0;
+let emailBatchInProgress = false;
 
+// Change these order numbers to match the in-store walking path.
 const aisles = [
   { name: 'Paint Aisle', icon: '🎨', cats: ['spray_paint','paint'], order: 1 },
   { name: 'Tape & Adhesives', icon: '📦', cats: ['tape','glue'], order: 2 },
@@ -300,31 +634,178 @@ const aisles = [
 
 const catIcon = { spray_paint:'🎨', paint:'🖌️', wire:'🔩', tape:'📦', glue:'🧲', fasteners:'🔗', thread:'🧵', tools:'🔧', other:'✏️' };
 
+function authHeaders(extra = {}) {
+  if (!currentSession?.access_token) throw new Error('not authenticated');
+  return { ...extra, 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${currentSession.access_token}` };
+}
+
+async function restError(res, action) {
+  const body = await res.text().catch(() => '');
+  const err = new Error(`${action} failed (${res.status})`);
+  err.status = res.status;
+  err.body = body;
+  return err;
+}
+
+function logError(context, err) {
+  console.error(`[Teacher dashboard] ${context}`, err);
+}
+
+function friendlyError(err, fallback = 'Something went wrong.') {
+  const text = `${err?.message || ''} ${err?.body || ''}`.toLowerCase();
+  if (err?.status === 401 || text.includes('jwt') || text.includes('not authenticated')) return 'Session expired. Please sign in again.';
+  if (err?.status === 403 || text.includes('row-level security') || text.includes('permission denied') || text.includes('rls')) return 'Unauthorized or RLS blocked this action.';
+  if (text.includes('failed to fetch') || text.includes('network')) return 'Network problem. Check your connection and try again.';
+  return fallback;
+}
+
 async function fetchAll() {
   const res = await fetch(`${SUPABASE_URL}/rest/v1/requests?order=created_at.asc`, {
-    headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+    headers: authHeaders()
   });
-  if (!res.ok) throw new Error('fetch failed');
+  if (!res.ok) throw await restError(res, 'Load requests');
   return res.json();
 }
 
 async function patch(id, data) {
-  const res = await fetch(`${SUPABASE_URL}/rest/v1/requests?id=eq.${id}`, {
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Prefer': 'return=minimal' },
-    body: JSON.stringify(data)
-  });
-  if (!res.ok) throw new Error('patch failed');
+  activeSaveCount++;
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/requests?id=eq.${id}`, {
+      method: 'PATCH',
+      headers: authHeaders({ 'Content-Type': 'application/json', 'Prefer': 'return=minimal' }),
+      body: JSON.stringify(data)
+    });
+    if (!res.ok) throw await restError(res, 'Save request');
+  } finally {
+    activeSaveCount--;
+  }
 }
 
-async function load() {
+async function patchRows(rows, data, context) {
+  const results = await Promise.allSettled(rows.map(item => patch(item.id, data)));
+  const failedRows = rows.filter((_row, idx) => results[idx].status === 'rejected');
+  const okRows = rows.filter((_row, idx) => results[idx].status === 'fulfilled');
+  const failed = results.filter(r => r.status === 'rejected');
+  if (failed.length) logError(context, failed.map(r => r.reason));
+  return { ok: okRows.length, failed: failedRows.length, okRows, failedRows, firstError: failed[0]?.reason };
+}
+
+function showLogin(message = '') {
+  currentSession = null;
+  allRequests = [];
+  if (refreshTimer) {
+    clearInterval(refreshTimer);
+    refreshTimer = null;
+  }
+  document.getElementById('appShell').style.display = 'none';
+  document.getElementById('authScreen').style.display = 'flex';
+  document.getElementById('authMsg').textContent = message;
+}
+
+function showApp(session) {
+  currentSession = session;
+  document.getElementById('authScreen').style.display = 'none';
+  document.getElementById('appShell').style.display = 'block';
+  load();
+  if (!refreshTimer) refreshTimer = setInterval(autoRefresh, 60000);
+}
+
+async function signInTeacher() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  const msg = document.getElementById('authMsg');
+  const btn = document.getElementById('loginBtn');
+  msg.textContent = '';
+  if (!email || !password) {
+    msg.textContent = 'Enter your email and password.';
+    return;
+  }
+  btn.disabled = true;
+  btn.textContent = 'Signing in...';
   try {
-    allRequests = await fetchAll();
+    const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+    if (error) {
+      logError('Login failed', error);
+      msg.textContent = error.message || 'Login failed.';
+      return;
+    }
+    showApp(data.session);
+  } catch(e) {
+    logError('Login failed', e);
+    msg.textContent = friendlyError(e, 'Login failed. Check your connection and try again.');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Sign In';
+  }
+}
+
+async function signOutTeacher() {
+  try {
+    const { error } = await supabaseClient.auth.signOut();
+    if (error) logError('Sign out failed', error);
+  } catch(e) {
+    logError('Sign out failed', e);
+  }
+  showLogin('Signed out.');
+}
+
+async function initAuth() {
+  document.getElementById('loginBtn').addEventListener('click', signInTeacher);
+  document.getElementById('loginPassword').addEventListener('keydown', e => {
+    if (e.key === 'Enter') signInTeacher();
+  });
+  document.getElementById('authScreen').style.display = 'flex';
+  document.getElementById('authMsg').textContent = 'Checking session...';
+
+  try {
+    const { data, error } = await supabaseClient.auth.getSession();
+    if (error) logError('Session check failed', error);
+    if (data?.session) showApp(data.session);
+    else showLogin();
+  } catch(e) {
+    logError('Session check failed', e);
+    showLogin('Could not check your session. Please sign in.');
+  }
+
+  supabaseClient.auth.onAuthStateChange((_event, session) => {
+    if (session?.access_token === currentSession?.access_token) return;
+    if (session) showApp(session);
+    else showLogin();
+  });
+}
+
+function isRefreshBlocked() {
+  return emailBatchInProgress
+    || activeSaveCount > 0
+    || !!document.querySelector('.modal-bg.open, .email-modal-bg.open');
+}
+
+async function autoRefresh() {
+  if (isRefreshBlocked()) return;
+  await load(true);
+}
+
+async function manualRefresh() {
+  if (isRefreshBlocked()) {
+    showToast('Close the current action before refreshing.');
+    return;
+  }
+  if (await load()) showToast('Refreshed');
+}
+
+async function load(isAuto = false) {
+  try {
+    const requests = await fetchAll();
+    if (isAuto && isRefreshBlocked()) return false;
+    allRequests = requests;
     const now = new Date();
     document.getElementById('lastRefresh').textContent = `Updated ${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}`;
     render();
+    return true;
   } catch(e) {
-    document.getElementById('mainContent').innerHTML = '<div class="loading">Failed to load. Check Supabase config.</div>';
+    logError('Load requests failed', e);
+    document.getElementById('mainContent').innerHTML = `<div class="loading">${friendlyError(e, 'Could not load requests. Check Supabase connection and try again.')}</div>`;
+    return false;
   }
 }
 
@@ -371,16 +852,16 @@ function filteredRequests() {
   });
 }
 
-function stats() {
-  const t = allRequests.length, p = allRequests.filter(r=>r.status==='pending').length,
-    a = allRequests.filter(r=>r.status==='approved').length,
-    d = allRequests.filter(r=>r.status==='denied').length,
-    o = allRequests.filter(r=>r.status==='outofstock').length;
+function stats(reqs = allRequests) {
+  const t = reqs.length, p = reqs.filter(r=>r.status==='pending').length,
+    a = reqs.filter(r=>r.status==='approved').length,
+    d = reqs.filter(r=>r.status==='denied').length,
+    o = reqs.filter(r=>r.status==='outofstock').length;
   return `<div class="stats">
     <div class="stat"><div class="stat-n">${t}</div><div class="stat-l">Total</div></div>
     <div class="stat"><div class="stat-n" style="color:var(--yellow)">${p}</div><div class="stat-l">Pending</div></div>
     <div class="stat"><div class="stat-n" style="color:var(--green)">${a}</div><div class="stat-l">Approved</div></div>
-    <div class="stat"><div class="stat-n" style="color:var(--accent)">${d}</div><div class="stat-l">Denied</div></div>
+    <div class="stat"><div class="stat-n" style="color:var(--red)">${d}</div><div class="stat-l">Denied</div></div>
     <div class="stat"><div class="stat-n" style="color:var(--yellow)">${o}</div><div class="stat-l">OOS</div></div>
   </div>`;
 }
@@ -392,6 +873,8 @@ function render() {
 
 function renderReviewer(main) {
   const reqs = filteredRequests();
+  const actionableReqs = reqs.filter(r => !r.purchased);
+  const purchasedReqs = reqs.filter(r => r.purchased);
 
   // Notify banner — unnotified denials across ALL requests
   const unnotified = allRequests.filter(r => r.status === 'denied' && !r.denial_notified);
@@ -407,12 +890,17 @@ function renderReviewer(main) {
     <div class="view-btn ${reviewView==='chrono'?'active':''}" onclick="setReviewView('chrono',this)">Chronological</div>
   </div>`;
 
-  let html = stats() + notifyBanner + viewToggle;
+  let html = stats(actionableReqs) + notifyBanner + viewToggle;
 
   if (reviewView === 'chrono') {
     // Flat chronological list
-    const sorted = [...reqs].sort((a,b) => new Date(a.created_at) - new Date(b.created_at));
-    if (!sorted.length) { html += '<div class="loading">No requests match this filter.</div>'; main.innerHTML = html; return; }
+    const sorted = [...actionableReqs].sort((a,b) => new Date(a.created_at) - new Date(b.created_at));
+    if (!sorted.length) {
+      html += '<div class="loading">No actionable requests match this filter.</div>';
+      html += purchasedArchive(purchasedReqs);
+      main.innerHTML = html;
+      return;
+    }
     sorted.forEach(item => {
       const pc = item.period === '5' ? 'p5' : 'p6';
       const denialNote = item.status === 'denied' && item.denial_reason ? `<div class="req-note">Denied: ${item.denial_reason}${item.denial_notified?' · notified':' · not notified'}</div>` : '';
@@ -436,18 +924,24 @@ function renderReviewer(main) {
         </div>
       </div>`;
     });
+    html += purchasedArchive(purchasedReqs);
     main.innerHTML = html;
     return;
   }
 
   // Grouped view
   const groups = {};
-  reqs.forEach(r => {
+  actionableReqs.forEach(r => {
     if (!groups[r.submission_id]) groups[r.submission_id] = { country: r.country, period: r.period, email: r.reply_email, items: [] };
     groups[r.submission_id].items.push(r);
   });
   const sorted = Object.values(groups).sort((a,b) => a.period !== b.period ? a.period.localeCompare(b.period) : a.country.localeCompare(b.country));
-  if (!sorted.length) { html += '<div class="loading">No requests match this filter.</div>'; main.innerHTML = html; return; }
+  if (!sorted.length) {
+    html += '<div class="loading">No actionable requests match this filter.</div>';
+    html += purchasedArchive(purchasedReqs);
+    main.innerHTML = html;
+    return;
+  }
 
   sorted.forEach(g => {
     const pc = g.period === '5' ? 'p5' : 'p6';
@@ -487,7 +981,43 @@ function renderReviewer(main) {
 
     html += '</div>';
   });
+  html += purchasedArchive(purchasedReqs);
   main.innerHTML = html;
+}
+
+function purchasedArchive(items) {
+  const sorted = [...items].sort((a,b) => new Date(a.purchased_at || a.created_at || 0) - new Date(b.purchased_at || b.created_at || 0));
+  let html = `<div class="sub-group" style="margin-top:1rem">
+    <div class="denied-toggle" onclick="togglePurchasedArchive()">
+      ${purchasedArchiveOpen?'▾':'▸'} Purchased Archive (${sorted.length}) · reference only
+    </div>
+    <div class="denied-items-list ${purchasedArchiveOpen?'open':''}" id="purchasedArchive">`;
+  if (!sorted.length) {
+    html += '<div class="req-item"><div class="req-body"><div class="req-detail">No purchased items match this filter.</div></div></div>';
+  }
+  sorted.forEach(item => {
+    const pc = item.period === '5' ? 'p5' : 'p6';
+    const linkHtml = item.link ? `<a class="req-link" href="${item.link}" target="_blank">↗ Reference</a>` : '';
+    const purchasedWhen = item.purchased_at ? `<div class="req-note" style="color:var(--blue)">Purchased ${new Date(item.purchased_at).toLocaleString([], {month:'short', day:'numeric', hour:'numeric', minute:'2-digit'})}</div>` : '';
+    html += `<div class="req-item">
+      <div class="req-icon">${catIcon[item.category]||'📦'}</div>
+      <div class="req-body">
+        <div class="req-name">${item.item_name}</div>
+        <div class="req-detail">${item.item_detail||''}</div>
+        <div class="req-detail">${item.country} · Per. ${item.period} · ${item.reply_email}</div>
+        ${linkHtml}
+        ${purchasedWhen}
+      </div>
+      <div class="req-actions"><span class="pbadge ${pc}">Per. ${item.period}</span><span class="sbadge s-purchased">purchased</span></div>
+    </div>`;
+  });
+  html += '</div></div>';
+  return html;
+}
+
+function togglePurchasedArchive() {
+  purchasedArchiveOpen = !purchasedArchiveOpen;
+  render();
 }
 
 function toggleDenied(id) {
@@ -510,28 +1040,70 @@ async function notifyDenials() {
   if (!unnotified.length) return;
   const btn = document.getElementById('notifyBtn');
   if (btn) { btn.disabled = true; btn.textContent = 'Sending…'; }
-  let sent = 0, failed = 0;
-  for (const item of unnotified) {
-    try {
-      if (window.emailjs) {
-        await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_DENIAL_TEMPLATE_ID, {
-          to_email: item.reply_email,
-          country: item.country,
-          period: item.period,
-          item_name: item.item_name,
-          denial_reason: item.denial_reason
-        });
+  emailBatchInProgress = true;
+  let sent = 0, failed = 0, saveFailed = 0;
+  try {
+    for (const item of unnotified) {
+      try {
+        if (window.emailjs) {
+          await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_DENIAL_TEMPLATE_ID, {
+            to_email: item.reply_email,
+            country: item.country,
+            period: item.period,
+            item_name: item.item_name,
+            denial_reason: item.denial_reason
+          });
+        }
+        sent++;
+      } catch(e) {
+        logError(`Denial email failed for ${item.item_name}`, e);
+        failed++;
+        continue;
       }
-      await patch(item.id, { denial_notified: true });
-      item.denial_notified = true;
-      sent++;
-    } catch(e) {
-      console.error('Notify error for', item.item_name, e);
-      failed++;
+      try {
+        await patch(item.id, { denial_notified: true });
+        item.denial_notified = true;
+      } catch(e) {
+        logError(`Denial notification save failed for ${item.item_name}`, e);
+        saveFailed++;
+      }
     }
+  } finally {
+    emailBatchInProgress = false;
   }
   render();
-  showToast(failed > 0 ? `Sent ${sent}, ${failed} failed — check console` : `${sent} denial email${sent>1?'s':''} sent`);
+  showToast(failed || saveFailed
+    ? `Denial emails: ${sent} sent, ${failed} email failed, ${saveFailed} save failed.`
+    : `${sent} denial email${sent>1?'s':''} sent`);
+}
+
+function normShopText(v) {
+  return (v || '').trim().replace(/\s+/g, ' ').toLowerCase();
+}
+
+function shopKey(r) {
+  return [r.category, normShopText(r.item_name), normShopText(r.item_detail)].join('|');
+}
+
+function idsArg(ids) {
+  return ids.join(',');
+}
+
+function rowsFromIds(ids) {
+  const set = new Set(String(ids || '').split(',').filter(Boolean));
+  return allRequests.filter(r => set.has(String(r.id)));
+}
+
+function groupedShopItems(rows) {
+  const groups = {};
+  rows.forEach(r => {
+    const key = shopKey(r);
+    if (!groups[key]) {
+      groups[key] = { key, domId: key.replace(/[^a-z0-9_-]/gi,'_'), category: r.category, item_name: r.item_name, item_detail: r.item_detail || '', rows: [] };
+    }
+    groups[key].rows.push(r);
+  });
+  return Object.values(groups).sort((a,b) => a.item_name.localeCompare(b.item_name));
 }
 
 function renderShopper(main) {
@@ -547,7 +1119,10 @@ function renderShopper(main) {
     return true;
   });
 
-  const active = aisles.filter(a => approved.some(r => a.cats.includes(r.category)));
+  const grouped = groupedShopItems(approved);
+  const active = aisles
+    .filter(a => grouped.some(g => a.cats.includes(g.category)))
+    .sort((a,b) => a.order - b.order);
   let html = '';
   if (!active.length) {
     html = '<div class="loading">No approved items yet.<br><br>Approve some requests in Review mode first.</div>';
@@ -555,26 +1130,33 @@ function renderShopper(main) {
   }
 
   active.forEach(aisle => {
-    const items = approved.filter(r => aisle.cats.includes(r.category));
-    const remaining = items.filter(i => !grabbed.has(i.id) && i.status !== 'outofstock').length;
+    const items = grouped.filter(g => aisle.cats.includes(g.category));
+    const remaining = items.filter(g => g.rows.some(i => !i.purchased && i.status !== 'outofstock')).length;
     html += `<div class="aisle"><div class="aisle-hd"><span class="aisle-icon">${aisle.icon}</span><span class="aisle-name">${aisle.name}</span><span class="aisle-ct">${remaining} left</span></div><hr class="aisle-hr">`;
-    items.forEach(item => {
-      const isGrabbed = grabbed.has(item.id) && item.status !== 'outofstock';
-      const isOos = item.status === 'outofstock';
-      const pColor = item.period === '5' ? 'rgba(26,107,200,0.12)' : 'rgba(200,57,26,0.12)';
-      const pText = item.period === '5' ? 'var(--blue)' : 'var(--accent)';
+    items.forEach(group => {
+      const ids = group.rows.map(r => r.id);
+      const activeRows = group.rows.filter(r => r.status !== 'outofstock');
+      const isGrabbed = activeRows.length > 0 && activeRows.every(r => r.purchased);
+      const isOos = group.rows.every(r => r.status === 'outofstock');
+      const mixedOos = !isOos && group.rows.some(r => r.status === 'outofstock');
       const cbClass = isOos ? 'shop-cb oos-cb' : (isGrabbed ? 'shop-cb chk' : 'shop-cb');
       const cbContent = isOos ? '~' : (isGrabbed ? '✓' : '');
-      const oosNoteHtml = isOos && item.oos_note ? `<div class="shop-sub-note">Alt: ${item.oos_note}</div>` : '';
+      const oosNotes = [...new Set(group.rows.filter(r => r.oos_note).map(r => r.oos_note))];
+      const oosNoteHtml = oosNotes.length ? `<div class="shop-sub-note">Alt: ${oosNotes.join('; ')}</div>` : '';
       const itemClass = isGrabbed ? 'shop-item grabbed' : (isOos ? 'shop-item oos' : 'shop-item');
-      const oosBtn = !isOos ? `<button class="btn-oos" onclick="openOosModal('${item.id}','${esc(item.item_name)}')">Out of Stock</button>` : `<button class="btn-oos active-oos" onclick="unOos('${item.id}')">Undo OOS</button>`;
-      html += `<div class="${itemClass}" id="shop_${item.id}">
-        <div class="${cbClass}" onclick="toggleGrab('${item.id}')">${cbContent}</div>
+      const oosBtn = !isOos ? `<button class="btn-oos" onclick="openOosModal('${idsArg(ids)}','${esc(group.item_name)}')">${mixedOos?'Mark All OOS':'Out of Stock'}</button>` : `<button class="btn-oos active-oos" onclick="unOos('${idsArg(ids)}')">Undo OOS</button>`;
+      const countries = [...new Map(group.rows.map(r => [r.submission_id, `Per. ${r.period} · ${r.country}`])).values()];
+      const pColor = group.rows.some(r => r.period === '5') && group.rows.some(r => r.period === '6') ? 'var(--surface3)' : (group.rows[0].period === '5' ? 'var(--blue-bg)' : 'var(--yellow-bg)');
+      const pText = group.rows.some(r => r.period === '5') && group.rows.some(r => r.period === '6') ? 'var(--muted)' : (group.rows[0].period === '5' ? 'var(--accent)' : 'var(--yellow)');
+      const links = [...new Map(group.rows.filter(r => r.link).map(r => [r.link, r.link])).values()];
+      const linksHtml = links.length ? ` · ${links.map((link,idx) => `<a href="${link}" target="_blank" style="color:var(--blue)">link${links.length>1?' '+(idx+1):''}</a>`).join(' · ')}` : '';
+      html += `<div class="${itemClass}" id="shop_${group.domId}">
+        <div class="${cbClass}" onclick="toggleGrab('${idsArg(ids)}')">${cbContent}</div>
         <div class="shop-body">
-          <div class="shop-name">${item.item_name}</div>
-          <div class="shop-meta">${item.item_detail||''}${item.link?` · <a href="${item.link}" target="_blank" style="color:var(--blue)">link</a>`:''}</div>
+          <div class="shop-name">${group.item_name}${group.rows.length>1?` <span style="color:var(--muted);font-family:var(--mono);font-size:0.72rem;">×${group.rows.length}</span>`:''}</div>
+          <div class="shop-meta">${group.item_detail||''}${linksHtml}</div>
           ${oosNoteHtml}
-          <span class="shop-tag" style="background:${pColor};color:${pText}">Per. ${item.period} · ${item.country}</span>
+          <span class="shop-tag" style="background:${pColor};color:${pText}">${group.rows.length} request${group.rows.length>1?'s':''} · ${countries.join(' · ')}</span>
         </div>
         <div class="shop-actions">${oosBtn}</div>
       </div>`;
@@ -582,20 +1164,32 @@ function renderShopper(main) {
     html += '</div>';
   });
   main.innerHTML = html;
-  updateProgress(approved.filter(r => r.status === 'approved'));
+  updateProgress(approved);
 }
 
-function updateProgress(approvedItems) {
-  const total = approvedItems.length;
-  const done = approvedItems.filter(i => grabbed.has(i.id)).length;
-  document.getElementById('grabbedCt').textContent = done;
-  document.getElementById('totalAppr').textContent = total;
-  document.getElementById('progFill').style.width = total > 0 ? (done/total*100)+'%' : '0%';
+function updateProgress(shopItems) {
+  const total = shopItems.length;
+  const purchased = shopItems.filter(i => i.status === 'approved' && i.purchased).length;
+  const oos = shopItems.filter(i => i.status === 'outofstock').length;
+  const handled = purchased + oos;
+  const remaining = Math.max(total - handled, 0);
+  document.getElementById('handledCt').textContent = handled;
+  document.getElementById('totalShopCt').textContent = total;
+  document.getElementById('remainingCt').textContent = remaining;
+  document.getElementById('progFill').style.width = total > 0 ? (handled/total*100)+'%' : '0%';
 }
 
 // ===== Actions =====
 async function approve(id) {
-  try { await patch(id, {status:'approved'}); allRequests.find(r=>r.id==id).status='approved'; render(); showToast('Approved'); } catch(e) { showToast('Error'); }
+  try {
+    await patch(id, {status:'approved'});
+    allRequests.find(r=>r.id==id).status='approved';
+    render();
+    showToast('Approved');
+  } catch(e) {
+    logError('Approve save failed', e);
+    showToast(friendlyError(e, 'Save failed. Item was not approved.'));
+  }
 }
 
 function openDenyModal(id, name) {
@@ -619,7 +1213,10 @@ async function confirmDeny() {
     item.status='denied'; item.denial_reason=reason; item.denial_notified=false;
     closeDenyModal(); render();
     showToast('Denied — use Notify Students to email');
-  } catch(e){console.error(e); showToast('Error');}
+  } catch(e){
+    logError('Deny save failed', e);
+    showToast(friendlyError(e, 'Save failed. Item was not denied.'));
+  }
 }
 
 // ===== OOS =====
@@ -632,29 +1229,53 @@ function openOosModal(id, name) {
 function closeOosModal() { document.getElementById('oosModal').classList.remove('open'); oosTargetId=null; }
 async function confirmOos() {
   const note=document.getElementById('oosNote').value.trim();
+  const rows=rowsFromIds(oosTargetId);
   try {
-    await patch(oosTargetId,{status:'outofstock',oos_note:note});
-    const item=allRequests.find(r=>r.id==oosTargetId);
-    item.status='outofstock'; item.oos_note=note;
-    grabbed.delete(oosTargetId);
-    closeOosModal(); render(); showToast('Marked out of stock');
-  } catch(e){showToast('Error');}
+    const result = await patchRows(rows, {status:'outofstock',oos_note:note,purchased:false,purchased_at:null}, 'OOS save failed');
+    result.okRows.forEach(item => { item.status='outofstock'; item.oos_note=note; item.purchased=false; item.purchased_at=null; });
+    closeOosModal(); render();
+    showToast(result.failed ? `OOS save: ${result.ok} saved, ${result.failed} failed.` : `${result.ok} marked out of stock`);
+  } catch(e){
+    logError('OOS save failed', e);
+    showToast(friendlyError(e, 'Save failed. OOS was not updated.'));
+  }
 }
 async function unOos(id) {
+  const rows=rowsFromIds(id);
   try {
-    await patch(id,{status:'approved',oos_note:''});
-    const item=allRequests.find(r=>r.id==id);
-    item.status='approved'; item.oos_note='';
-    render(); showToast('Restored to approved');
-  } catch(e){showToast('Error');}
+    const result = await patchRows(rows, {status:'approved',oos_note:'',purchased:false,purchased_at:null}, 'Undo OOS save failed');
+    result.okRows.forEach(item => { item.status='approved'; item.oos_note=''; item.purchased=false; item.purchased_at=null; });
+    render();
+    showToast(result.failed ? `Undo OOS: ${result.ok} saved, ${result.failed} failed.` : `${result.ok} restored to approved`);
+  } catch(e){
+    logError('Undo OOS save failed', e);
+    showToast(friendlyError(e, 'Save failed. OOS was not restored.'));
+  }
 }
 
 // ===== Grab =====
-function toggleGrab(id) {
-  const item = allRequests.find(r=>r.id==id);
-  if (item?.status==='outofstock') return; // can't grab OOS, use unOos first
-  grabbed.has(id) ? grabbed.delete(id) : grabbed.add(id);
+async function toggleGrab(id) {
+  const rows = rowsFromIds(id).filter(r => r.status !== 'outofstock');
+  if (!rows.length) return; // can't grab OOS, use unOos first
+  const nextPurchased = !rows.every(r => r.purchased);
+  const stamp = nextPurchased ? new Date().toISOString() : null;
+  const prev = rows.map(r => ({ item:r, purchased:r.purchased, purchased_at:r.purchased_at }));
+  rows.forEach(item => { item.purchased = nextPurchased; item.purchased_at = stamp; });
   render();
+  try {
+    const result = await patchRows(rows, { purchased: nextPurchased, purchased_at: stamp }, 'Purchased save failed');
+    if (result.failed) {
+      const failedSet = new Set(result.failedRows.map(r => r.id));
+      prev.filter(p => failedSet.has(p.item.id)).forEach(p => { p.item.purchased = p.purchased; p.item.purchased_at = p.purchased_at; });
+      render();
+      showToast(`Purchase save: ${result.ok} saved, ${result.failed} failed.`);
+    }
+  } catch(e) {
+    logError('Purchased save failed', e);
+    prev.forEach(p => { p.item.purchased = p.purchased; p.item.purchased_at = p.purchased_at; });
+    render();
+    showToast(friendlyError(e, 'Save failed. Purchased state was not updated.'));
+  }
 }
 
 // ===== Email =====
@@ -662,7 +1283,7 @@ async function openEmailModal() {
   // Build groups from approved/oos items only — denied handled separately via notify
   const groups = {};
   allRequests.filter(r => r.status === 'approved' || r.status === 'outofstock').forEach(r => {
-    if (!groups[r.submission_id]) groups[r.submission_id] = {country:r.country,period:r.period,email:r.reply_email,items:[]};
+    if (!groups[r.submission_id]) groups[r.submission_id] = {submission_id:r.submission_id,country:r.country,period:r.period,email:r.reply_email,items:[]};
     groups[r.submission_id].items.push(r);
   });
 
@@ -675,11 +1296,14 @@ async function openEmailModal() {
   // Build preview modal first
   let html = '';
   groupList.forEach((g, idx) => {
-    const purch = g.items.filter(i => grabbed.has(i.id) && i.status==='approved');
+    g.allRows = allRequests.filter(r => r.submission_id === g.submission_id);
+    g.completedNotified = g.allRows.length > 0 && g.allRows.every(i => i.completed_notified);
+    const purch = g.items.filter(i => i.purchased && i.status==='approved');
     const oos = g.items.filter(i => i.status==='outofstock');
-    const pending = g.items.filter(i => i.status==='approved' && !grabbed.has(i.id));
+    const pending = g.items.filter(i => i.status==='approved' && !i.purchased);
+    const sentBadge = g.completedNotified ? `<span style="font-family:var(--mono);font-size:0.62rem;font-weight:700;text-transform:uppercase;color:var(--green);background:var(--green-bg);border-radius:999px;padding:0.22rem 0.48rem;">Sent</span>` : '';
     html += `<div class="eg">
-      <div class="eg-head"><span class="eg-country">${g.country} · Per. ${g.period}</span><span class="eg-email">${g.email}</span></div>
+      <div class="eg-head"><span class="eg-country">${g.country} · Per. ${g.period}</span><span style="display:flex;align-items:center;gap:0.4rem;"><span class="eg-email">${g.email}</span>${sentBadge}</span></div>
       <div class="eg-items">
         ${purch.map(i=>`<div class="ep">✓ ${i.item_name}</div>`).join('')}
         ${oos.map(i=>`<div class="eo">~ ${i.item_name}${i.oos_note?' ('+i.oos_note+')':''}</div>`).join('')}
@@ -689,45 +1313,75 @@ async function openEmailModal() {
   });
 
   document.getElementById('emailGroups').innerHTML = html;
-  document.getElementById('emailCard_sub').textContent = `${groupList.length} group${groupList.length>1?'s':''} will receive a shopping update email.`;
+  const unsentGroups = groupList.filter(g => !g.completedNotified);
+  const sentGroups = groupList.filter(g => g.completedNotified);
+  document.getElementById('emailCard_sub').textContent = unsentGroups.length
+    ? `${unsentGroups.length} unsent group${unsentGroups.length>1?'s':''} will receive a shopping update email.`
+    : `All ${groupList.length} group${groupList.length>1?'s were':' was'} already sent. Use resend only if needed.`;
   document.getElementById('emailModal').classList.add('open');
-  document.getElementById('emailSendBtn').onclick = () => sendCompletedEmails(groupList);
+  const sendBtn = document.getElementById('emailSendBtn');
+  const resendBtn = document.getElementById('emailResendBtn');
+  sendBtn.textContent = unsentGroups.length ? 'Send New Emails' : 'All Sent';
+  sendBtn.disabled = unsentGroups.length === 0;
+  sendBtn.style.background = unsentGroups.length ? 'var(--green)' : 'var(--border)';
+  sendBtn.style.color = unsentGroups.length ? '#fff' : 'var(--muted)';
+  sendBtn.onclick = () => sendCompletedEmails(unsentGroups);
+  resendBtn.style.display = sentGroups.length ? 'block' : 'none';
+  resendBtn.disabled = false;
+  resendBtn.textContent = sentGroups.length === groupList.length ? 'Resend All' : 'Resend Sent';
+  resendBtn.onclick = () => sendCompletedEmails(sentGroups, true);
 }
 
-async function sendCompletedEmails(groupList) {
+async function sendCompletedEmails(groupList, isResend = false) {
+  if (!groupList.length) return;
   const btn = document.getElementById('emailSendBtn');
-  btn.disabled = true; btn.textContent = 'Sending…';
-  let sent = 0, failed = 0;
+  const resendBtn = document.getElementById('emailResendBtn');
+  btn.disabled = true; resendBtn.disabled = true;
+  const activeBtn = isResend ? resendBtn : btn;
+  activeBtn.textContent = 'Sending…';
+  emailBatchInProgress = true;
+  let sent = 0, failed = 0, marked = 0, markFailed = 0;
 
-  for (const g of groupList) {
-    const purch = g.items.filter(i => grabbed.has(i.id) && i.status==='approved');
-    const oos = g.items.filter(i => i.status==='outofstock');
-    const pending = g.items.filter(i => i.status==='approved' && !grabbed.has(i.id));
+  try {
+    for (const g of groupList) {
+      const purch = g.items.filter(i => i.purchased && i.status==='approved');
+      const oos = g.items.filter(i => i.status==='outofstock');
+      const pending = g.items.filter(i => i.status==='approved' && !i.purchased);
 
-    const lines = [];
-    if (purch.length) { lines.push('PURCHASED:'); purch.forEach(i=>lines.push(`  ✓ ${i.item_name}${i.item_detail?' — '+i.item_detail:''}`)); lines.push(''); }
-    if (oos.length) { lines.push('OUT OF STOCK:'); oos.forEach(i=>lines.push(`  ~ ${i.item_name}${i.oos_note?' (got instead: '+i.oos_note+')':''}`)); lines.push(''); }
-    if (pending.length) { lines.push('STILL WORKING ON:'); pending.forEach(i=>lines.push(`  ○ ${i.item_name}`)); lines.push(''); }
-    const itemSummary = lines.join('\n');
+      const lines = [];
+      if (purch.length) { lines.push('PURCHASED:'); purch.forEach(i=>lines.push(`  ✓ ${i.item_name}${i.item_detail?' — '+i.item_detail:''}`)); lines.push(''); }
+      if (oos.length) { lines.push('OUT OF STOCK:'); oos.forEach(i=>lines.push(`  ~ ${i.item_name}${i.oos_note?' (got instead: '+i.oos_note+')':''}`)); lines.push(''); }
+      if (pending.length) { lines.push('STILL WORKING ON:'); pending.forEach(i=>lines.push(`  ○ ${i.item_name}`)); lines.push(''); }
+      const itemSummary = lines.join('\n');
 
-    try {
-      if (window.emailjs) {
-        await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_COMPLETED_TEMPLATE_ID, {
-          to_email: g.email,
-          country: g.country,
-          period: g.period,
-          item_summary: itemSummary
-        });
+      try {
+        if (window.emailjs) {
+          await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_COMPLETED_TEMPLATE_ID, {
+            to_email: g.email,
+            country: g.country,
+            period: g.period,
+            item_summary: itemSummary
+          });
+        }
+        sent++;
+        const rowsToMark = g.allRows || allRequests.filter(r => r.submission_id === g.submission_id);
+        const result = await patchRows(rowsToMark, { completed_notified: true }, `Completed notification save failed for ${g.country}`);
+        result.okRows.forEach(item => { item.completed_notified = true; });
+        marked += result.ok;
+        markFailed += result.failed;
+      } catch(e) {
+        logError(`Completed email failed for ${g.country}`, e);
+        failed++;
       }
-      sent++;
-    } catch(e) {
-      console.error('Completed email error for', g.country, e);
-      failed++;
     }
+  } finally {
+    emailBatchInProgress = false;
   }
 
   closeEmailModal();
-  showToast(failed > 0 ? `Sent ${sent}, ${failed} failed — check console` : `${sent} email${sent>1?'s':''} sent`);
+  showToast(failed || markFailed
+    ? `Shopping emails: ${sent} sent, ${failed} email failed, ${markFailed} save failed.`
+    : `${sent} email${sent>1?'s':''} sent`);
 }
 
 function closeEmailModal() { document.getElementById('emailModal').classList.remove('open'); }
@@ -738,8 +1392,7 @@ function showToast(msg) {
   setTimeout(()=>t.classList.remove('show'),2000);
 }
 
-load();
-setInterval(load, 60000);
+initAuth();
 </script>
 <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
 <script>
@@ -748,5 +1401,6 @@ setInterval(load, 60000);
     console.log('EmailJS initialized (teacher)');
   })();
 </script>
+</div>
 </body>
 </html>
