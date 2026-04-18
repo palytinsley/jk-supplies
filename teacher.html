@@ -116,9 +116,9 @@ button { -webkit-tap-highlight-color: transparent; }
   align-items: start;
 }
 .sjp-logo-header {
-  height: 24px;
+  height: 22px;
   width: auto;
-  opacity: 0.85;
+  opacity: 0.9;
   display: block;
   grid-row: 1 / span 2;
   margin-top: 0.02rem;
@@ -131,21 +131,6 @@ button { -webkit-tap-highlight-color: transparent; }
   color: var(--text);
   letter-spacing: 0;
   line-height: 1;
-}
-.header-title::before {
-  content: 'OPS';
-  display: inline-flex;
-  align-items: center;
-  height: 1.5rem;
-  margin-right: 0.45rem;
-  padding: 0 0.42rem;
-  border-radius: var(--radius-sm);
-  background: linear-gradient(135deg, var(--accent), var(--blue));
-  color: #fff;
-  font-family: var(--mono);
-  font-size: 0.62rem;
-  font-weight: 700;
-  vertical-align: 0.12rem;
 }
 .header-sub {
   grid-column: 2;
@@ -542,9 +527,9 @@ button { -webkit-tap-highlight-color: transparent; }
   box-shadow: var(--shadow-float);
 }
 .sjp-logo-login {
-  height: clamp(80px, 12vw, 120px);
+  height: clamp(88px, 11vw, 110px);
   width: auto;
-  margin: 0 auto 1.5rem auto;
+  margin: 0 auto 1.1rem auto;
   display: block;
 }
 .sjp-login-sub {
@@ -655,6 +640,7 @@ button { -webkit-tap-highlight-color: transparent; }
 <div id="authScreen" style="display:none;">
   <div class="auth-card">
     <img src="icons/SJPLogo.png" class="sjp-logo-login" alt="SJP logo">
+    <div class="sjp-login-sub">Social Justice Pathway</div>
     <div class="auth-kicker">Teacher Access</div>
     <div class="auth-title">Junk Kouture<br>Dashboard</div>
     <div class="auth-sub">Review requests, approve supplies, and move through the shopping list with a clean operational view.</div>
