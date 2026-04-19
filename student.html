@@ -1096,6 +1096,14 @@ window.__submitting = false;
 function uiIcon(name){
   return `<img class="ui-icon" src="icons/${name}.svg" alt="" aria-hidden="true">`;
 }
+function escHtml(s) {
+  return (s == null ? '' : String(s))
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
 
 function buildGrid(id,group,type){
   const el=document.getElementById(id); if(!el) return; el.innerHTML='';
@@ -1268,7 +1276,7 @@ function renderCart(){
   e.style.display='none'; c.innerHTML='';
   cart.forEach(item=>{
     const el=document.createElement('div'); el.className='cart-item';
-    el.innerHTML=`<div class="cart-item-icon">${item.icon}</div><div class="cart-item-body"><div class="cart-item-name">${item.name}</div><div class="cart-item-detail">${[item.detail,item.link].filter(Boolean).join(' · ')||'&nbsp;'}</div></div><button class="cart-item-remove" onclick="removeFromCart(${item.id})" aria-label="Remove item"><img class="ui-icon" src="icons/x.svg" alt="" aria-hidden="true"></button>`;
+    el.innerHTML=`<div class="cart-item-icon">${item.icon}</div><div class="cart-item-body"><div class="cart-item-name">${escHtml(item.name)}</div><div class="cart-item-detail">${[item.detail,item.link].filter(Boolean).map(escHtml).join(' · ')||'&nbsp;'}</div></div><button class="cart-item-remove" onclick="removeFromCart(${item.id})" aria-label="Remove item"><img class="ui-icon" src="icons/x.svg" alt="" aria-hidden="true"></button>`;
     c.appendChild(el);
   });
 }
@@ -1305,9 +1313,9 @@ function goGroupStep(){
   showStep(2);
 }
 function renderSuccessSummary(country,email,period,items){
-  const list=items.map(item=>`<div class="success-summary-item"><div>${item.icon} ${item.name}</div>${item.detail?`<div class="success-summary-detail">${item.detail}</div>`:''}${item.link?`<div class="success-summary-detail">${item.link}</div>`:''}</div>`).join('');
+  const list=items.map(item=>`<div class="success-summary-item"><div>${item.icon} ${escHtml(item.name)}</div>${item.detail?`<div class="success-summary-detail">${escHtml(item.detail)}</div>`:''}${item.link?`<div class="success-summary-detail">${escHtml(item.link)}</div>`:''}</div>`).join('');
   document.getElementById('successSummary').innerHTML=`<div class="success-summary-title">Submitted for</div>
-    <div class="success-summary-meta">${country} · Period ${period}<br>${email}</div>
+    <div class="success-summary-meta">${escHtml(country)} · Period ${escHtml(period)}<br>${escHtml(email)}</div>
     <div class="success-summary-title">${items.length} item${items.length>1?'s':''}</div>
     <div class="success-summary-items">${list}</div>`;
 }
@@ -1330,11 +1338,11 @@ function openConfirm(){
   if(!country){toast('Select your country.','err');return;}
  if(!email.endsWith('@pausd.us') && !email.endsWith('@pausd.org')){toast('Enter your @pausd.us email.','err');return;}
   const period=document.getElementById('country').selectedOptions[0]?.dataset?.period||'?';
-  document.getElementById('confirmMeta').innerHTML=`<strong>${country}</strong> · Period ${period}<br><span style="color:var(--muted)">${email}</span>`;
+  document.getElementById('confirmMeta').innerHTML=`<strong>${escHtml(country)}</strong> · Period ${escHtml(period)}<br><span style="color:var(--muted)">${escHtml(email)}</span>`;
   const cont=document.getElementById('confirmItems'); cont.innerHTML='';
   cart.forEach(item=>{
     const el=document.createElement('div'); el.className='confirm-item';
-    el.innerHTML=`<span>${item.icon}</span><div><div>${item.name}</div>${item.detail?`<div class="ci-detail">${item.detail}</div>`:''}</div>`;
+    el.innerHTML=`<span>${item.icon}</span><div><div>${escHtml(item.name)}</div>${item.detail?`<div class="ci-detail">${escHtml(item.detail)}</div>`:''}</div>`;
     cont.appendChild(el);
   });
   document.getElementById('sendBtn').disabled=false;
