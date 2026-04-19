@@ -1216,7 +1216,9 @@ function stats(reqs = allRequests) {
 
 function render() {
   const main = document.getElementById('mainContent');
+  const savedScroll = main.scrollTop;
   mode === 'reviewer' ? renderReviewer(main) : renderShopper(main);
+  main.scrollTop = savedScroll;
 }
 
 function reviewActiveRows(reqs) {
@@ -1273,16 +1275,17 @@ function historyActions(item) {
 }
 
 function renderReqRow(item, opts = {}) {
-  const linkHtml = item.link ? `<a class="req-link" href="${item.link}" target="_blank">↗ Reference</a>` : '';
-  const denialNote = item.status === 'denied' && item.denial_reason ? `<div class="req-note">Reason: ${item.denial_reason}${item.denial_notified?' · ✓ notified':''}</div>` : '';
-  const oosNote = item.status === 'outofstock' && item.oos_note ? `<div class="req-note">Got instead: ${item.oos_note}</div>` : '';
+  const safe = safeUrl(item.link);
+  const linkHtml = safe ? `<a class="req-link" href="${safe}" target="_blank" rel="noopener noreferrer">↗ Reference</a>` : '';
+  const denialNote = item.status === 'denied' && item.denial_reason ? `<div class="req-note">Reason: ${escHtml(item.denial_reason)}${item.denial_notified?' · ✓ notified':''}</div>` : '';
+  const oosNote = item.status === 'outofstock' && item.oos_note ? `<div class="req-note">Got instead: ${escHtml(item.oos_note)}</div>` : '';
   const purchasedWhen = item.purchased_at ? `<div class="req-note" style="color:var(--blue)">Purchased ${new Date(item.purchased_at).toLocaleString([], {month:'short', day:'numeric', hour:'numeric', minute:'2-digit'})}</div>` : '';
   const meta = opts.meta ? `<div class="req-detail">${opts.meta}</div>` : '';
   return `<div class="req-item ${opts.className||''}">
     ${opts.selectable ? renderSelectBox(item) : `<div class="req-icon">${catIcon[item.category]||'📦'}</div>`}
     <div class="req-body">
-      <div class="req-name">${item.item_name}</div>
-      <div class="req-detail">${item.item_detail||''}</div>
+      <div class="req-name">${escHtml(item.item_name)}</div>
+      <div class="req-detail">${escHtml(item.item_detail)}</div>
       ${meta}${linkHtml}${denialNote}${oosNote}${purchasedWhen}
     </div>
     ${opts.actions || reviewActions(item)}
@@ -1298,7 +1301,7 @@ function renderHistorySection(label, rows, open, toggleFnName, emptyText) {
     const pc = item.period === '5' ? 'p5' : 'p6';
     html += renderReqRow(item, {
       className: item.status === 'denied' ? 'denied-row' : '',
-      meta: `${item.country} · Per. ${item.period} · ${item.reply_email}`,
+      meta: `${escHtml(item.country)} · Per. ${escHtml(item.period)} · ${escHtml(item.reply_email)}`,
       actions: historyActions(item)
     });
   });
@@ -1341,9 +1344,9 @@ function renderReviewer(main) {
       const pc = item.period === '5' ? 'p5' : 'p6';
       html += `<div class="sub-group">
         <div class="sub-head">
-          <div class="sub-country">${item.country}</div>
-          <span class="pbadge ${pc}">Per. ${item.period}</span>
-          <span class="sub-email">${item.reply_email}</span>
+          <div class="sub-country">${escHtml(item.country)}</div>
+          <span class="pbadge ${pc}">Per. ${escHtml(item.period)}</span>
+          <span class="sub-email">${escHtml(item.reply_email)}</span>
         </div>
         ${renderReqRow(item, { selectable: true, actions: reviewActions(item) })}
       </div>`;
@@ -1369,7 +1372,7 @@ function renderReviewer(main) {
 
   sorted.forEach(g => {
     const pc = g.period === '5' ? 'p5' : 'p6';
-    html += `<div class="sub-group"><div class="sub-head"><div class="sub-country">${g.country}</div><span class="pbadge ${pc}">Per. ${g.period}</span><span class="sub-email">${g.email}</span></div>`;
+    html += `<div class="sub-group"><div class="sub-head"><div class="sub-country">${escHtml(g.country)}</div><span class="pbadge ${pc}">Per. ${escHtml(g.period)}</span><span class="sub-email">${escHtml(g.email)}</span></div>`;
     g.items.forEach(item => {
       html += renderReqRow(item, { selectable: true, actions: reviewActions(item) });
     });
@@ -1389,13 +1392,7 @@ function toggleShopHistory() {
   render();
 }
 
-function toggleDenied(id) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  el.classList.toggle('open');
-  const toggle = el.previousElementSibling;
-  if (toggle) toggle.textContent = toggle.textContent.replace('▸','▾').replace('▾','▸');
-}
+
 
 function setReviewView(v, el) {
   reviewView = v;
@@ -1555,16 +1552,16 @@ function renderShopper(main) {
     html += `<div class="aisle"><div class="aisle-hd"><span class="aisle-icon">${aisle.icon}</span><span class="aisle-name">${aisle.name}</span><span class="aisle-ct">${remaining} left</span></div><hr class="aisle-hr">`;
     items.forEach(group => {
       const ids = group.rows.map(r => r.id);
-      const countries = [...new Map(group.rows.map(r => [r.submission_id, `Per. ${r.period} · ${r.country}`])).values()];
+      const countries = [...new Map(group.rows.map(r => [r.submission_id, `Per. ${escHtml(r.period)} · ${escHtml(r.country)}`])).values()];
       const pColor = group.rows.some(r => r.period === '5') && group.rows.some(r => r.period === '6') ? 'var(--surface3)' : (group.rows[0].period === '5' ? 'var(--blue-bg)' : 'var(--yellow-bg)');
       const pText = group.rows.some(r => r.period === '5') && group.rows.some(r => r.period === '6') ? 'var(--muted)' : (group.rows[0].period === '5' ? 'var(--accent)' : 'var(--yellow)');
-      const links = [...new Map(group.rows.filter(r => r.link).map(r => [r.link, r.link])).values()];
-      const linksHtml = links.length ? ` · ${links.map((link,idx) => `<a href="${link}" target="_blank" style="color:var(--blue)">link${links.length>1?' '+(idx+1):''}</a>`).join(' · ')}` : '';
+      const links = [...new Map(group.rows.filter(r => safeUrl(r.link)).map(r => [r.link, r.link])).values()];
+      const linksHtml = links.length ? ` · ${links.map((link,idx) => `<a href="${link}" target="_blank" rel="noopener noreferrer" style="color:var(--blue)">link${links.length>1?' '+(idx+1):''}</a>`).join(' · ')}` : '';
       html += `<div class="shop-item" id="shop_${group.domId}">
         <div class="shop-cb" onclick="toggleGrab('${idsArg(ids)}')" aria-label="Mark purchased">${icon('square')}</div>
         <div class="shop-body">
-          <div class="shop-name">${group.item_name}${group.rows.length>1?` <span style="color:var(--muted);font-family:var(--mono);font-size:0.72rem;">×${group.rows.length}</span>`:''}</div>
-          <div class="shop-meta">${group.item_detail||''}${linksHtml}</div>
+          <div class="shop-name">${escHtml(group.item_name)}${group.rows.length>1?` <span style="color:var(--muted);font-family:var(--mono);font-size:0.72rem;">×${group.rows.length}</span>`:''}</div>
+          <div class="shop-meta">${escHtml(group.item_detail)}${linksHtml}</div>
           <span class="shop-tag" style="background:${pColor};color:${pText}">${group.rows.length} request${group.rows.length>1?'s':''} · ${countries.join(' · ')}</span>
         </div>
         <div class="shop-actions"><button class="btn-oos" onclick="openOosModal('${idsArg(ids)}','${esc(group.item_name)}')">${icon('alert-triangle')}Out of Stock</button></div>
@@ -1589,10 +1586,10 @@ function renderShopHistory(rows) {
     const oosIds = group.rows.filter(r => r.status === 'outofstock').map(r => r.id);
     const isOos = group.rows.every(r => r.status === 'outofstock');
     const oosNotes = [...new Set(group.rows.filter(r => r.oos_note).map(r => r.oos_note))];
-    const oosNoteHtml = oosNotes.length ? `<div class="shop-sub-note">Alt: ${oosNotes.join('; ')}</div>` : '';
-    const countries = [...new Map(group.rows.map(r => [r.submission_id, `Per. ${r.period} · ${r.country}`])).values()];
-    const links = [...new Map(group.rows.filter(r => r.link).map(r => [r.link, r.link])).values()];
-    const linksHtml = links.length ? ` · ${links.map((link,idx) => `<a href="${link}" target="_blank" style="color:var(--blue)">link${links.length>1?' '+(idx+1):''}</a>`).join(' · ')}` : '';
+    const oosNoteHtml = oosNotes.length ? `<div class="shop-sub-note">Alt: ${oosNotes.map(escHtml).join('; ')}</div>` : '';
+    const countries = [...new Map(group.rows.map(r => [r.submission_id, `Per. ${escHtml(r.period)} · ${escHtml(r.country)}`])).values()];
+    const links = [...new Map(group.rows.filter(r => safeUrl(r.link)).map(r => [r.link, r.link])).values()];
+    const linksHtml = links.length ? ` · ${links.map((link,idx) => `<a href="${link}" target="_blank" rel="noopener noreferrer" style="color:var(--blue)">link${links.length>1?' '+(idx+1):''}</a>`).join(' · ')}` : '';
     const action = [
       purchasedIds.length ? `<button class="btn-oos" onclick="undoPurchase('${idsArg(purchasedIds)}')">${icon('arrow-back-up')}Undo purchase</button>` : '',
       oosIds.length ? `<button class="btn-oos active-oos" onclick="unOos('${idsArg(oosIds)}')">${icon('arrow-back-up')}Undo OOS</button>` : ''
@@ -1604,8 +1601,8 @@ function renderShopHistory(rows) {
     html += `<div class="shop-item ${isOos?'oos':'grabbed'}">
       <div class="${isOos?'shop-cb oos-cb':'shop-cb chk'}" ${cbAction}>${cbIcon}</div>
       <div class="shop-body">
-        <div class="shop-name">${group.item_name}${group.rows.length>1?` <span style="color:var(--muted);font-family:var(--mono);font-size:0.72rem;">×${group.rows.length}</span>`:''}</div>
-        <div class="shop-meta">${group.item_detail||''}${linksHtml}</div>
+        <div class="shop-name">${escHtml(group.item_name)}${group.rows.length>1?` <span style="color:var(--muted);font-family:var(--mono);font-size:0.72rem;">×${group.rows.length}</span>`:''}</div>
+        <div class="shop-meta">${escHtml(group.item_detail)}${linksHtml}</div>
         ${oosNoteHtml}
         <span class="shop-tag" style="background:${isOos?'var(--yellow-bg)':'var(--green-bg)'};color:${isOos?'var(--yellow)':'var(--green)'}">${icon(isOos?'alert-triangle':'shopping-cart-check')}${isOos?'out of stock':'purchased'} · ${countries.join(' · ')}</span>
       </div>
@@ -1784,11 +1781,11 @@ async function openEmailModal() {
     const pending = g.items.filter(i => i.status==='approved' && !i.purchased);
     const sentBadge = g.completedNotified ? `<span style="font-family:var(--mono);font-size:0.62rem;font-weight:700;text-transform:uppercase;color:var(--green);background:var(--green-bg);border-radius:999px;padding:0.22rem 0.48rem;">Sent</span>` : '';
     html += `<div class="eg">
-      <div class="eg-head"><span class="eg-country">${g.country} · Per. ${g.period}</span><span style="display:flex;align-items:center;gap:0.4rem;"><span class="eg-email">${g.email}</span>${sentBadge}</span></div>
+      <div class="eg-head"><span class="eg-country">${escHtml(g.country)} · Per. ${escHtml(g.period)}</span><span style="display:flex;align-items:center;gap:0.4rem;"><span class="eg-email">${escHtml(g.email)}</span>${sentBadge}</span></div>
       <div class="eg-items">
-        ${purch.map(i=>`<div class="ep">✓ ${i.item_name}</div>`).join('')}
-        ${oos.map(i=>`<div class="eo">~ ${i.item_name}${i.oos_note?' ('+i.oos_note+')':''}</div>`).join('')}
-        ${pending.map(i=>`<div style="color:var(--muted)">○ ${i.item_name} (not yet grabbed)</div>`).join('')}
+        ${purch.map(i=>`<div class="ep">✓ ${escHtml(i.item_name)}</div>`).join('')}
+        ${oos.map(i=>`<div class="eo">~ ${escHtml(i.item_name)}${i.oos_note?' ('+escHtml(i.oos_note)+')':''}</div>`).join('')}
+        ${pending.map(i=>`<div style="color:var(--muted)">○ ${escHtml(i.item_name)} (not yet grabbed)</div>`).join('')}
       </div>
     </div>`;
   });
@@ -1868,6 +1865,19 @@ async function sendCompletedEmails(groupList, isResend = false) {
 function closeEmailModal() { document.getElementById('emailModal').classList.remove('open'); }
 
 function esc(s) { return (s||'').replace(/'/g,"\\'").replace(/"/g,'&quot;'); }
+function safeUrl(url) {
+  if (!url) return null;
+  const u = String(url).trim();
+  return /^https?:\/\//i.test(u) ? u : null;
+}
+function escHtml(s) {
+  return (s == null ? '' : String(s))
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
 function showToast(msg) {
   const t = document.getElementById('toast');
   if (!t) return;
@@ -1888,7 +1898,6 @@ initAuth();
 <script>
   (function(){
     emailjs.init('t9UIpuX-5wgc4RPno');
-    console.log('EmailJS initialized (teacher)');
   })();
 </script>
 </div>
