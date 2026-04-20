@@ -7,6 +7,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16.png">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
 <style>
 :root {
   --bg: #fcf9f8;
@@ -53,17 +54,23 @@ button, .pill, .finish-btn, .color-swatch { -webkit-tap-highlight-color: transpa
   width: 1.25rem;
   height: 1.25rem;
   flex: 0 0 auto;
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   vertical-align: middle;
 }
-.btn-add, .btn-submit, .step-back, .btn-back, .btn-send, .cart-item-remove {
+.ui-icon.ti {
+  font-size: 1.25rem;
+  line-height: 1;
+}
+.btn-add, .btn-submit, .step-back, .btn-back, .btn-send, .cart-item-action, .btn-cancel-edit {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
 }
-.btn-submit .ui-icon, .btn-send .ui-icon { filter: brightness(0) invert(1); }
-.btn-add .ui-icon, .step-back .ui-icon, .btn-back .ui-icon, .cart-item-remove .ui-icon { opacity: 0.78; }
+.btn-submit img.ui-icon, .btn-send img.ui-icon { filter: brightness(0) invert(1); }
+.btn-add .ui-icon, .step-back .ui-icon, .btn-back .ui-icon, .cart-item-action .ui-icon, .btn-cancel-edit .ui-icon { opacity: 0.78; }
 .input-with-icon { position: relative; }
 .input-with-icon .ui-icon {
   position: absolute;
@@ -245,6 +252,14 @@ button, .pill, .finish-btn, .color-swatch { -webkit-tap-highlight-color: transpa
   font-weight: 700;
   outline: 1px dashed var(--ghost-strong);
 }
+.cart-empty .ui-icon {
+  display: flex;
+  margin: 0 auto 0.45rem;
+  width: 1.45rem;
+  height: 1.45rem;
+  font-size: 1.45rem;
+  opacity: 0.48;
+}
 .cart-items { display: flex; flex-direction: column; gap: 0.55rem; }
 .cart-item {
   background: var(--surface);
@@ -271,7 +286,13 @@ button, .pill, .finish-btn, .color-swatch { -webkit-tap-highlight-color: transpa
 .cart-item-body { flex: 1; min-width: 0; }
 .cart-item-name { font-family: var(--headline); font-weight: 800; font-size: 0.92rem; letter-spacing: 0; }
 .cart-item-detail { font-size: 0.75rem; color: var(--muted); margin-top: 0.18rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.cart-item-remove {
+.cart-item-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-shrink: 0;
+}
+.cart-item-action {
   background: var(--surface-mid);
   border: none;
   border-radius: var(--radius-sm);
@@ -283,7 +304,12 @@ button, .pill, .finish-btn, .color-swatch { -webkit-tap-highlight-color: transpa
   flex-shrink: 0;
   transition: color 0.12s, background 0.12s, transform 0.12s;
 }
-.cart-item-remove:hover { color: var(--danger); }
+.cart-item-action:hover { background: #fff7f5; color: var(--primary); }
+.cart-item-action.remove:hover { color: var(--danger); }
+.cart-item.editing {
+  outline-color: rgba(165,25,0,0.42);
+  background: #fff7f5;
+}
 
 /* FORM CARD */
 .form-card {
@@ -499,6 +525,32 @@ hr.div { border: none; height: 0.8rem; margin: 0.25rem 0; }
   box-shadow: inset 0 0 0 1px var(--ghost), 0 18px 36px -34px rgba(28,27,27,0.5);
 }
 .btn-add:hover { background: #fff7f5; color: var(--primary); }
+.btn-add.editing {
+  background: var(--text);
+  color: var(--bg);
+}
+.edit-controls {
+  display: none;
+  margin: 0 0 0.5rem;
+}
+.edit-controls.visible { display: block; }
+.btn-cancel-edit {
+  width: 100%;
+  background: transparent;
+  border: 0;
+  color: var(--muted);
+  font-family: var(--headline);
+  font-size: 0.86rem;
+  font-weight: 800;
+  padding: 0.55rem;
+  min-height: 44px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+}
+.btn-cancel-edit:hover {
+  background: var(--surface-mid);
+  color: var(--primary);
+}
 
 .btn-submit {
   width: 100%;
@@ -722,7 +774,7 @@ hr.div { border: none; height: 0.8rem; margin: 0.25rem 0; }
       <div class="header-sub">Add items → review → submit once for your group</div>
     </div>
     <div class="cart-badge">
-      <img class="ui-icon" src="icons/shopping-cart.svg" alt="" aria-hidden="true">
+      <i class="ui-icon ti ti-shopping-cart" aria-hidden="true"></i>
       <span class="n" id="cartN">0</span>
       <span class="l">items</span>
     </div>
@@ -739,7 +791,7 @@ hr.div { border: none; height: 0.8rem; margin: 0.25rem 0; }
 
   <div class="step-panel active" id="stepItems">
   <div class="section-label">Your Cart</div>
-  <div class="cart-empty" id="cartEmpty">Nothing yet — add your first item below</div>
+  <div class="cart-empty" id="cartEmpty"><i class="ui-icon ti ti-shopping-cart-off" aria-hidden="true"></i>Nothing yet — add your first item below</div>
   <div class="cart-items" id="cartItems"></div>
 
   <div class="section-label">Add an Item</div>
@@ -988,15 +1040,18 @@ hr.div { border: none; height: 0.8rem; margin: 0.25rem 0; }
     <div class="form-row">
       <label>Reference link (optional)</label>
       <div class="input-with-icon">
-        <img class="ui-icon" src="icons/link.svg" alt="" aria-hidden="true">
+        <i class="ui-icon ti ti-link" aria-hidden="true"></i>
         <input type="text" id="itemLink" placeholder="Home Depot, Amazon link, etc." />
       </div>
     </div>
   </div>
 
-  <button class="btn-add" onclick="addToCart()"><img class="ui-icon" src="icons/plus.svg" alt="" aria-hidden="true">Add to Cart</button>
+  <button class="btn-add" id="addCartBtn" onclick="addToCart()"><i class="ui-icon ti ti-plus" aria-hidden="true"></i><span id="addCartBtnText">Add to Cart</span></button>
+  <div class="edit-controls" id="editControls">
+    <button class="btn-cancel-edit" onclick="cancelCartEdit()"><i class="ui-icon ti ti-x" aria-hidden="true"></i>Cancel editing</button>
+  </div>
   <div class="step-nav">
-    <button class="btn-submit" onclick="goGroupStep()"><img class="ui-icon" src="icons/arrow-right.svg" alt="" aria-hidden="true">Next: Group Info</button>
+    <button class="btn-submit" onclick="goGroupStep()"><i class="ui-icon ti ti-arrow-right" aria-hidden="true"></i>Next: Group Info</button>
   </div>
   </div>
 
@@ -1037,8 +1092,8 @@ hr.div { border: none; height: 0.8rem; margin: 0.25rem 0; }
   </div>
 
   <div class="step-nav">
-    <button class="step-back" onclick="showStep(1)"><img class="ui-icon" src="icons/arrow-left.svg" alt="" aria-hidden="true">Items</button>
-    <button class="btn-submit" onclick="openConfirm()"><img class="ui-icon" src="icons/check.svg" alt="" aria-hidden="true">Review &amp; Submit</button>
+    <button class="step-back" onclick="showStep(1)"><i class="ui-icon ti ti-arrow-left" aria-hidden="true"></i>Items</button>
+    <button class="btn-submit" onclick="openConfirm()"><i class="ui-icon ti ti-check" aria-hidden="true"></i>Review &amp; Submit</button>
   </div>
   <p class="submit-hint">You'll review everything before it sends.</p>
   </div>
@@ -1053,8 +1108,8 @@ hr.div { border: none; height: 0.8rem; margin: 0.25rem 0; }
     <div class="confirm-meta" id="confirmMeta"></div>
     <div class="confirm-items" id="confirmItems"></div>
     <div class="sheet-actions">
-      <button class="btn-back" onclick="closeConfirm()"><img class="ui-icon" src="icons/arrow-left.svg" alt="" aria-hidden="true">Edit</button>
-      <button class="btn-send" id="sendBtn" onclick="submitOrder()"><img class="ui-icon" src="icons/check.svg" alt="" aria-hidden="true">Looks good — send it</button>
+      <button class="btn-back" onclick="closeConfirm()"><i class="ui-icon ti ti-arrow-left" aria-hidden="true"></i>Edit</button>
+      <button class="btn-send" id="sendBtn" onclick="submitOrder()"><i class="ui-icon ti ti-check" aria-hidden="true"></i>Looks good — send it</button>
     </div>
   </div>
 </div>
@@ -1069,7 +1124,7 @@ hr.div { border: none; height: 0.8rem; margin: 0.25rem 0; }
   <div class="success-id" id="confirmId"></div>
   <div class="success-next">
     <div class="success-next-note">Your first request is already submitted. Use this only if you forgot something or need to add more items.</div>
-    <button class="btn-submit" onclick="startAnotherRequest()"><img class="ui-icon" src="icons/plus.svg" alt="" aria-hidden="true">Start another request</button>
+    <button class="btn-submit" onclick="startAnotherRequest()"><i class="ui-icon ti ti-plus" aria-hidden="true"></i>Start another request</button>
   </div>
   <p style="margin-top:1rem">Check your email for a confirmation.<br>Now go make something wild.</p>
 </div>
@@ -1091,10 +1146,11 @@ const colorData = {
 const cart=[], sel={}, multi={};
 let sprayC=null, paintC=null;
 let validationOverrideKey='';
+let editingCartIndex=-1;
 window.__submitting = false;
 
 function uiIcon(name){
-  return `<img class="ui-icon" src="icons/${name}.svg" alt="" aria-hidden="true">`;
+  return `<i class="ui-icon ti ti-${name}" aria-hidden="true"></i>`;
 }
 function escHtml(s) {
   return (s == null ? '' : String(s))
@@ -1206,6 +1262,23 @@ function checkEmail(){
   fb.textContent='Enter your full school email'; fb.className='email-feedback warn'; return false;
 }
 
+function currentFormState(cat){
+  const fields={};
+  ['itemLink','otherDesc','threadColor','sprayOther','paintOther','wireOther','tapeOther','glueOther','fastOther','threadOther','toolsOther'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) fields[id]=el.value;
+  });
+  return {
+    category:cat,
+    sel:{...sel},
+    multi:Object.fromEntries(Object.entries(multi).map(([k,v])=>[k,[...v]])),
+    sprayC:sprayC?{...sprayC}:null,
+    paintC:paintC?{...paintC}:null,
+    fields,
+    otherVisible:[...document.querySelectorAll('.other-field.visible')].map(el=>el.id)
+  };
+}
+
 function buildItem(cat){
   const icons={spray_paint:'🎨',paint:'🖌️',wire:'🔩',tape:'📦',glue:'🧲',fasteners:'🔗',thread:'🧵',tools:'🔧',other:'✏️'};
   let name='',detail='';
@@ -1241,7 +1314,7 @@ function buildItem(cat){
     const d=document.getElementById('otherDesc').value.trim(); if(!d) return null;
     name=d.length>60?d.slice(0,60)+'…':d;
   }
-  return {icon:icons[cat]||'📦',name,detail,category:cat,id:Date.now()+Math.random()};
+  return {icon:icons[cat]||'📦',name,detail,category:cat,id:Date.now()+Math.random(),formState:currentFormState(cat)};
 }
 
 function addToCart(){
@@ -1257,6 +1330,13 @@ function addToCart(){
   const item=buildItem(cat); if(!item){toast('Fill in the required details.','err');return;}
   item.link=document.getElementById('itemLink').value.trim();
   clearValidation();
+  if(editingCartIndex>-1){
+    item.id=cart[editingCartIndex]?.id||item.id;
+    cart[editingCartIndex]=item;
+    saveSession(); renderCart(); resetForm();
+    toast('Changes saved.','ok');
+    return;
+  }
   cart.push(item); saveSession(); renderCart(); resetForm();
   shakeCartIcon();
   toast('Added to cart.','ok');
@@ -1268,19 +1348,28 @@ function shakeCartIcon(){
   void icon.offsetWidth;
   icon.classList.add('cart-shake');
 }
-function removeFromCart(id){const i=cart.findIndex(x=>x.id===id);if(i>-1){cart.splice(i,1);saveSession();renderCart();}}
+function removeFromCart(id){
+  const i=cart.findIndex(x=>x.id===id);
+  if(i>-1){
+    cart.splice(i,1);
+    if(editingCartIndex===i) cancelCartEdit();
+    else if(editingCartIndex>i) editingCartIndex--;
+    saveSession();renderCart();
+  }
+}
 function renderCart(){
   const c=document.getElementById('cartItems'),e=document.getElementById('cartEmpty');
   document.getElementById('cartN').textContent=cart.length;
   if(!cart.length){e.style.display='block';c.innerHTML='';return;}
   e.style.display='none'; c.innerHTML='';
-  cart.forEach(item=>{
+  cart.forEach((item,index)=>{
     const el=document.createElement('div'); el.className='cart-item';
-    el.innerHTML=`<div class="cart-item-icon">${item.icon}</div><div class="cart-item-body"><div class="cart-item-name">${escHtml(item.name)}</div><div class="cart-item-detail">${[item.detail,item.link].filter(Boolean).map(escHtml).join(' · ')||'&nbsp;'}</div></div><button class="cart-item-remove" onclick="removeFromCart(${item.id})" aria-label="Remove item"><img class="ui-icon" src="icons/x.svg" alt="" aria-hidden="true"></button>`;
+    if(index===editingCartIndex) el.classList.add('editing');
+    el.innerHTML=`<div class="cart-item-icon">${item.icon}</div><div class="cart-item-body"><div class="cart-item-name">${escHtml(item.name)}</div><div class="cart-item-detail">${[item.detail,item.link].filter(Boolean).map(escHtml).join(' · ')||'&nbsp;'}</div></div><div class="cart-item-actions"><button class="cart-item-action" onclick="editCartItem(${index})" aria-label="Edit item"><i class="ui-icon ti ti-pencil" aria-hidden="true"></i></button><button class="cart-item-action remove" onclick="removeFromCart(${item.id})" aria-label="Remove item"><i class="ui-icon ti ti-trash" aria-hidden="true"></i></button></div>`;
     c.appendChild(el);
   });
 }
-function resetForm(){
+function resetForm(keepEditing=false){
   clearValidation();
   document.getElementById('category').value='';
   document.querySelectorAll('.sub-options').forEach(el=>el.classList.remove('visible'));
@@ -1294,6 +1383,148 @@ function resetForm(){
   document.getElementById('glitterRow').style.display='none';
   sprayC=null; paintC=null;
   Object.keys(sel).forEach(k=>delete sel[k]); Object.keys(multi).forEach(k=>delete multi[k]);
+  if(!keepEditing){
+    editingCartIndex=-1;
+    updateEditMode();
+  }
+}
+function updateEditMode(){
+  const btn=document.getElementById('addCartBtn');
+  const txt=document.getElementById('addCartBtnText');
+  const controls=document.getElementById('editControls');
+  const editing=editingCartIndex>-1;
+  if(btn) btn.classList.toggle('editing',editing);
+  if(txt) txt.textContent=editing?'Save Changes':'Add to Cart';
+  if(controls) controls.classList.toggle('visible',editing);
+  renderCart();
+}
+function setOtherVisible(rowId,show){
+  const row=document.getElementById(rowId);
+  if(!row) return;
+  row.classList.toggle('visible',show);
+  document.querySelectorAll('.other-trigger .pill').forEach(btn=>{
+    if((btn.getAttribute('onclick')||'').includes(rowId)){
+      btn.classList.toggle('selected',show);
+      btn.textContent=show?'− Hide':'+ Other';
+    }
+  });
+}
+function selectByOnclick(key,val,selector='.pill'){
+  document.querySelectorAll(selector).forEach(el=>{
+    const action=el.getAttribute('onclick')||'';
+    if(action.includes("'"+key+"'") && action.includes("'"+val+"'")) el.classList.add('selected');
+  });
+}
+function restoreColor(type,color){
+  if(!color) return;
+  const scope=type==='spray'?'#sub_spray_paint':'#sub_paint';
+  const disp=document.getElementById(type==='spray'?'sprayCDisp':'paintCDisp');
+  document.querySelectorAll(scope+' .color-swatch').forEach(s=>{
+    const match=s.title===color.n;
+    s.classList.toggle('selected',match);
+  });
+  if(disp) disp.innerHTML=`<div class="sel-color-dot" style="background:${color.h}${color.b?';box-shadow:inset 0 0 0 1px #bbb':''}"></div><span>${escHtml(color.n)}</span>`;
+  if(type==='spray') sprayC={...color}; else paintC={...color};
+}
+function findColorByName(name){
+  for(const group of Object.values(colorData)){
+    const found=group.find(c=>c.n===name);
+    if(found) return {...found};
+  }
+  return null;
+}
+function itemToFormState(item){
+  const state={category:item.category,sel:{},multi:{},sprayC:null,paintC:null,fields:{itemLink:item.link||''},otherVisible:[]};
+  const afterDash=(item.name||'').split('—').slice(1).join('—').trim();
+  const known={
+    tapeType:['Duct Tape','Painters Tape','Masking Tape','Double-Sided Tape','Scotch Tape','Fabric Tape'],
+    glueType:['Hot Glue Sticks','Hot Glue Gun','Elmers Glue','E6000','Glitter Glue','Mod Podge'],
+    fastType:['Zip Ties','Velcro','Staples','Silver Eyelets','Elastic Band','Sewing Needles'],
+    toolsType:['Needle Nose Pliers','Hammer','Screwdrivers','Crochet Hook','Bolt Cutters','Extension Cord'],
+    threadType:['Thread','Ribbon','Yarn','Elastic']
+  };
+  if(item.category==='spray_paint'){
+    const color=findColorByName(afterDash);
+    if(color) state.sprayC=color; else {state.fields.sprayOther=afterDash; state.otherVisible.push('sprayOF');}
+    (item.detail||'').split(',').map(s=>s.trim()).forEach(part=>{
+      if(['Gloss','Matte','Metallic','Satin','Flat'].includes(part)) state.sel.sprayFinish=part;
+      if(part.startsWith('×')) state.sel.sprayQty=part.slice(1);
+    });
+  } else if(item.category==='paint'){
+    const color=findColorByName(afterDash);
+    if(color) state.paintC=color; else {state.fields.paintOther=afterDash; state.otherVisible.push('paintOF');}
+    state.sel.paintSize=item.detail||'';
+  } else if(item.category==='wire'){
+    state.sel.wireType=afterDash;
+    state.sel.wireQty=item.detail||'';
+  } else if(item.category==='tape'){
+    const vals=afterDash?afterDash.split(',').map(s=>s.trim()).filter(Boolean):[];
+    state.multi.tapeType=vals.filter(v=>known.tapeType.includes(v));
+    const other=vals.filter(v=>!known.tapeType.includes(v)).join(', ');
+    if(other){state.fields.tapeOther=other; state.otherVisible.push('tapeOF');}
+    state.sel.tapeQty=item.detail||'';
+  } else if(item.category==='glue'){
+    const vals=afterDash?afterDash.split(',').map(s=>s.trim()).filter(Boolean):[];
+    state.multi.glueType=vals.filter(v=>known.glueType.includes(v));
+    const other=vals.filter(v=>!known.glueType.includes(v)).join(', ');
+    if(other){state.fields.glueOther=other; state.otherVisible.push('glueOF');}
+    if((item.detail||'').startsWith('Glitter: ')) state.sel.glitterC=item.detail.replace('Glitter: ','');
+  } else if(item.category==='fasteners'){
+    const vals=afterDash?afterDash.split(',').map(s=>s.trim()).filter(Boolean):[];
+    state.multi.fastType=vals.filter(v=>known.fastType.includes(v));
+    const other=vals.filter(v=>!known.fastType.includes(v)).join(', ');
+    if(other){state.fields.fastOther=other; state.otherVisible.push('fastOF');}
+  } else if(item.category==='thread'){
+    if(known.threadType.includes(item.name)) state.sel.threadType=item.name;
+    else {state.fields.threadOther=item.name||''; state.otherVisible.push('threadOF');}
+    if((item.detail||'').startsWith('Color: ')) state.fields.threadColor=item.detail.replace('Color: ','');
+  } else if(item.category==='tools'){
+    const vals=afterDash?afterDash.split(',').map(s=>s.trim()).filter(Boolean):[];
+    state.multi.toolsType=vals.filter(v=>known.toolsType.includes(v));
+    const other=vals.filter(v=>!known.toolsType.includes(v)).join(', ');
+    if(other){state.fields.toolsOther=other; state.otherVisible.push('toolsOF');}
+  } else if(item.category==='other'){
+    state.fields.otherDesc=item.name||'';
+  }
+  return state;
+}
+function applyFormState(state){
+  resetForm(true);
+  document.getElementById('category').value=state.category||'';
+  onCat();
+  Object.entries(state.fields||{}).forEach(([id,value])=>{
+    const el=document.getElementById(id);
+    if(el) el.value=value||'';
+  });
+  (state.otherVisible||[]).forEach(id=>setOtherVisible(id,true));
+  Object.assign(sel,state.sel||{});
+  Object.entries(sel).forEach(([key,val])=>{
+    if(key==='sprayFinish') selectByOnclick(key,val,'.finish-btn');
+    else selectByOnclick(key,val,'.pill');
+  });
+  Object.entries(state.multi||{}).forEach(([key,vals])=>{
+    multi[key]=new Set(vals);
+    vals.forEach(val=>selectByOnclick(key,val,'.pill.multi'));
+  });
+  restoreColor('spray',state.sprayC);
+  restoreColor('paint',state.paintC);
+  document.getElementById('glitterRow').style.display=multi['glueType']?.has('Glitter Glue')?'block':'none';
+}
+function editCartItem(index){
+  const item=cart[index];
+  if(!item) return;
+  editingCartIndex=index;
+  applyFormState(item.formState||itemToFormState(item));
+  updateEditMode();
+  showStep(1);
+  document.querySelector('.form-card')?.scrollIntoView({behavior:'smooth',block:'start'});
+  toast('Editing this item.','ok');
+}
+function cancelCartEdit(){
+  editingCartIndex=-1;
+  resetForm(true);
+  updateEditMode();
+  toast('Editing canceled.','ok');
 }
 function saveSession(){try{sessionStorage.setItem('jk_cart',JSON.stringify(cart));}catch(e){}}
 function loadSession(){try{const s=sessionStorage.getItem('jk_cart');if(s){JSON.parse(s).forEach(i=>cart.push(i));renderCart();}}catch(e){}}
@@ -1309,6 +1540,7 @@ function showStep(n){
   window.scrollTo({top:0,behavior:'smooth'});
 }
 function goGroupStep(){
+  if(editingCartIndex>-1){toast('Save or cancel your edit first.','err');return;}
   if(!cart.length){toast('Add at least one item first.','err');return;}
   showStep(2);
 }
@@ -1332,6 +1564,7 @@ function startAnotherRequest(){
 
 function openConfirm(){
   if(window.__submitting) return;
+  if(editingCartIndex>-1){toast('Save or cancel your edit first.','err');showStep(1);return;}
   if(!cart.length){toast('Add at least one item first.','err');return;}
   const country=document.getElementById('country').value;
   const email=document.getElementById('replyEmail').value.trim();
