@@ -892,6 +892,8 @@ button { -webkit-tap-highlight-color: transparent; }
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+(function(){
+// HARDENED: Keep dashboard state and logic private; only inline-handler shims are exported at the bottom.
 const SUPABASE_URL = 'https://ywdigsbpvtjsjhliuwrm.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_CSLa84XRVDj2D_cEl72TpQ_43T7e6qr';
 const EMAILJS_SERVICE_ID = 'service_v7bchw7';
@@ -900,6 +902,18 @@ const EMAILJS_COMPLETED_TEMPLATE_ID = 'template_gsncn3g';
 const EMAILJS_PUBLIC_KEY = 't9UIpuX-5wgc4RPno';
 const PASSWORD_RESET_REDIRECT = 'https://palytinsley.github.io/jk-supplies/teacher.html';
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const VALID_STATUSES = Object.freeze(['pending', 'approved', 'denied', 'outofstock']);
+const VALID_STATUS_SET = new Set(VALID_STATUSES);
+const SAFE_ID_RE = /^[A-Za-z0-9_-]+$/;
+const AUTH_TOKEN_SALT = 0x4a4b2026;
+const AUTH_TOKEN_KEY = 'jk_teacher_session_token';
+const AUTH_TOKEN_TS_KEY = 'jk_teacher_session_token_ts';
+const AUTH_FAIL_COUNT_KEY = 'jk_teacher_auth_fail_count';
+const AUTH_LOCKOUT_UNTIL_KEY = 'jk_teacher_auth_lockout_until';
+const AUTH_LOCKOUT_MS = 60000;
+const AUTH_MAX_ATTEMPTS = 5;
+let authLockoutTimer = null;
+let loginInProgress = false;
 
 let allRequests = [];
 let mode = 'reviewer';
@@ -943,8 +957,52 @@ function icon(name) {
   return `<img class="ui-icon" src="icons/${name}.svg" alt="" aria-hidden="true">`;
 }
 
+function computeAuthToken(ts) {
+  // HARDENED: Integrity token is generated at login and checked before privileged operations.
+  return String((Number(ts) ^ AUTH_TOKEN_SALT) >>> 0);
+}
+
+function establishAuthToken() {
+  // HARDENED: Store a per-login dashboard token separate from Supabase's persisted auth session.
+  const ts = Date.now();
+  try {
+    sessionStorage.setItem(AUTH_TOKEN_TS_KEY, String(ts));
+    sessionStorage.setItem(AUTH_TOKEN_KEY, computeAuthToken(ts));
+  } catch(e) {
+    logError('Auth token store failed', e);
+  }
+}
+
+function clearAuthToken() {
+  // HARDENED: Remove dashboard token on sign-out or forced re-auth.
+  try {
+    sessionStorage.removeItem(AUTH_TOKEN_TS_KEY);
+    sessionStorage.removeItem(AUTH_TOKEN_KEY);
+  } catch(e) {}
+}
+
+function hasValidAuthToken() {
+  // HARDENED: Missing or forged token forces re-auth even if a browser-stored Supabase session exists.
+  try {
+    const ts = sessionStorage.getItem(AUTH_TOKEN_TS_KEY);
+    const token = sessionStorage.getItem(AUTH_TOKEN_KEY);
+    return !!ts && !!token && token === computeAuthToken(ts);
+  } catch(e) {
+    return false;
+  }
+}
+
+function requirePrivilegedAccess(context = 'Privileged operation') {
+  // HARDENED: Every REST/write path checks both Supabase session state and dashboard token integrity.
+  if (!currentSession?.access_token || !hasValidAuthToken()) {
+    logError(`${context} blocked`, new Error('missing or invalid dashboard auth token'));
+    showLogin('Please sign in again.');
+    throw new Error('not authenticated');
+  }
+}
+
 function authHeaders(extra = {}) {
-  if (!currentSession?.access_token) throw new Error('not authenticated');
+  requirePrivilegedAccess('Auth headers');
   return { ...extra, 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${currentSession.access_token}` };
 }
 
@@ -972,10 +1030,97 @@ function emailLooksValid(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
+function isValidRowId(id) {
+  // HARDENED: Row ids used in REST filters must be simple non-empty ids only.
+  return typeof id === 'string' && id.length > 0 && SAFE_ID_RE.test(id);
+}
+
+function normalizeId(id) {
+  return String(id == null ? '' : id).trim();
+}
+
+function validatePatchData(data, context = 'Patch') {
+  // HARDENED: Unknown status strings are silently blocked and logged before any REST write.
+  if (Object.prototype.hasOwnProperty.call(data || {}, 'status') && !VALID_STATUS_SET.has(data.status)) {
+    logError(`${context} blocked`, new Error(`invalid status: ${data.status}`));
+    return false;
+  }
+  return true;
+}
+
+function confirmLargeBatch(count) {
+  // HARDENED: Soft guard for accidental mass updates from batch actions.
+  if (count <= 50) return true;
+  return window.confirm(`You're about to update ${count} rows. Continue?`);
+}
+
 function setAuthMessage(message = '', ok = false) {
   const msg = document.getElementById('authMsg');
   msg.textContent = message;
   msg.classList.toggle('ok', !!ok);
+}
+
+function getAuthLockoutRemaining() {
+  // HARDENED: Session lockout slows repeated password attempts from the same browser session.
+  try {
+    const until = Number(sessionStorage.getItem(AUTH_LOCKOUT_UNTIL_KEY) || 0);
+    return Math.max(0, until - Date.now());
+  } catch(e) {
+    return 0;
+  }
+}
+
+function setLoginLockedState() {
+  // HARDENED: Disable the login form while the brute-force lockout countdown is active.
+  let hadExpiredLockout = false;
+  try {
+    const until = Number(sessionStorage.getItem(AUTH_LOCKOUT_UNTIL_KEY) || 0);
+    hadExpiredLockout = !!until && until <= Date.now();
+  } catch(e) {}
+  const remaining = getAuthLockoutRemaining();
+  const locked = remaining > 0;
+  const loginBtn = document.getElementById('loginBtn');
+  const loginEmail = document.getElementById('loginEmail');
+  const loginPassword = document.getElementById('loginPassword');
+  if (loginBtn) loginBtn.disabled = locked || loginInProgress;
+  if (loginEmail) loginEmail.disabled = locked;
+  if (loginPassword) loginPassword.disabled = locked;
+  if (locked) {
+    setAuthMessage(`Too many attempts. Try again in ${Math.ceil(remaining / 1000)} seconds.`);
+    clearTimeout(authLockoutTimer);
+    authLockoutTimer = setTimeout(setLoginLockedState, 1000);
+  } else {
+    clearTimeout(authLockoutTimer);
+    authLockoutTimer = null;
+    try {
+      sessionStorage.removeItem(AUTH_LOCKOUT_UNTIL_KEY);
+      if (hadExpiredLockout) sessionStorage.removeItem(AUTH_FAIL_COUNT_KEY);
+    } catch(e) {}
+  }
+  return locked;
+}
+
+function recordLoginFailure() {
+  // HARDENED: Five failed attempts trigger a 60-second lockout in sessionStorage.
+  try {
+    const failures = Number(sessionStorage.getItem(AUTH_FAIL_COUNT_KEY) || 0) + 1;
+    sessionStorage.setItem(AUTH_FAIL_COUNT_KEY, String(failures));
+    if (failures >= AUTH_MAX_ATTEMPTS) {
+      sessionStorage.setItem(AUTH_LOCKOUT_UNTIL_KEY, String(Date.now() + AUTH_LOCKOUT_MS));
+      setLoginLockedState();
+      return true;
+    }
+  } catch(e) {}
+  return false;
+}
+
+function clearLoginFailures() {
+  // HARDENED: Successful login clears failed-attempt counters.
+  try {
+    sessionStorage.removeItem(AUTH_FAIL_COUNT_KEY);
+    sessionStorage.removeItem(AUTH_LOCKOUT_UNTIL_KEY);
+  } catch(e) {}
+  setLoginLockedState();
 }
 
 function hasRecoveryUrl() {
@@ -1003,6 +1148,7 @@ function setAuthMode(nextMode, message = '', ok = false, canReset = true) {
 }
 
 async function fetchAll() {
+  requirePrivilegedAccess('Load requests');
   const res = await fetch(`${SUPABASE_URL}/rest/v1/requests?order=created_at.asc`, {
     headers: authHeaders()
   });
@@ -1011,9 +1157,17 @@ async function fetchAll() {
 }
 
 async function patch(id, data) {
+  requirePrivilegedAccess('Patch request');
+  const safeId = normalizeId(id);
+  if (!isValidRowId(safeId)) {
+    const err = new Error(`invalid row id: ${id}`);
+    logError('Patch request blocked', err);
+    throw err;
+  }
+  if (!validatePatchData(data, 'Patch request')) throw new Error('invalid patch data');
   activeSaveCount++;
   try {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/requests?id=eq.${id}`, {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/requests?id=eq.${encodeURIComponent(safeId)}`, {
       method: 'PATCH',
       headers: authHeaders({ 'Content-Type': 'application/json', 'Prefer': 'return=minimal' }),
       body: JSON.stringify(data)
@@ -1025,15 +1179,21 @@ async function patch(id, data) {
 }
 
 async function patchRows(rows, data, context) {
-  const results = await Promise.allSettled(rows.map(item => patch(item.id, data)));
-  const failedRows = rows.filter((_row, idx) => results[idx].status === 'rejected');
-  const okRows = rows.filter((_row, idx) => results[idx].status === 'fulfilled');
+  requirePrivilegedAccess(context || 'Patch rows');
+  if (!validatePatchData(data, context || 'Patch rows')) return { ok: 0, failed: rows.length, okRows: [], failedRows: rows, firstError: null };
+  const safeRows = rows.filter(item => isValidRowId(normalizeId(item?.id)));
+  if (safeRows.length !== rows.length) logError(context || 'Patch rows', new Error('one or more invalid row ids were blocked'));
+  const results = await Promise.allSettled(safeRows.map(item => patch(item.id, data)));
+  const failedRows = safeRows.filter((_row, idx) => results[idx].status === 'rejected');
+  const okRows = safeRows.filter((_row, idx) => results[idx].status === 'fulfilled');
   const failed = results.filter(r => r.status === 'rejected');
   if (failed.length) logError(context, failed.map(r => r.reason));
   return { ok: okRows.length, failed: failedRows.length, okRows, failedRows, firstError: failed[0]?.reason };
 }
 
 function showLogin(message = '') {
+  // HARDENED: Returning to the login screen clears the dashboard token.
+  clearAuthToken();
   currentSession = null;
   allRequests = [];
   recoverySessionReady = false;
@@ -1047,10 +1207,15 @@ function showLogin(message = '') {
   document.getElementById('newPassword').value = '';
   document.getElementById('confirmPassword').value = '';
   setAuthMode('login', message);
+  setLoginLockedState();
 }
 
 function showApp(session) {
   if (authMode === 'recovery') return;
+  if (!hasValidAuthToken()) {
+    showLogin('Please sign in again.');
+    return;
+  }
   currentSession = session;
   document.getElementById('authScreen').style.display = 'none';
   document.getElementById('appShell').style.display = 'block';
@@ -1075,6 +1240,7 @@ function showRecovery(message = 'Set a new password for your teacher account.', 
 
 async function signInTeacher() {
   if (authMode !== 'login') return;
+  if (setLoginLockedState()) return;
   const email = document.getElementById('loginEmail').value.trim();
   const password = document.getElementById('loginPassword').value;
   const btn = document.getElementById('loginBtn');
@@ -1083,22 +1249,29 @@ async function signInTeacher() {
     setAuthMessage('Enter your email and password.');
     return;
   }
+  loginInProgress = true;
   btn.disabled = true;
   btn.textContent = 'Signing in...';
+  establishAuthToken();
   try {
     const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
     if (error) {
       logError('Login failed', error);
-      setAuthMessage(error.message || 'Login failed.');
+      clearAuthToken();
+      if (!recordLoginFailure()) setAuthMessage(error.message || 'Login failed.');
       return;
     }
+    clearLoginFailures();
     showApp(data.session);
   } catch(e) {
     logError('Login failed', e);
-    setAuthMessage(friendlyError(e, 'Login failed. Check your connection and try again.'));
+    clearAuthToken();
+    if (!recordLoginFailure()) setAuthMessage(friendlyError(e, 'Login failed. Check your connection and try again.'));
   } finally {
+    loginInProgress = false;
     btn.disabled = false;
     btn.textContent = 'Sign In';
+    setLoginLockedState();
   }
 }
 
@@ -1187,6 +1360,7 @@ function backToLoginFromRecovery() {
 }
 
 async function signOutTeacher() {
+  clearAuthToken();
   try {
     const { error } = await supabaseClient.auth.signOut();
     if (error) logError('Sign out failed', error);
@@ -1209,6 +1383,7 @@ async function initAuth() {
   });
   document.getElementById('authScreen').style.display = 'flex';
   setAuthMessage('Checking session...');
+  setLoginLockedState();
   const recoveryFromUrl = hasRecoveryUrl();
 
   supabaseClient.auth.onAuthStateChange((event, session) => {
@@ -1227,7 +1402,8 @@ async function initAuth() {
     }
     if (authMode === 'recovery') return;
     if (session?.access_token === currentSession?.access_token) return;
-    if (session) showApp(session);
+    if (session && (loginInProgress || hasValidAuthToken())) showApp(session);
+    else if (session) showLogin('Please sign in again.');
     else showLogin();
   });
 
@@ -1242,7 +1418,11 @@ async function initAuth() {
       } else {
         showRecovery('This reset link is invalid or expired. Request a new reset email.', false);
       }
-    } else if (data?.session) showApp(data.session);
+    } else if (data?.session && hasValidAuthToken()) showApp(data.session);
+    else if (data?.session) {
+      await supabaseClient.auth.signOut().catch(e => logError('Stale session sign out failed', e));
+      showLogin('Please sign in again.');
+    }
     else showLogin();
   } catch(e) {
     logError('Session check failed', e);
@@ -1281,7 +1461,7 @@ async function load(isAuto = false) {
     return true;
   } catch(e) {
     logError('Load requests failed', e);
-    document.getElementById('mainContent').innerHTML = `<div class="loading">${friendlyError(e, 'Could not load requests. Check Supabase connection and try again.')}</div>`;
+    document.getElementById('mainContent').innerHTML = `<div class="loading">${escHtml(friendlyError(e, 'Could not load requests. Check Supabase connection and try again.'))}</div>`;
     return false;
   }
 }
@@ -1381,7 +1561,7 @@ function rowSelected(id) {
 
 function renderSelectBox(item) {
   const checked = rowSelected(item.id);
-  return `<button class="select-box ${checked?'checked':''}" onclick="toggleReviewSelection('${item.id}')" aria-label="Select ${esc(item.item_name)}">${icon(checked?'square-check':'square')}</button>`;
+  return `<button class="select-box ${checked?'checked':''}" onclick="toggleReviewSelection('${esc(item.id)}')" aria-label="Select ${escHtml(item.item_name)}">${icon(checked?'square-check':'square')}</button>`;
 }
 
 function selectedRows() {
@@ -1402,22 +1582,25 @@ function renderBatchTools(visibleRows) {
 }
 
 function reviewActions(item) {
+  const status = VALID_STATUS_SET.has(item.status) ? item.status : 'pending';
   if (item.status === 'pending') {
-    return `<div class="req-actions"><button class="btn-approve" onclick="approve('${item.id}')">${icon('check')}OK</button><button class="btn-deny" onclick="openDenyModal('${item.id}','${esc(item.item_name)}')">${icon('x')}Deny</button></div>`;
+    return `<div class="req-actions"><button class="btn-approve" onclick="approve('${esc(item.id)}')">${icon('check')}OK</button><button class="btn-deny" onclick="openDenyModal('${esc(item.id)}','${esc(item.item_name)}')">${icon('x')}Deny</button></div>`;
   }
-  return `<div class="req-actions"><span class="sbadge s-${item.status}">${item.status}</span><button class="btn-oos" onclick="resetToPending('${item.id}')">${icon('arrow-back-up')}Reset to pending</button></div>`;
+  return `<div class="req-actions"><span class="sbadge s-${status}">${escHtml(status)}</span><button class="btn-oos" onclick="resetToPending('${esc(item.id)}')">${icon('arrow-back-up')}Reset to pending</button></div>`;
 }
 
 function historyActions(item) {
-  if (item.purchased) return `<div class="req-actions"><span class="sbadge s-purchased">${icon('shopping-cart-check')}purchased</span><button class="btn-oos" onclick="undoPurchase('${item.id}')">${icon('arrow-back-up')}Undo purchase</button></div>`;
-  if (item.status === 'outofstock') return `<div class="req-actions"><span class="sbadge s-outofstock">${icon('alert-triangle')}OOS</span><button class="btn-oos" onclick="unOos('${item.id}')">${icon('arrow-back-up')}Undo OOS</button></div>`;
-  if (item.status === 'denied') return `<div class="req-actions"><span class="sbadge s-denied">${icon('x')}denied</span><button class="btn-oos" onclick="resetToPending('${item.id}')">${icon('arrow-back-up')}Reset to pending</button></div>`;
-  return `<div class="req-actions"><span class="sbadge s-${item.status}">${item.status}</span></div>`;
+  const safeId = esc(item.id);
+  const status = VALID_STATUS_SET.has(item.status) ? item.status : 'pending';
+  if (item.purchased) return `<div class="req-actions"><span class="sbadge s-purchased">${icon('shopping-cart-check')}purchased</span><button class="btn-oos" onclick="undoPurchase('${safeId}')">${icon('arrow-back-up')}Undo purchase</button></div>`;
+  if (item.status === 'outofstock') return `<div class="req-actions"><span class="sbadge s-outofstock">${icon('alert-triangle')}OOS</span><button class="btn-oos" onclick="unOos('${safeId}')">${icon('arrow-back-up')}Undo OOS</button></div>`;
+  if (item.status === 'denied') return `<div class="req-actions"><span class="sbadge s-denied">${icon('x')}denied</span><button class="btn-oos" onclick="resetToPending('${safeId}')">${icon('arrow-back-up')}Reset to pending</button></div>`;
+  return `<div class="req-actions"><span class="sbadge s-${status}">${escHtml(status)}</span></div>`;
 }
 
 function renderReqRow(item, opts = {}) {
   const safe = safeUrl(item.link);
-  const linkHtml = safe ? `<a class="req-link" href="${safe}" target="_blank" rel="noopener noreferrer">↗ Reference</a>` : '';
+  const linkHtml = safe ? `<a class="req-link" href="${escHtml(safe)}" target="_blank" rel="noopener noreferrer">↗ Reference</a>` : '';
   const denialNote = item.status === 'denied' && item.denial_reason ? `<div class="req-note">Reason: ${escHtml(item.denial_reason)}${item.denial_notified?' · ✓ notified':''}</div>` : '';
   const oosNote = item.status === 'outofstock' && item.oos_note ? `<div class="req-note">Got instead: ${escHtml(item.oos_note)}</div>` : '';
   const purchasedWhen = item.purchased_at ? `<div class="req-note" style="color:var(--blue)">Purchased ${new Date(item.purchased_at).toLocaleString([], {month:'short', day:'numeric', hour:'numeric', minute:'2-digit'})}</div>` : '';
@@ -1563,6 +1746,7 @@ function clearReviewSelection() {
 async function batchApproveSelected() {
   const rows = selectedRows();
   if (!rows.length) return;
+  if (!confirmLargeBatch(rows.length)) return;
   try {
     const result = await patchRows(rows, {status:'approved',denial_reason:'',denial_notified:false}, 'Batch approve failed');
     result.okRows.forEach(item => { item.status='approved'; item.denial_reason=''; item.denial_notified=false; });
@@ -1590,6 +1774,7 @@ function openBatchDenyModal() {
 async function resetSelectedToPending() {
   const rows = selectedRows();
   if (!rows.length) return;
+  if (!confirmLargeBatch(rows.length)) return;
   await resetRowsToPending(rows);
   selectedReviewIds.clear();
   render();
@@ -1646,11 +1831,16 @@ function shopKey(r) {
 }
 
 function idsArg(ids) {
-  return ids.join(',');
+  // HARDENED: Inline id argument lists only contain validated row ids.
+  return ids.map(normalizeId).filter(isValidRowId).join(',');
 }
 
 function rowsFromIds(ids) {
-  const set = new Set(String(ids || '').split(',').filter(Boolean));
+  // HARDENED: Reject malformed row ids before they can flow into PATCH filters.
+  const raw = String(ids || '').split(',').map(normalizeId).filter(Boolean);
+  const safeIds = raw.filter(isValidRowId);
+  if (safeIds.length !== raw.length) logError('Invalid row id blocked', new Error(String(ids || '')));
+  const set = new Set(safeIds);
   return allRequests.filter(r => set.has(String(r.id)));
 }
 
@@ -1697,8 +1887,8 @@ function renderShopper(main) {
       const pColor = group.rows.some(r => r.period === '5') && group.rows.some(r => r.period === '6') ? 'var(--surface3)' : (group.rows[0].period === '5' ? 'var(--blue-bg)' : 'var(--yellow-bg)');
       const pText = group.rows.some(r => r.period === '5') && group.rows.some(r => r.period === '6') ? 'var(--muted)' : (group.rows[0].period === '5' ? 'var(--accent)' : 'var(--yellow)');
       const links = [...new Map(group.rows.filter(r => safeUrl(r.link)).map(r => [r.link, r.link])).values()];
-      const linksHtml = links.length ? ` · ${links.map((link,idx) => `<a href="${link}" target="_blank" rel="noopener noreferrer" style="color:var(--blue)">link${links.length>1?' '+(idx+1):''}</a>`).join(' · ')}` : '';
-      html += `<div class="shop-item" id="shop_${group.domId}">
+      const linksHtml = links.length ? ` · ${links.map((link,idx) => `<a href="${escHtml(link)}" target="_blank" rel="noopener noreferrer" style="color:var(--blue)">link${links.length>1?' '+(idx+1):''}</a>`).join(' · ')}` : '';
+      html += `<div class="shop-item" id="shop_${escHtml(group.domId)}">
         <div class="shop-cb" onclick="toggleGrab('${idsArg(ids)}')" aria-label="Mark purchased">${icon('square')}</div>
         <div class="shop-body">
           <div class="shop-name">${escHtml(group.item_name)}${group.rows.length>1?` <span style="color:var(--muted);font-family:var(--mono);font-size:0.72rem;">×${group.rows.length}</span>`:''}</div>
@@ -1730,7 +1920,7 @@ function renderShopHistory(rows) {
     const oosNoteHtml = oosNotes.length ? `<div class="shop-sub-note">Alt: ${oosNotes.map(escHtml).join('; ')}</div>` : '';
     const countries = [...new Map(group.rows.map(r => [r.submission_id, `Per. ${escHtml(r.period)} · ${escHtml(r.country)}`])).values()];
     const links = [...new Map(group.rows.filter(r => safeUrl(r.link)).map(r => [r.link, r.link])).values()];
-    const linksHtml = links.length ? ` · ${links.map((link,idx) => `<a href="${link}" target="_blank" rel="noopener noreferrer" style="color:var(--blue)">link${links.length>1?' '+(idx+1):''}</a>`).join(' · ')}` : '';
+    const linksHtml = links.length ? ` · ${links.map((link,idx) => `<a href="${escHtml(link)}" target="_blank" rel="noopener noreferrer" style="color:var(--blue)">link${links.length>1?' '+(idx+1):''}</a>`).join(' · ')}` : '';
     const action = [
       purchasedIds.length ? `<button class="btn-oos" onclick="undoPurchase('${idsArg(purchasedIds)}')">${icon('arrow-back-up')}Undo purchase</button>` : '',
       oosIds.length ? `<button class="btn-oos active-oos" onclick="unOos('${idsArg(oosIds)}')">${icon('arrow-back-up')}Undo OOS</button>` : ''
@@ -1768,6 +1958,7 @@ function updateProgress(shopItems) {
 
 // RAINBOW MANAGER
 async function fetchRainbows() {
+  requirePrivilegedAccess('Load rainbows');
   const res = await fetch(`${SUPABASE_URL}/rest/v1/rainbows?select=country,count`, {
     headers: authHeaders()
   });
@@ -1777,13 +1968,19 @@ async function fetchRainbows() {
 
 // RAINBOW MANAGER
 async function upsertRainbowCount(country, count) {
+  requirePrivilegedAccess('Reset rainbows');
+  const safeCountry = String(country || '').trim();
+  if (!safeCountry || safeCountry.length > 120) {
+    logError('Reset rainbows blocked', new Error('invalid country'));
+    return;
+  }
   const res = await fetch(`${SUPABASE_URL}/rest/v1/rainbows?on_conflict=country`, {
     method: 'POST',
     headers: authHeaders({
       'Content-Type': 'application/json',
       'Prefer': 'resolution=merge-duplicates,return=minimal'
     }),
-    body: JSON.stringify({ country, count })
+    body: JSON.stringify({ country: safeCountry, count })
   });
   if (!res.ok) throw await restError(res, 'Reset rainbows');
 }
@@ -1979,6 +2176,7 @@ async function confirmDeny() {
   const custom=document.getElementById('denyCustom').value.trim(), reason=custom||denyReason;
   if (!reason){showToast('Pick or write a reason.');return;}
   const rows = denyTargetIds.length ? rowsFromIds(idsArg(denyTargetIds)) : rowsFromIds(String(denyTargetId));
+  if (!confirmLargeBatch(rows.length)) return;
   try {
     const result = await patchRows(rows,{status:'denied',denial_reason:reason,denial_notified:false,purchased:false,purchased_at:null}, 'Deny save failed');
     result.okRows.forEach(item => { item.status='denied'; item.denial_reason=reason; item.denial_notified=false; item.purchased=false; item.purchased_at=null; });
@@ -2107,9 +2305,9 @@ async function openEmailModal() {
     html += `<div class="eg">
       <div class="eg-head"><span class="eg-country">${escHtml(g.country)} · Per. ${escHtml(g.period)}</span><span style="display:flex;align-items:center;gap:0.4rem;"><span class="eg-email">${escHtml(g.email)}</span>${sentBadge}</span></div>
       <div class="eg-items">
-        ${purch.map(i=>`<div class="ep">✓ ${escHtml(i.item_name)}</div>`).join('')}
-        ${oos.map(i=>`<div class="eo">~ ${escHtml(i.item_name)}${i.oos_note?' ('+escHtml(i.oos_note)+')':''}</div>`).join('')}
-        ${pending.map(i=>`<div style="color:var(--muted)">○ ${escHtml(i.item_name)} (not yet grabbed)</div>`).join('')}
+        ${purch.map(i=>`<div class="ep">✓ ${escHtml(i.item_name)}${i.item_detail?' — '+escHtml(i.item_detail):''}</div>`).join('')}
+        ${oos.map(i=>`<div class="eo">~ ${escHtml(i.item_name)}${i.item_detail?' — '+escHtml(i.item_detail):''}${i.oos_note?' ('+escHtml(i.oos_note)+')':''}</div>`).join('')}
+        ${pending.map(i=>`<div style="color:var(--muted)">○ ${escHtml(i.item_name)}${i.item_detail?' — '+escHtml(i.item_detail):''} (not yet grabbed)</div>`).join('')}
       </div>
     </div>`;
   });
@@ -2188,11 +2386,26 @@ async function sendCompletedEmails(groupList, isResend = false) {
 
 function closeEmailModal() { document.getElementById('emailModal').classList.remove('open'); }
 
-function esc(s) { return (s||'').replace(/'/g,"\\'").replace(/"/g,'&quot;'); }
+function esc(s) {
+  // HARDENED: Escape values embedded in single-quoted inline handler arguments.
+  return String(s == null ? '' : s)
+    .replace(/\\/g, '\\\\')
+    .replace(/'/g, "\\'")
+    .replace(/\r/g, '\\r')
+    .replace(/\n/g, '\\n')
+    .replace(/</g, '\\x3c')
+    .replace(/>/g, '\\x3e')
+    .replace(/"/g, '&quot;');
+}
 function safeUrl(url) {
   if (!url) return null;
   const u = String(url).trim();
-  return /^https?:\/\//i.test(u) ? u : null;
+  try {
+    const parsed = new URL(u);
+    return /^https?:$/i.test(parsed.protocol) ? parsed.href : null;
+  } catch(e) {
+    return null;
+  }
 }
 function escHtml(s) {
   return (s == null ? '' : String(s))
@@ -2216,7 +2429,56 @@ function showToast(msg) {
   }, 2200);
 }
 
+function initDevToolsDeterrent() {
+  // HARDENED: DevTools deterrent only; real security still depends on Supabase Auth/RLS and guarded operations.
+  const threshold = 160;
+  setInterval(() => {
+    if (window.outerWidth - window.innerWidth > threshold ||
+        window.outerHeight - window.innerHeight > threshold) {
+      document.body.innerHTML = '<div style="display:grid;place-items:center;height:100vh;font-family:sans-serif;color:#666">This page is not available.</div>';
+    }
+  }, 1000);
+}
+
+// HARDENED: Controlled export list for functions required by inline HTML event handlers.
+Object.assign(window, {
+  setMode,
+  manualRefresh,
+  signOutTeacher,
+  setFilter,
+  openEmailModal,
+  closeEmailModal,
+  pickDenyReason,
+  closeDenyModal,
+  confirmDeny,
+  closeOosModal,
+  confirmOos,
+  closeRainbowResetModal,
+  confirmRainbowReset,
+  notifyDenials,
+  setReviewView,
+  toggleReviewSelection,
+  selectAllVisible,
+  clearReviewSelection,
+  batchApproveSelected,
+  openBatchDenyModal,
+  resetSelectedToPending,
+  approve,
+  openDenyModal,
+  resetToPending,
+  toggleReviewHistory,
+  toggleShopHistory,
+  toggleGrab,
+  openOosModal,
+  undoPurchase,
+  unOos,
+  loadRainbowManager,
+  openRainbowResetModal
+});
+
+initDevToolsDeterrent();
 initAuth();
+})();
 </script>
 <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
 <script>
