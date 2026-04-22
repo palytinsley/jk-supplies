@@ -578,6 +578,33 @@ hr.div { border: none; height: 0.8rem; margin: 0.25rem 0; }
   background: var(--surface-mid);
   color: var(--primary);
 }
+.btn-rainbow {
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+  background:
+    linear-gradient(var(--surface), var(--surface)) padding-box,
+    linear-gradient(90deg,#ff365f,#ff9d00,#ffe34d,#28c76f,#29a7ff,#8b5cf6,#ff45c8) border-box;
+  border: 2px solid transparent;
+  color: var(--text);
+  font-family: var(--headline);
+  font-size: 0.98rem;
+  font-weight: 900;
+  padding: 1rem;
+  min-height: 58px;
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  margin: 0.55rem 0 0.5rem;
+  box-shadow: 0 22px 46px -34px rgba(28,27,27,0.62);
+}
+.btn-rainbow::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg,rgba(255,54,95,0.13),rgba(255,227,77,0.18),rgba(41,167,255,0.13),rgba(255,69,200,0.12));
+  pointer-events: none;
+}
+.btn-rainbow span { position: relative; z-index: 1; }
 
 .btn-submit {
   width: 100%;
@@ -759,6 +786,131 @@ hr.div { border: none; height: 0.8rem; margin: 0.25rem 0; }
 .success-id { text-align: center; color: var(--muted); font-size: 0.76rem; font-weight: 800; margin-top: 0.85rem; }
 .success-next { max-width: 620px; margin: 1.15rem auto 0; }
 .success-next-note { color: var(--muted); font-size: 0.84rem; font-weight: 700; line-height: 1.55; margin-bottom: 0.7rem; }
+
+/* RAINBOW */
+.rainbow-warning {
+  display: none;
+  max-width: 620px;
+  margin: 1.1rem auto 0;
+  padding: 1rem;
+  border-radius: var(--radius-lg);
+  background:
+    linear-gradient(var(--surface), var(--surface)) padding-box,
+    linear-gradient(90deg,#ff365f,#ff9d00,#ffe34d,#28c76f,#29a7ff,#8b5cf6,#ff45c8) border-box;
+  border: 2px solid transparent;
+  box-shadow: 0 24px 54px -34px rgba(28,27,27,0.5);
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.32s ease, transform 0.32s ease;
+}
+.rainbow-warning.visible { display: block; opacity: 1; transform: translateY(0); }
+.rainbow-warning-title { font-family: var(--headline); font-size: 1rem; font-weight: 900; margin-bottom: 0.34rem; }
+.rainbow-warning-copy { color: var(--muted); font-size: 0.88rem; font-weight: 700; line-height: 1.5; margin-bottom: 0.8rem; }
+.rainbow-confirm-btn {
+  width: 100%;
+  border: 0;
+  border-radius: var(--radius-md);
+  min-height: 50px;
+  cursor: pointer;
+  font-family: var(--headline);
+  font-weight: 900;
+  color: #fff;
+  background: linear-gradient(90deg,#d61f46,#e97d00,#209953,#137bd1,#7c3aed);
+  box-shadow: 0 20px 42px -22px rgba(124,58,237,0.58);
+}
+.rainbow-confirm-btn:disabled { filter: grayscale(0.45); opacity: 0.58; cursor: default; }
+.rainbow-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 220;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(28,27,27,0.38);
+  backdrop-filter: blur(12px);
+}
+.rainbow-modal.open { display: flex; }
+.rainbow-modal-card {
+  width: min(420px,100%);
+  background: var(--surface);
+  color: var(--text);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+  box-shadow: 0 28px 80px -34px rgba(28,27,27,0.7);
+}
+.rainbow-modal-card h3 { font-family: var(--headline); font-size: 1.18rem; margin-bottom: 0.5rem; }
+.rainbow-modal-card p { color: var(--muted); font-weight: 700; line-height: 1.55; margin-bottom: 1rem; }
+.rainbow-modal-actions { display: flex; gap: 0.6rem; }
+.rainbow-modal-actions button {
+  flex: 1;
+  min-height: 48px;
+  border: 0;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-family: var(--headline);
+  font-weight: 900;
+}
+.rainbow-modal-actions .cancel { background: var(--surface-mid); color: var(--muted); }
+.rainbow-modal-actions .confirm { background: var(--text); color: var(--bg); }
+.rainbow-countdown, .rainbow-chaos {
+  position: fixed;
+  inset: 0;
+  z-index: 240;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(8,6,16,0.88);
+  color: #fff;
+}
+.rainbow-countdown {
+  font-family: var(--headline);
+  font-size: clamp(6rem,28vw,14rem);
+  font-weight: 900;
+}
+.rainbow-chaos { cursor: pointer; animation: rainbowShake 0.16s infinite; }
+.rainbow-chaos.exiting { animation: rainbowExit 1s ease forwards; }
+.rainbow-chaos canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+.rainbow-up {
+  position: relative;
+  z-index: 4;
+  font-family: var(--headline);
+  font-size: clamp(3.1rem,17vw,9rem);
+  font-weight: 900;
+  letter-spacing: 0;
+  text-align: center;
+  color: #fff;
+  animation: rainbowHue 0.42s linear infinite;
+  text-shadow:
+    0 0 8px #ff365f,
+    0 0 16px #ff9d00,
+    0 0 24px #ffe34d,
+    0 0 34px #28c76f,
+    0 0 46px #29a7ff,
+    0 0 60px #ff45c8;
+}
+.rainbow-emoji {
+  position: absolute;
+  z-index: 3;
+  font-size: 2rem;
+  pointer-events: none;
+  animation-fill-mode: forwards;
+}
+.unicorn-fall { top: -4rem; animation-name: unicornFall; animation-timing-function: linear; }
+.rainbow-rise { bottom: -4rem; left: 50%; animation-name: rainbowRise; animation-timing-function: ease-out; }
+.body-rainbow-chaos { animation: bodyHue 2s linear 4; }
+@keyframes rainbowShake {
+  0%,100% { transform: translate(0,0) rotate(0deg); }
+  25% { transform: translate(3px,-2px) rotate(0.4deg); }
+  50% { transform: translate(-3px,3px) rotate(-0.4deg); }
+  75% { transform: translate(2px,2px) rotate(0.25deg); }
+}
+@keyframes rainbowHue { to { filter: hue-rotate(360deg); } }
+@keyframes bodyHue { to { filter: hue-rotate(360deg); } }
+@keyframes unicornFall { to { transform: translateY(calc(100vh + 8rem)) rotate(28deg); opacity: 0.92; } }
+@keyframes rainbowRise { to { transform: translate(var(--drift), -105vh) rotate(var(--spin)); opacity: 0; } }
+@keyframes rainbowExit { to { opacity: 0; transform: scale(1.18); } }
 
 /* TOAST */
 .toast {
@@ -1078,6 +1230,7 @@ hr.div { border: none; height: 0.8rem; margin: 0.25rem 0; }
   <div class="edit-controls" id="editControls">
     <button class="btn-cancel-edit" onclick="cancelCartEdit()"><i class="ui-icon ti ti-x" aria-hidden="true"></i>Cancel editing</button>
   </div>
+  <button class="btn-rainbow" onclick="addRainbowToCart()"><span>🌈 Order a Rainbow</span></button>
   <div class="step-nav">
     <button class="btn-submit" onclick="goGroupStep()"><i class="ui-icon ti ti-arrow-right" aria-hidden="true"></i>Next: Group Info</button>
   </div>
@@ -1150,6 +1303,11 @@ hr.div { border: none; height: 0.8rem; margin: 0.25rem 0; }
   <p>Mr. Tinsley has your list.<br>You do not need to submit again.</p>
   <div class="success-summary" id="successSummary"></div>
   <div class="success-id" id="confirmId"></div>
+  <div class="rainbow-warning" id="rainbowWarning">
+    <div class="rainbow-warning-title">Rainbow request ready.</div>
+    <div class="rainbow-warning-copy" id="rainbowWarningCopy"></div>
+    <button class="rainbow-confirm-btn" id="rainbowOrderBtn" onclick="showRainbowConfirm()" disabled>Order your Rainbow</button>
+  </div>
   <div class="success-next">
     <div class="success-next-note">Your first request is already submitted. Use this only if you forgot something or need to add more items.</div>
     <button class="btn-submit" onclick="startAnotherRequest()"><i class="ui-icon ti ti-plus" aria-hidden="true"></i>Start another request</button>
@@ -1158,6 +1316,27 @@ hr.div { border: none; height: 0.8rem; margin: 0.25rem 0; }
 </div>
 
 <div class="toast" id="toast"></div>
+
+<div class="rainbow-modal" id="rainbowConfirmModal">
+  <div class="rainbow-modal-card">
+    <h3>Are you sure?</h3>
+    <p>This uses one of your group's rainbows.</p>
+    <div class="rainbow-modal-actions">
+      <button class="cancel" onclick="closeRainbowConfirm()">Cancel</button>
+      <button class="confirm" onclick="confirmRainbowChaos()">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<div class="rainbow-modal" id="rainbowExhaustedModal">
+  <div class="rainbow-modal-card">
+    <h3>Your order went through!</h3>
+    <p>Your group has used all 3 rainbows, so this one wasn't included — but everything else is confirmed.</p>
+    <div class="rainbow-modal-actions">
+      <button class="confirm" onclick="closeRainbowExhausted()">Got it</button>
+    </div>
+  </div>
+</div>
 
 <script>
 const SUPABASE_URL = 'https://ywdigsbpvtjsjhliuwrm.supabase.co';
@@ -1243,6 +1422,224 @@ function updateEmbargoStatus(){
 }
 function embargoToastMessage(orderWindow){
   return `Orders for ${orderWindow.periodLabel} open ${formatUnlockDay(orderWindow.unlockTime)} at ${formatUnlockTime(orderWindow.unlockTime)} — you can keep building your cart!`;
+}
+
+// RAINBOW
+const RAINBOW_LIMIT = 3;
+const RAINBOW_SCHEMA_SQL = `CREATE TABLE rainbows (
+  country TEXT PRIMARY KEY,
+  count INTEGER NOT NULL DEFAULT 0
+);`;
+let pendingRainbow = null;
+let rainbowChaosTimer = null;
+let rainbowAnimationFrame = null;
+
+function isRainbowItem(item){
+  return item?.category==='rainbow';
+}
+function hasRainbowInCart(){
+  return cart.some(isRainbowItem);
+}
+function addRainbowToCart(){
+  if(hasRainbowInCart()){
+    toast('You already have a rainbow in your cart.');
+    return;
+  }
+  cart.push({icon:'🌈',name:'Order a Rainbow',detail:'One group rainbow',category:'rainbow',id:Date.now()+Math.random()});
+  saveSession(); renderCart(); shakeCartIcon();
+  toast('Rainbow added to cart.','ok');
+}
+function rainbowRequestRow(sid,country,email,period){
+  return {submission_id:sid,period,country,reply_email:email,category:'rainbow',item_name:'Order a Rainbow',item_detail:'',link:'',status:'pending',denial_reason:'',oos_note:''};
+}
+async function fetchRainbowCount(country){
+  const url=SUPABASE_URL+'/rest/v1/rainbows?country=eq.'+encodeURIComponent(country)+'&select=count';
+  const res=await fetch(url,{headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY}});
+  if(!res.ok) throw new Error('Rainbow count failed');
+  const rows=await res.json();
+  return rows[0]?.count||0;
+}
+async function reserveRainbow(country){
+  const used=await fetchRainbowCount(country);
+  if(used>=RAINBOW_LIMIT) return {reserved:false,used};
+  const next=used+1;
+  const method=used? 'PATCH':'POST';
+  const url=used
+    ? SUPABASE_URL+'/rest/v1/rainbows?country=eq.'+encodeURIComponent(country)
+    : SUPABASE_URL+'/rest/v1/rainbows';
+  const body=used?{count:next}:{country,count:next};
+  const res=await fetch(url,{method,headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Prefer':'return=minimal'},body:JSON.stringify(body)});
+  if(!res.ok) throw new Error('Rainbow reserve failed');
+  return {reserved:true,used:next};
+}
+async function writeRainbowRequest(sid,country,email,period){
+  const res=await fetch(SUPABASE_URL+'/rest/v1/requests',{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Prefer':'return=minimal'},body:JSON.stringify([rainbowRequestRow(sid,country,email,period)])});
+  if(!res.ok) throw new Error('Rainbow request failed');
+}
+async function handleRainbowAfterSubmit({sid,country,email,period,items}){
+  if(!items.some(isRainbowItem)) return;
+  try{
+    const result=await reserveRainbow(country);
+    if(!result.reserved){
+      showRainbowExhausted();
+      return;
+    }
+    await writeRainbowRequest(sid,country,email,period);
+    showRainbowWarning(result.used,{sid,country,email,period});
+  }catch(e){
+    console.error('Rainbow error:',e);
+    showRainbowExhausted();
+  }
+}
+function showRainbowWarning(used,context){
+  pendingRainbow=context;
+  const warning=document.getElementById('rainbowWarning');
+  const copy=document.getElementById('rainbowWarningCopy');
+  const btn=document.getElementById('rainbowOrderBtn');
+  if(!warning||!copy||!btn) return;
+  copy.textContent=`Your group has used ${used} of ${RAINBOW_LIMIT} rainbows available.`;
+  btn.disabled=true;
+  warning.classList.add('visible');
+  setTimeout(()=>{btn.disabled=false;},2000);
+}
+function showRainbowConfirm(){
+  if(!pendingRainbow) return;
+  document.getElementById('rainbowConfirmModal').classList.add('open');
+}
+function closeRainbowConfirm(){
+  document.getElementById('rainbowConfirmModal').classList.remove('open');
+}
+function confirmRainbowChaos(){
+  closeRainbowConfirm();
+  runRainbowCountdown();
+}
+function showRainbowExhausted(){
+  document.getElementById('rainbowExhaustedModal').classList.add('open');
+}
+function closeRainbowExhausted(){
+  document.getElementById('rainbowExhaustedModal').classList.remove('open');
+}
+function vibrate(pattern){
+  if(navigator.vibrate) navigator.vibrate(pattern);
+}
+function runRainbowCountdown(){
+  const overlay=document.createElement('div');
+  overlay.className='rainbow-countdown';
+  document.body.appendChild(overlay);
+  const steps=[
+    {n:'3',v:200},
+    {n:'2',v:200},
+    {n:'1',v:[300,100,300]}
+  ];
+  let i=0;
+  function tick(){
+    const step=steps[i];
+    overlay.textContent=step.n;
+    vibrate(step.v);
+    i++;
+    if(i<steps.length) setTimeout(tick,800);
+    else setTimeout(()=>{overlay.remove(); startRainbowChaos();},800);
+  }
+  tick();
+}
+function startRainbowChaos(){
+  vibrate([100,50,100,50,200,100,400]);
+  document.body.classList.add('body-rainbow-chaos');
+  const overlay=document.createElement('div');
+  overlay.className='rainbow-chaos';
+  overlay.innerHTML='<canvas></canvas><div class="rainbow-up">RAINBOW UP!</div>';
+  document.body.appendChild(overlay);
+  spawnRainbowEmojis(overlay);
+  const stopConfetti=startRainbowConfetti(overlay.querySelector('canvas'));
+  const finish=()=>{
+    clearTimeout(rainbowChaosTimer);
+    stopConfetti();
+    document.body.classList.remove('body-rainbow-chaos');
+    overlay.classList.add('exiting');
+    setTimeout(()=>overlay.remove(),1000);
+  };
+  overlay.addEventListener('click',finish,{once:true});
+  rainbowChaosTimer=setTimeout(finish,8000);
+}
+function spawnRainbowEmojis(overlay){
+  for(let i=0;i<34;i++){
+    ['left','right'].forEach(side=>{
+      const e=document.createElement('div');
+      e.className='rainbow-emoji unicorn-fall';
+      e.textContent='🦄';
+      e.style[side]=(Math.random()*14)+'vw';
+      e.style.animationDuration=(3.2+Math.random()*4.8)+'s';
+      e.style.animationDelay=(Math.random()*3.8)+'s';
+      e.style.fontSize=(1.35+Math.random()*1.7)+'rem';
+      overlay.appendChild(e);
+    });
+  }
+  for(let i=0;i<70;i++){
+    const e=document.createElement('div');
+    e.className='rainbow-emoji rainbow-rise';
+    e.textContent='🌈';
+    e.style.setProperty('--drift',((Math.random()-0.5)*120)+'vw');
+    e.style.setProperty('--spin',((Math.random()-0.5)*560)+'deg');
+    e.style.animationDuration=(2.5+Math.random()*3.2)+'s';
+    e.style.animationDelay=(Math.random()*4.6)+'s';
+    e.style.fontSize=(1.25+Math.random()*1.8)+'rem';
+    overlay.appendChild(e);
+  }
+}
+function startRainbowConfetti(canvas){
+  const ctx=canvas.getContext('2d');
+  const colors=['#ff365f','#ff9d00','#ffe34d','#28c76f','#29a7ff','#8b5cf6','#ff45c8'];
+  const particles=[];
+  function resize(){
+    canvas.width=window.innerWidth*devicePixelRatio;
+    canvas.height=window.innerHeight*devicePixelRatio;
+  }
+  resize();
+  window.addEventListener('resize',resize);
+  for(let i=0;i<360;i++){
+    particles.push({
+      x:Math.random()*canvas.width,
+      y:-Math.random()*canvas.height,
+      size:(4+Math.random()*10)*devicePixelRatio,
+      speed:(1.5+Math.random()*5)*devicePixelRatio,
+      drift:(Math.random()-0.5)*2.4*devicePixelRatio,
+      spin:Math.random()*Math.PI,
+      rot:(Math.random()-0.5)*0.25,
+      color:colors[Math.floor(Math.random()*colors.length)],
+      shape:Math.floor(Math.random()*3)
+    });
+  }
+  function drawStar(p){
+    ctx.beginPath();
+    for(let i=0;i<10;i++){
+      const r=i%2?p.size*0.42:p.size;
+      const a=p.spin+i*Math.PI/5;
+      ctx.lineTo(Math.cos(a)*r,Math.sin(a)*r);
+    }
+    ctx.closePath();
+    ctx.fill();
+  }
+  function frame(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    particles.forEach(p=>{
+      p.y+=p.speed; p.x+=p.drift; p.spin+=p.rot;
+      if(p.y>canvas.height+40){p.y=-40;p.x=Math.random()*canvas.width;}
+      ctx.save();
+      ctx.translate(p.x,p.y);
+      ctx.rotate(p.spin);
+      ctx.fillStyle=p.color;
+      if(p.shape===0){ctx.beginPath();ctx.arc(0,0,p.size*0.55,0,Math.PI*2);ctx.fill();}
+      else if(p.shape===1){ctx.fillRect(-p.size/2,-p.size/4,p.size,p.size/2);}
+      else drawStar(p);
+      ctx.restore();
+    });
+    rainbowAnimationFrame=requestAnimationFrame(frame);
+  }
+  frame();
+  return ()=>{
+    cancelAnimationFrame(rainbowAnimationFrame);
+    window.removeEventListener('resize',resize);
+  };
 }
 
 function buildGrid(id,group,type){
@@ -1450,7 +1847,8 @@ function renderCart(){
   cart.forEach((item,index)=>{
     const el=document.createElement('div'); el.className='cart-item';
     if(index===editingCartIndex) el.classList.add('editing');
-    el.innerHTML=`<div class="cart-item-icon">${item.icon}</div><div class="cart-item-body"><div class="cart-item-name">${escHtml(item.name)}</div><div class="cart-item-detail">${[item.detail,item.link].filter(Boolean).map(escHtml).join(' · ')||'&nbsp;'}</div></div><div class="cart-item-actions"><button class="cart-item-action" onclick="editCartItem(${index})" aria-label="Edit item"><i class="ui-icon ti ti-pencil" aria-hidden="true"></i></button><button class="cart-item-action remove" onclick="removeFromCart(${item.id})" aria-label="Remove item"><i class="ui-icon ti ti-trash" aria-hidden="true"></i></button></div>`;
+    const editAction=isRainbowItem(item)?'':`<button class="cart-item-action" onclick="editCartItem(${index})" aria-label="Edit item"><i class="ui-icon ti ti-pencil" aria-hidden="true"></i></button>`;
+    el.innerHTML=`<div class="cart-item-icon">${item.icon}</div><div class="cart-item-body"><div class="cart-item-name">${escHtml(item.name)}</div><div class="cart-item-detail">${[item.detail,item.link].filter(Boolean).map(escHtml).join(' · ')||'&nbsp;'}</div></div><div class="cart-item-actions">${editAction}<button class="cart-item-action remove" onclick="removeFromCart(${item.id})" aria-label="Remove item"><i class="ui-icon ti ti-trash" aria-hidden="true"></i></button></div>`;
     c.appendChild(el);
   });
 }
@@ -1638,6 +2036,10 @@ function renderSuccessSummary(country,email,period,items){
 }
 function startAnotherRequest(){
   cart.length=0;
+  pendingRainbow=null;
+  document.getElementById('rainbowWarning')?.classList.remove('visible');
+  document.getElementById('rainbowConfirmModal')?.classList.remove('open');
+  document.getElementById('rainbowExhaustedModal')?.classList.remove('open');
   try{sessionStorage.removeItem('jk_cart');}catch(e){}
   renderCart();
   resetForm();
@@ -1699,9 +2101,12 @@ async function submitOrder(){
       return;
     }
     const sid='sub_'+Date.now();
-    const rows=cart.map(item=>({submission_id:sid,period,country,reply_email:email,category:item.category,item_name:item.name,item_detail:item.detail||'',link:item.link||'',status:'pending',denial_reason:'',oos_note:''}));
-    const res=await fetch(SUPABASE_URL+'/rest/v1/requests',{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Prefer':'return=minimal'},body:JSON.stringify(rows)});
-    if(!res.ok) throw new Error('Supabase failed');
+    const mainItems=cart.filter(item=>!isRainbowItem(item));
+    const rows=mainItems.map(item=>({submission_id:sid,period,country,reply_email:email,category:item.category,item_name:item.name,item_detail:item.detail||'',link:item.link||'',status:'pending',denial_reason:'',oos_note:''}));
+    if(rows.length){
+      const res=await fetch(SUPABASE_URL+'/rest/v1/requests',{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Prefer':'return=minimal'},body:JSON.stringify(rows)});
+      if(!res.ok) throw new Error('Supabase failed');
+    }
     try{
       sessionStorage.setItem('jk_last_submission_id',sid);
       sessionStorage.setItem('jk_last_submission_sig',sig);
@@ -1711,9 +2116,10 @@ async function submitOrder(){
     cart.length=0;
     document.getElementById('confirmOverlay').classList.remove('open');
     document.getElementById('mainContent').style.display='none';
-    renderSuccessSummary(country,email,period,submittedItems);
+    renderSuccessSummary(country,email,period,mainItems);
     document.getElementById('successScreen').classList.add('visible');
     document.getElementById('confirmId').textContent='Request ID: '+sid;
+    handleRainbowAfterSubmit({sid,country,email,period,items:submittedItems});
   }catch(e){
     console.error('Submit error:',e);
     toast('Something went wrong. Try again.','err');
