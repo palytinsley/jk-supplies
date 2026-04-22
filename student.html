@@ -211,6 +211,28 @@ button, .pill, .finish-btn, .color-swatch { -webkit-tap-highlight-color: transpa
   transition: background 0.18s ease, color 0.18s ease, transform 0.18s ease;
 }
 .step-chip.active { background: var(--text); color: var(--bg); box-shadow: 0 12px 26px -20px rgba(28,27,27,0.7); }
+.embargo-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.42rem;
+  width: 100%;
+  margin: -0.42rem 0 1rem;
+  padding: 0.68rem 0.85rem;
+  border-radius: var(--radius-md);
+  background: #fff3c4;
+  color: #72520a;
+  font-family: var(--headline);
+  font-size: 0.78rem;
+  font-weight: 800;
+  line-height: 1.35;
+  outline: 1px solid rgba(162,117,17,0.2);
+}
+.embargo-chip.open {
+  background: #e2f4e7;
+  color: var(--success);
+  outline-color: rgba(39,99,59,0.2);
+}
+.embargo-chip .ui-icon { width: 1.05rem; height: 1.05rem; font-size: 1.05rem; }
 .step-panel { display: none; }
 .step-panel.active { display: block; }
 .step-nav { display: flex; gap: 0.65rem; margin-top: 0.95rem; align-items: center; }
@@ -788,6 +810,7 @@ hr.div { border: none; height: 0.8rem; margin: 0.25rem 0; }
     <div class="step-chip" id="stepChip2">2 · Group</div>
     <div class="step-chip" id="stepChip3">3 · Review</div>
   </div>
+  <div class="embargo-chip" id="embargoStatus" aria-live="polite"></div>
 
   <div class="step-panel active" id="stepItems">
   <div class="section-label">Your Cart</div>
@@ -1161,6 +1184,53 @@ function escHtml(s) {
     .replace(/'/g, '&#39;');
 }
 
+// EMBARGO
+// Friday remains the unlock day for the whole day, so groups stay open after
+// their period's unlock time. Starting Saturday, the window points to next Friday.
+function getNextFriday(fromDate=new Date()){
+  const friday=new Date(fromDate);
+  friday.setHours(0,0,0,0);
+  const daysUntilFriday=(5-friday.getDay()+7)%7;
+  friday.setDate(friday.getDate()+daysUntilFriday);
+  return friday;
+}
+function periodOrdinal(period){
+  return period==='5'?'5th period':period==='6'?'6th period':'your period';
+}
+function getOrderWindow(){
+  const country=document.getElementById('country');
+  const period=country?.selectedOptions?.[0]?.dataset?.period;
+  const unlockTime=getNextFriday();
+  if(period==='5'){
+    unlockTime.setHours(10,0,0,0);
+  } else {
+    unlockTime.setHours(11,50,0,0);
+  }
+  return {
+    unlocked:new Date()>=unlockTime,
+    unlockTime,
+    periodLabel:periodOrdinal(period)
+  };
+}
+function formatUnlockDay(date){
+  return date.toLocaleDateString([], {weekday:'long', month:'long', day:'numeric'});
+}
+function formatUnlockTime(date){
+  return date.toLocaleTimeString([], {hour:'numeric', minute:'2-digit'});
+}
+function updateEmbargoStatus(){
+  const chip=document.getElementById('embargoStatus');
+  if(!chip) return;
+  const orderWindow=getOrderWindow();
+  chip.classList.toggle('open',orderWindow.unlocked);
+  chip.innerHTML=orderWindow.unlocked
+    ? `${uiIcon('circle-check')}Orders are open for ${escHtml(orderWindow.periodLabel)}.`
+    : `${uiIcon('clock')}Orders open ${escHtml(formatUnlockDay(orderWindow.unlockTime))} at ${escHtml(formatUnlockTime(orderWindow.unlockTime))} for ${escHtml(orderWindow.periodLabel)}.`;
+}
+function embargoToastMessage(orderWindow){
+  return `Orders for ${orderWindow.periodLabel} open ${formatUnlockDay(orderWindow.unlockTime)} at ${formatUnlockTime(orderWindow.unlockTime)} — you can keep building your cart!`;
+}
+
 function buildGrid(id,group,type){
   const el=document.getElementById(id); if(!el) return; el.innerHTML='';
   group.forEach(c=>{
@@ -1214,6 +1284,7 @@ function onCountry(){
   const p=opt?.dataset?.period;
   document.getElementById('periodRow').style.display=p?'block':'none';
   if(p) document.getElementById('periodVal').textContent=p+'th Period';
+  updateEmbargoStatus();
 }
 function clearValidation(){
   validationOverrideKey='';
@@ -1563,6 +1634,12 @@ function startAnotherRequest(){
 }
 
 function openConfirm(){
+  const orderWindow=getOrderWindow();
+  if(!orderWindow.unlocked){
+    updateEmbargoStatus();
+    toast(embargoToastMessage(orderWindow));
+    return;
+  }
   if(window.__submitting) return;
   if(editingCartIndex>-1){toast('Save or cancel your edit first.','err');showStep(1);return;}
   if(!cart.length){toast('Add at least one item first.','err');return;}
@@ -1647,7 +1724,7 @@ function initValidationListeners(){
   });
 }
 
-initGrids(); initValidationListeners(); loadSession();
+initGrids(); initValidationListeners(); loadSession(); updateEmbargoStatus();
 </script>
 </body>
 </html>
