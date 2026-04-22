@@ -232,6 +232,11 @@ button, .pill, .finish-btn, .color-swatch { -webkit-tap-highlight-color: transpa
   color: var(--success);
   outline-color: rgba(39,99,59,0.2);
 }
+.embargo-chip.partial {
+  background: #fff8df;
+  color: #5d4a11;
+  outline-color: rgba(162,117,17,0.18);
+}
 .embargo-chip .ui-icon { width: 1.05rem; height: 1.05rem; font-size: 1.05rem; }
 .step-panel { display: none; }
 .step-panel.active { display: block; }
@@ -1197,15 +1202,15 @@ function getNextFriday(fromDate=new Date()){
 function periodOrdinal(period){
   return period==='5'?'5th period':period==='6'?'6th period':'your period';
 }
+function getPeriodUnlockTime(period){
+  const unlockTime=getNextFriday();
+  unlockTime.setHours(period==='5'?10:11, period==='5'?0:50, 0, 0);
+  return unlockTime;
+}
 function getOrderWindow(){
   const country=document.getElementById('country');
   const period=country?.selectedOptions?.[0]?.dataset?.period;
-  const unlockTime=getNextFriday();
-  if(period==='5'){
-    unlockTime.setHours(10,0,0,0);
-  } else {
-    unlockTime.setHours(11,50,0,0);
-  }
+  const unlockTime=getPeriodUnlockTime(period==='5'?'5':'6');
   return {
     unlocked:new Date()>=unlockTime,
     unlockTime,
@@ -1221,11 +1226,20 @@ function formatUnlockTime(date){
 function updateEmbargoStatus(){
   const chip=document.getElementById('embargoStatus');
   if(!chip) return;
-  const orderWindow=getOrderWindow();
-  chip.classList.toggle('open',orderWindow.unlocked);
-  chip.innerHTML=orderWindow.unlocked
-    ? `${uiIcon('circle-check')}Orders are open for ${escHtml(orderWindow.periodLabel)}.`
-    : `${uiIcon('clock')}Orders open ${escHtml(formatUnlockDay(orderWindow.unlockTime))} at ${escHtml(formatUnlockTime(orderWindow.unlockTime))} for ${escHtml(orderWindow.periodLabel)}.`;
+  const now=new Date();
+  const fifthUnlock=getPeriodUnlockTime('5');
+  const sixthUnlock=getPeriodUnlockTime('6');
+  const fifthOpen=now>=fifthUnlock;
+  const sixthOpen=now>=sixthUnlock;
+  chip.classList.toggle('open',fifthOpen&&sixthOpen);
+  chip.classList.toggle('partial',fifthOpen&&!sixthOpen);
+  if(fifthOpen&&sixthOpen){
+    chip.innerHTML=`${uiIcon('circle-check')}Orders are open.`;
+  } else if(fifthOpen&&!sixthOpen){
+    chip.innerHTML=`${uiIcon('clock')}5th period orders are open · 6th period opens at ${escHtml(formatUnlockTime(sixthUnlock))}.`;
+  } else {
+    chip.innerHTML=`${uiIcon('clock')}Orders open ${escHtml(formatUnlockDay(fifthUnlock))} — ${escHtml(formatUnlockTime(fifthUnlock))} (5th period) · ${escHtml(formatUnlockTime(sixthUnlock))} (6th period).`;
+  }
 }
 function embargoToastMessage(orderWindow){
   return `Orders for ${orderWindow.periodLabel} open ${formatUnlockDay(orderWindow.unlockTime)} at ${formatUnlockTime(orderWindow.unlockTime)} — you can keep building your cart!`;
