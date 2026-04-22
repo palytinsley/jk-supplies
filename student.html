@@ -989,6 +989,8 @@ hr.div { border: none; height: 0.8rem; margin: 0.25rem 0; }
         <option value="thread">🧵 Thread / Ribbon / Yarn</option>
         <option value="tools">🔧 Tools</option>
         <option value="other">✏️ Other</option>
+        <!-- RAINBOW -->
+        <option value="rainbow">🌈 Order a Rainbow</option>
       </select>
     </div>
 
@@ -1217,7 +1219,7 @@ hr.div { border: none; height: 0.8rem; margin: 0.25rem 0; }
     </div>
 
     <hr class="div">
-    <div class="form-row">
+    <div class="form-row" id="itemLinkRow">
       <label>Reference link (optional)</label>
       <div class="input-with-icon">
         <i class="ui-icon ti ti-link" aria-hidden="true"></i>
@@ -1230,7 +1232,6 @@ hr.div { border: none; height: 0.8rem; margin: 0.25rem 0; }
   <div class="edit-controls" id="editControls">
     <button class="btn-cancel-edit" onclick="cancelCartEdit()"><i class="ui-icon ti ti-x" aria-hidden="true"></i>Cancel editing</button>
   </div>
-  <button class="btn-rainbow" onclick="addRainbowToCart()"><span>🌈 Order a Rainbow</span></button>
   <div class="step-nav">
     <button class="btn-submit" onclick="goGroupStep()"><i class="ui-icon ti ti-arrow-right" aria-hidden="true"></i>Next: Group Info</button>
   </div>
@@ -1244,6 +1245,8 @@ hr.div { border: none; height: 0.8rem; margin: 0.25rem 0; }
       <select id="country" onchange="onCountry()">
         <option value="">— Select your country —</option>
         <option data-period="6">Afghanistan</option>
+        <!-- BRAZIL -->
+        <option data-period="5">Brazil</option>
         <option data-period="6">Cambodia</option>
         <option data-period="6">China</option>
         <option data-period="5">Cuba</option>
@@ -1388,6 +1391,8 @@ function getPeriodUnlockTime(period){
 }
 function getOrderWindow(){
   const country=document.getElementById('country');
+  // BRAZIL
+  if(country?.value==='Brazil') return {unlocked:true,unlockTime:new Date(),periodLabel:'5th period'};
   const period=country?.selectedOptions?.[0]?.dataset?.period;
   const unlockTime=getPeriodUnlockTime(period==='5'?'5':'6');
   return {
@@ -1442,10 +1447,12 @@ function hasRainbowInCart(){
 }
 function addRainbowToCart(){
   if(hasRainbowInCart()){
-    toast('You already have a rainbow in your cart.');
+    // RAINBOW
+    toast('You already have a rainbow in your cart.','err');
     return;
   }
-  cart.push({icon:'🌈',name:'Order a Rainbow',detail:'One group rainbow',category:'rainbow',id:Date.now()+Math.random()});
+  // RAINBOW
+  cart.push({icon:'🌈',name:'Order a Rainbow',detail:'',category:'rainbow',id:Date.now()+Math.random(),formState:currentFormState('rainbow')});
   saveSession(); renderCart(); shakeCartIcon();
   toast('Rainbow added to cart.','ok');
 }
@@ -1460,6 +1467,8 @@ async function fetchRainbowCount(country){
   return rows[0]?.count||0;
 }
 async function reserveRainbow(country){
+  // BRAZIL
+  if(country==='Brazil') return {reserved:true,used:1};
   const used=await fetchRainbowCount(country);
   if(used>=RAINBOW_LIMIT) return {reserved:false,used};
   const next=used+1;
@@ -1688,6 +1697,9 @@ function onCat(){
   clearValidation();
   const v=document.getElementById('category').value;
   document.querySelectorAll('.sub-options').forEach(el=>el.classList.remove('visible'));
+  // RAINBOW
+  const linkRow=document.getElementById('itemLinkRow');
+  if(linkRow) linkRow.style.display=v==='rainbow'?'none':'block';
   if(v){const s=document.getElementById('sub_'+v);if(s)s.classList.add('visible');}
 }
 function onCountry(){
@@ -1709,6 +1721,8 @@ function showValidation(id,msg,soft=false){
 }
 function validationKey(cat,msg){return cat+'|'+msg;}
 function validateCurrentItem(cat){
+  // RAINBOW
+  if(cat==='rainbow') return null;
   if(cat==='spray_paint'){
     const color=sprayC?.n||document.getElementById('sprayOther').value.trim();
     if(!color) return {block:true,id:'sprayVal',msg:'Pick a color or type the color you need.'};
@@ -1762,9 +1776,12 @@ function currentFormState(cat){
 }
 
 function buildItem(cat){
-  const icons={spray_paint:'🎨',paint:'🖌️',wire:'🔩',tape:'📦',glue:'🧲',fasteners:'🔗',thread:'🧵',tools:'🔧',other:'✏️'};
+  const icons={spray_paint:'🎨',paint:'🖌️',wire:'🔩',tape:'📦',glue:'🧲',fasteners:'🔗',thread:'🧵',tools:'🔧',other:'✏️',rainbow:'🌈'};
   let name='',detail='';
-  if(cat==='spray_paint'){
+  // RAINBOW
+  if(cat==='rainbow'){
+    name='Order a Rainbow';
+  } else if(cat==='spray_paint'){
     const cn=sprayC?.n||document.getElementById('sprayOther').value.trim(); if(!cn) return null;
     name='Spray Paint — '+cn; detail=[sel['sprayFinish'],sel['sprayQty']?'×'+sel['sprayQty']:''].filter(Boolean).join(', ');
   } else if(cat==='paint'){
@@ -1802,6 +1819,8 @@ function buildItem(cat){
 function addToCart(){
   const cat=document.getElementById('category').value;
   if(!cat){toast('Pick a category first.','err');return;}
+  // RAINBOW
+  if(cat==='rainbow' && cart.some((item,index)=>index!==editingCartIndex && isRainbowItem(item))){toast('You already have a rainbow in your cart.','err');return;}
   const validation=validateCurrentItem(cat);
   if(validation){
     showValidation(validation.id,validation.msg,!!validation.soft);
@@ -1810,7 +1829,8 @@ function addToCart(){
     if(validationOverrideKey!==key){validationOverrideKey=key;return;}
   }
   const item=buildItem(cat); if(!item){toast('Fill in the required details.','err');return;}
-  item.link=document.getElementById('itemLink').value.trim();
+  // RAINBOW
+  item.link=cat==='rainbow'?'':document.getElementById('itemLink').value.trim();
   clearValidation();
   if(editingCartIndex>-1){
     item.id=cart[editingCartIndex]?.id||item.id;
@@ -1848,13 +1868,18 @@ function renderCart(){
     const el=document.createElement('div'); el.className='cart-item';
     if(index===editingCartIndex) el.classList.add('editing');
     const editAction=isRainbowItem(item)?'':`<button class="cart-item-action" onclick="editCartItem(${index})" aria-label="Edit item"><i class="ui-icon ti ti-pencil" aria-hidden="true"></i></button>`;
-    el.innerHTML=`<div class="cart-item-icon">${item.icon}</div><div class="cart-item-body"><div class="cart-item-name">${escHtml(item.name)}</div><div class="cart-item-detail">${[item.detail,item.link].filter(Boolean).map(escHtml).join(' · ')||'&nbsp;'}</div></div><div class="cart-item-actions">${editAction}<button class="cart-item-action remove" onclick="removeFromCart(${item.id})" aria-label="Remove item"><i class="ui-icon ti ti-trash" aria-hidden="true"></i></button></div>`;
+    // RAINBOW
+    const detailHtml=isRainbowItem(item)?'':`<div class="cart-item-detail">${[item.detail,item.link].filter(Boolean).map(escHtml).join(' · ')||'&nbsp;'}</div>`;
+    el.innerHTML=`<div class="cart-item-icon">${item.icon}</div><div class="cart-item-body"><div class="cart-item-name">${escHtml(item.name)}</div>${detailHtml}</div><div class="cart-item-actions">${editAction}<button class="cart-item-action remove" onclick="removeFromCart(${item.id})" aria-label="Remove item"><i class="ui-icon ti ti-trash" aria-hidden="true"></i></button></div>`;
     c.appendChild(el);
   });
 }
 function resetForm(keepEditing=false){
   clearValidation();
   document.getElementById('category').value='';
+  // RAINBOW
+  const linkRow=document.getElementById('itemLinkRow');
+  if(linkRow) linkRow.style.display='block';
   document.querySelectorAll('.sub-options').forEach(el=>el.classList.remove('visible'));
   document.querySelectorAll('.pill').forEach(p=>p.classList.remove('selected'));
   document.querySelectorAll('.finish-btn').forEach(b=>b.classList.remove('selected'));
@@ -1918,6 +1943,8 @@ function findColorByName(name){
 }
 function itemToFormState(item){
   const state={category:item.category,sel:{},multi:{},sprayC:null,paintC:null,fields:{itemLink:item.link||''},otherVisible:[]};
+  // RAINBOW
+  if(item.category==='rainbow') return state;
   const afterDash=(item.name||'').split('—').slice(1).join('—').trim();
   const known={
     tapeType:['Duct Tape','Painters Tape','Masking Tape','Double-Sided Tape','Scotch Tape','Fabric Tape'],
@@ -1975,6 +2002,8 @@ function applyFormState(state){
   resetForm(true);
   document.getElementById('category').value=state.category||'';
   onCat();
+  // RAINBOW
+  if(state.category==='rainbow') return;
   Object.entries(state.fields||{}).forEach(([id,value])=>{
     const el=document.getElementById(id);
     if(el) el.value=value||'';
