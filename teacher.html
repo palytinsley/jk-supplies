@@ -509,6 +509,116 @@ button { -webkit-tap-highlight-color: transparent; }
 .toast { position: fixed; top: calc(86px + env(safe-area-inset-top)); left: 50%; transform: translateX(-50%) translateY(-100px); background: rgba(28,27,27,0.93); color: #fff; padding: 0.78rem 1.05rem; border-radius: var(--radius-sm); font-size: 0.86rem; font-weight: 700; transition: transform 0.3s ease; z-index: 300; white-space: nowrap; box-shadow: var(--shadow-float); backdrop-filter: blur(20px); }
 .toast.show { transform: translateX(-50%) translateY(0); }
 
+/* RAINBOW MANAGER */
+.rainbow-manager {
+  background: var(--surface2);
+  border-radius: var(--radius-lg);
+  padding: 0.75rem;
+  box-shadow: var(--shadow-soft);
+}
+.rainbow-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.85rem;
+  padding: 0.45rem 0.35rem 0.85rem;
+}
+.rainbow-title {
+  font-family: var(--headline);
+  font-size: 1.45rem;
+  line-height: 1;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+.rainbow-sub {
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  margin-top: 0.35rem;
+}
+.rainbow-refresh, .rainbow-reset-all, .rainbow-reset-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  border: 0;
+  border-radius: var(--radius-sm);
+  min-height: 42px;
+  cursor: pointer;
+  font-family: var(--headline);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  background: var(--surface3);
+  color: var(--muted);
+}
+.rainbow-refresh, .rainbow-reset-btn { padding: 0.58rem 0.72rem; }
+.rainbow-reset-all {
+  width: 100%;
+  margin-top: 0.7rem;
+  padding: 0.86rem;
+}
+.rainbow-table-wrap {
+  overflow-x: auto;
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  box-shadow: inset 0 0 0 1px rgba(115,118,134,0.08);
+}
+.rainbow-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 720px;
+}
+.rainbow-table th {
+  color: var(--muted);
+  font-family: var(--headline);
+  font-size: 0.64rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-align: left;
+  text-transform: uppercase;
+  padding: 0.78rem 0.85rem;
+  border-bottom: 1px solid var(--border);
+}
+.rainbow-table td {
+  padding: 0.82rem 0.85rem;
+  border-bottom: 1px solid rgba(115,118,134,0.1);
+  vertical-align: middle;
+  font-size: 0.86rem;
+}
+.rainbow-table tr:last-child td { border-bottom: 0; }
+.rainbow-table tr.rainbow-maxed { background: rgba(255,218,214,0.45); }
+.rainbow-country { font-family: var(--headline); font-weight: 700; letter-spacing: 0; }
+.rainbow-period { font-family: var(--mono); color: var(--muted); font-weight: 700; }
+.rainbow-pips { display: inline-flex; align-items: center; gap: 0.28rem; white-space: nowrap; }
+.rainbow-pip {
+  width: 0.72rem;
+  height: 0.72rem;
+  border-radius: 50%;
+  display: inline-block;
+  background: transparent;
+  box-shadow: inset 0 0 0 2px rgba(115,118,134,0.28);
+}
+.rainbow-pip.filled {
+  background: linear-gradient(135deg, #e11d48, #f59e0b 32%, #16a34a 64%, #2563eb);
+  box-shadow: none;
+}
+.rainbow-email-list { color: var(--text); line-height: 1.45; }
+.rainbow-muted { color: var(--muted-soft); }
+.rainbow-state {
+  padding: 1.25rem 0.85rem;
+  color: var(--muted);
+  font-weight: 700;
+  line-height: 1.45;
+}
+.btn-mok.danger {
+  background: var(--red);
+  color: #fff;
+  box-shadow: none;
+}
+
 /* AUTH */
 #authScreen {
   min-height: 100vh;
@@ -689,6 +799,8 @@ button { -webkit-tap-highlight-color: transparent; }
   <div class="mode-toggle">
     <button class="mode-btn active" id="btnReview" onclick="setMode('reviewer')"><img class="ui-icon" src="icons/clipboard-list.svg" alt="" aria-hidden="true">Review</button>
     <button class="mode-btn" id="btnShop" onclick="setMode('shopper')"><img class="ui-icon" src="icons/shopping-cart.svg" alt="" aria-hidden="true">Shop</button>
+    <!-- RAINBOW MANAGER -->
+    <button class="mode-btn" id="btnSettings" onclick="setMode('settings')"><img class="ui-icon" src="icons/settings.svg" alt="" aria-hidden="true">Settings</button>
     <button class="mode-btn" id="btnRefresh" onclick="manualRefresh()"><img class="ui-icon" src="icons/refresh.svg" alt="" aria-hidden="true">Refresh</button>
 	<button class="mode-btn" id="btnLogout" onclick="signOutTeacher()">Logout</button>
   </div>
@@ -764,6 +876,18 @@ button { -webkit-tap-highlight-color: transparent; }
   </div>
 </div>
 
+<!-- RAINBOW MANAGER -->
+<div class="modal-bg" id="rainbowResetModal">
+  <div class="modal">
+    <h3 id="rainbowResetTitle">Reset Rainbows</h3>
+    <p class="modal-sub" id="rainbowResetMessage"></p>
+    <div class="modal-btns">
+      <button class="btn-mc" onclick="closeRainbowResetModal()">Cancel</button>
+      <button class="btn-mok danger" id="rainbowResetConfirmBtn" onclick="confirmRainbowReset()"><img class="ui-icon" src="icons/refresh.svg" alt="" aria-hidden="true">Reset</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -795,6 +919,13 @@ let reviewHistoryOpen = false;
 let shopHistoryOpen = false;
 let denyTargetIds = [];
 let toastTimer = null;
+
+// RAINBOW MANAGER
+let rainbowRows = [];
+let rainbowLoading = false;
+let rainbowLoaded = false;
+let rainbowResetTarget = null;
+let rainbowLoadError = '';
 
 // Change these order numbers to match the in-store walking path.
 const aisles = [
@@ -1168,9 +1299,17 @@ function setMode(m) {
   selectedReviewIds.clear();
   document.getElementById('btnReview').classList.toggle('active', m === 'reviewer');
   document.getElementById('btnShop').classList.toggle('active', m === 'shopper');
+  // RAINBOW MANAGER
+  document.getElementById('btnSettings')?.classList.toggle('active', m === 'settings');
   document.getElementById('doneBar').style.display = m === 'shopper' ? 'flex' : 'none';
   const fb = document.getElementById('filterBar');
-  if (m === 'shopper') {
+  // RAINBOW MANAGER
+  fb.style.display = m === 'settings' ? 'none' : 'flex';
+  if (m === 'settings') {
+    filter = 'all';
+    render();
+    loadRainbowManager();
+  } else if (m === 'shopper') {
     fb.innerHTML = `
       <div class="chip active" onclick="setFilter('all',this)">All Shopping</div>
       <div class="chip p5" onclick="setFilter('5',this)">Per. 5</div>
@@ -1217,7 +1356,9 @@ function stats(reqs = allRequests) {
 function render() {
   const main = document.getElementById('mainContent');
   const savedScroll = main.scrollTop;
-  mode === 'reviewer' ? renderReviewer(main) : renderShopper(main);
+  // RAINBOW MANAGER
+  if (mode === 'settings') renderRainbowManager(main);
+  else mode === 'reviewer' ? renderReviewer(main) : renderShopper(main);
   main.scrollTop = savedScroll;
 }
 
@@ -1623,6 +1764,189 @@ function updateProgress(shopItems) {
   document.getElementById('totalShopCt').textContent = total;
   document.getElementById('remainingCt').textContent = remaining;
   document.getElementById('progFill').style.width = total > 0 ? (handled/total*100)+'%' : '0%';
+}
+
+// RAINBOW MANAGER
+async function fetchRainbows() {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/rainbows?select=country,count`, {
+    headers: authHeaders()
+  });
+  if (!res.ok) throw await restError(res, 'Load rainbows');
+  return res.json();
+}
+
+// RAINBOW MANAGER
+async function upsertRainbowCount(country, count) {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/rainbows?on_conflict=country`, {
+    method: 'POST',
+    headers: authHeaders({
+      'Content-Type': 'application/json',
+      'Prefer': 'resolution=merge-duplicates,return=minimal'
+    }),
+    body: JSON.stringify({ country, count })
+  });
+  if (!res.ok) throw await restError(res, 'Reset rainbows');
+}
+
+// RAINBOW MANAGER
+function rainbowCountryKey(country) {
+  return String(country || '').trim().toLowerCase();
+}
+
+// RAINBOW MANAGER
+function rainbowTableRows() {
+  const countryMap = new Map();
+  allRequests.forEach(r => {
+    const country = String(r.country || '').trim();
+    if (!country) return;
+    const key = rainbowCountryKey(country);
+    if (!countryMap.has(key)) countryMap.set(key, { country, periods: new Set(), emails: [] });
+    const row = countryMap.get(key);
+    if (r.period != null && String(r.period).trim()) row.periods.add(String(r.period).trim());
+    if (r.category === 'rainbow' && r.reply_email) row.emails.push(String(r.reply_email).trim());
+  });
+
+  const rainbowMap = new Map();
+  rainbowRows.forEach(r => {
+    const key = rainbowCountryKey(r.country);
+    if (key) rainbowMap.set(key, Math.max(0, Math.min(3, Number(r.count) || 0)));
+  });
+
+  return [...countryMap.values()].map(row => {
+    const key = rainbowCountryKey(row.country);
+    return {
+      country: row.country,
+      period: [...row.periods].sort((a,b) => a.localeCompare(b, undefined, { numeric: true })).join(', '),
+      used: rainbowMap.get(key) || 0,
+      emails: [...new Set(row.emails.filter(Boolean))]
+    };
+  }).sort((a,b) => b.used - a.used || a.country.localeCompare(b.country));
+}
+
+// RAINBOW MANAGER
+async function loadRainbowManager(silent = false) {
+  if (rainbowLoading) return;
+  rainbowLoading = true;
+  rainbowLoadError = '';
+  if (!silent) render();
+  try {
+    const [requests, rainbows] = await Promise.all([fetchAll(), fetchRainbows()]);
+    allRequests = requests;
+    rainbowRows = rainbows;
+    rainbowLoaded = true;
+    const now = new Date();
+    document.getElementById('lastRefresh').textContent = `Updated ${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}`;
+    render();
+    if (silent) showToast('Rainbow manager refreshed');
+  } catch(e) {
+    logError('Load rainbow manager failed', e);
+    rainbowLoadError = friendlyError(e, 'Could not load rainbow data.');
+    showToast(rainbowLoadError);
+  } finally {
+    rainbowLoading = false;
+    if (mode === 'settings') render();
+  }
+}
+
+// RAINBOW MANAGER
+function renderRainbowPips(used) {
+  let html = '<span class="rainbow-pips" aria-label="' + used + ' of 3 rainbows used">';
+  for (let i = 1; i <= 3; i++) html += `<span class="rainbow-pip ${i <= used ? 'filled' : ''}"></span>`;
+  html += '</span>';
+  return html;
+}
+
+// RAINBOW MANAGER
+function renderRainbowManager(main) {
+  const rows = rainbowTableRows();
+  let body = '';
+  if (rainbowLoading && !rainbowLoaded) {
+    body = '<div class="rainbow-state">Loading rainbows...</div>';
+  } else if (rainbowLoadError && !rainbowLoaded) {
+    body = `<div class="rainbow-state">${escHtml(rainbowLoadError)}</div>`;
+  } else if (!rows.length) {
+    body = '<div class="rainbow-state">No requests yet — rainbow data will appear here once students submit.</div>';
+  } else {
+    body = `<div class="rainbow-table-wrap">
+      <table class="rainbow-table">
+        <thead>
+          <tr>
+            <th>Country name</th>
+            <th>Period</th>
+            <th>Rainbows used</th>
+            <th>Who ordered</th>
+            <th>Reset</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rows.map(row => `<tr class="${row.used >= 3 ? 'rainbow-maxed' : ''}">
+            <td class="rainbow-country">${escHtml(row.country)}</td>
+            <td class="rainbow-period">${escHtml(row.period || '—')}</td>
+            <td>${renderRainbowPips(row.used)}</td>
+            <td class="rainbow-email-list">${row.emails.length ? row.emails.map(escHtml).join(', ') : '<span class="rainbow-muted">—</span>'}</td>
+            <td><button class="rainbow-reset-btn" onclick="openRainbowResetModal('${esc(row.country)}', false)">${icon('refresh')}Reset</button></td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+    <button class="rainbow-reset-all" onclick="openRainbowResetModal('', true)">${icon('refresh')}Reset All Rainbows</button>`;
+  }
+
+  main.innerHTML = `<div class="rainbow-manager">
+    <div class="rainbow-head">
+      <div>
+        <div class="rainbow-title">🌈 Rainbow Manager</div>
+        <div class="rainbow-sub">3 rainbows per group · track and reset</div>
+      </div>
+      <button class="rainbow-refresh" onclick="loadRainbowManager(true)">${icon('refresh')}Refresh</button>
+    </div>
+    ${body}
+  </div>`;
+}
+
+// RAINBOW MANAGER
+function openRainbowResetModal(country, all = false) {
+  rainbowResetTarget = all ? { all: true } : { country };
+  document.getElementById('rainbowResetTitle').textContent = all ? 'Reset All Rainbows' : 'Reset Rainbows';
+  document.getElementById('rainbowResetMessage').textContent = all
+    ? 'Reset rainbows for ALL groups? This cannot be undone.'
+    : `Reset rainbows for ${country}? This will set their count back to 0. Their past rainbow orders in the requests table are not deleted.`;
+  document.getElementById('rainbowResetConfirmBtn').disabled = false;
+  document.getElementById('rainbowResetConfirmBtn').innerHTML = `${icon('refresh')}Reset`;
+  document.getElementById('rainbowResetModal').classList.add('open');
+}
+
+// RAINBOW MANAGER
+function closeRainbowResetModal() {
+  document.getElementById('rainbowResetModal').classList.remove('open');
+  rainbowResetTarget = null;
+}
+
+// RAINBOW MANAGER
+async function confirmRainbowReset() {
+  if (!rainbowResetTarget) return;
+  const btn = document.getElementById('rainbowResetConfirmBtn');
+  btn.disabled = true;
+  btn.innerHTML = `${icon('refresh')}Resetting...`;
+  try {
+    if (rainbowResetTarget.all) {
+      const rows = rainbowTableRows();
+      const results = await Promise.allSettled(rows.map(row => upsertRainbowCount(row.country, 0)));
+      const failed = results.find(r => r.status === 'rejected');
+      if (failed) throw failed.reason;
+      showToast('All rainbows reset');
+    } else {
+      await upsertRainbowCount(rainbowResetTarget.country, 0);
+      showToast(`Rainbows reset for ${rainbowResetTarget.country}`);
+    }
+    closeRainbowResetModal();
+    await loadRainbowManager();
+  } catch(e) {
+    logError('Rainbow reset failed', e);
+    showToast(friendlyError(e, 'Could not reset rainbows.'));
+    btn.disabled = false;
+    btn.innerHTML = `${icon('refresh')}Reset`;
+  }
 }
 
 // ===== Actions =====
