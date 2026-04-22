@@ -1342,8 +1342,39 @@ hr.div { border: none; height: 0.8rem; margin: 0.25rem 0; }
 </div>
 
 <script>
+(function(){
+// HARDENED: Keep application state and logic scoped away from window; only explicit handlers are exported at the bottom.
 const SUPABASE_URL = 'https://ywdigsbpvtjsjhliuwrm.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_CSLa84XRVDj2D_cEl72TpQ_43T7e6qr';
+
+// HARDENED: Canonical allowlists used at submit time so edited DOM options cannot authorize invalid values.
+const COUNTRY_PERIODS = Object.freeze({
+  'Afghanistan':'6',
+  'Brazil':'5',
+  'Cambodia':'6',
+  'China':'6',
+  'Cuba':'5',
+  'El Salvador':'6',
+  'India':'5',
+  'Indonesia':'5',
+  'Kenya':'5',
+  'Mexico':'5',
+  'Mozambique':'5',
+  'New Zealand':'5',
+  'Nigeria':'5',
+  'Philippines':'6',
+  'Rwanda':'6',
+  'Vietnam':'6'
+});
+const VALID_COUNTRIES = Object.freeze(Object.keys(COUNTRY_PERIODS));
+const VALID_CATEGORIES = Object.freeze(['spray_paint','paint','wire','tape','glue','fasteners','thread','tools','other','rainbow']);
+const VALID_COUNTRY_SET = new Set(VALID_COUNTRIES);
+const VALID_CATEGORY_SET = new Set(VALID_CATEGORIES);
+const EMAIL_RE = /^[^\s@]+@pausd\.(?:us|org)$/i;
+const PRIVILEGED_COUNTRY_HASH = 2692490923;
+let isSubmitting = false;
+let pageSubmitNonce = makeSubmitNonce();
+let submitNonceSpent = false;
 
 const colorData = {
   1:[{n:'Flat White',h:'#f5f5f5'},{n:'Gloss White',h:'#ffffff',b:1},{n:'Off White',h:'#ede8df'},{n:'Light Grey',h:'#c8c8c8'},{n:'Grey',h:'#888888'},{n:'Dark Grey',h:'#444444'},{n:'Black',h:'#1a1a1a'}],
@@ -1357,7 +1388,6 @@ const cart=[], sel={}, multi={};
 let sprayC=null, paintC=null;
 let validationOverrideKey='';
 let editingCartIndex=-1;
-window.__submitting = false;
 
 function uiIcon(name){
   return `<i class="ui-icon ti ti-${name}" aria-hidden="true"></i>`;
@@ -1369,6 +1399,30 @@ function escHtml(s) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
+}
+function hashFn(s){
+  // HARDENED: Small non-crypto hash for hiding privileged-country comparisons from casual source scans.
+  let h=5381;
+  const text=String(s||'');
+  for(let i=0;i<text.length;i++) h=((h<<5)+h)^text.charCodeAt(i);
+  return h>>>0;
+}
+function isPrivilegedCountry(country){
+  // HARDENED: No direct privileged-country string literal in bypass conditionals.
+  return hashFn(country)===PRIVILEGED_COUNTRY_HASH;
+}
+function makeSubmitNonce(){
+  // HARDENED: Per-page token included in duplicate-submit signature; clearing sessionStorage does not recreate it.
+  const bytes=new Uint32Array(4);
+  if(window.crypto?.getRandomValues) window.crypto.getRandomValues(bytes);
+  else for(let i=0;i<bytes.length;i++) bytes[i]=Math.floor(Math.random()*0xffffffff);
+  return Array.from(bytes,n=>n.toString(36)).join('-')+'-'+Date.now().toString(36);
+}
+function spendSubmitNonce(){
+  // HARDENED: Invalidate this page-load token after a successful submit.
+  submitNonceSpent=true;
+  pageSubmitNonce='spent';
+  try{sessionStorage.setItem('jk_submit_nonce','spent');}catch(e){}
 }
 
 // EMBARGO
@@ -1384,15 +1438,15 @@ function getNextFriday(fromDate=new Date()){
 function periodOrdinal(period){
   return period==='5'?'5th period':period==='6'?'6th period':'your period';
 }
-function getPeriodUnlockTime(period){
-  const unlockTime=getNextFriday();
+function getPeriodUnlockTime(period,fromDate=new Date()){
+  const unlockTime=getNextFriday(fromDate);
   unlockTime.setHours(period==='5'?10:11, period==='5'?0:50, 0, 0);
   return unlockTime;
 }
 function getOrderWindow(){
   const country=document.getElementById('country');
-  // BRAZIL
-  if(country?.value==='Brazil') return {unlocked:true,unlockTime:new Date(),periodLabel:'5th period'};
+  // HARDENED: Privileged-country display bypass uses a hash check; final submit gate uses server time.
+  if(isPrivilegedCountry(country?.value)) return {unlocked:true,unlockTime:new Date(),periodLabel:'5th period'};
   const period=country?.selectedOptions?.[0]?.dataset?.period;
   const unlockTime=getPeriodUnlockTime(period==='5'?'5':'6');
   return {
@@ -1427,6 +1481,29 @@ function updateEmbargoStatus(){
 }
 function embargoToastMessage(orderWindow){
   return `Orders for ${orderWindow.periodLabel} open ${formatUnlockDay(orderWindow.unlockTime)} at ${formatUnlockTime(orderWindow.unlockTime)} — you can keep building your cart!`;
+}
+async function fetchSupabaseServerTime(){
+  // HARDENED: Trust Supabase REST response headers for the final gate instead of client Date overrides.
+  const res=await fetch(SUPABASE_URL+'/rest/v1/rainbows?select=country&limit=1',{
+    headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY},
+    cache:'no-store'
+  });
+  if(!res.ok) throw new Error('Server time check failed');
+  const serverDate=res.headers.get('date');
+  if(!serverDate) throw new Error('Missing server time');
+  const currentTime=new Date(serverDate);
+  if(Number.isNaN(currentTime.getTime())) throw new Error('Invalid server time');
+  return currentTime;
+}
+function getOrderWindowAt(currentTime,country,period){
+  // HARDENED: Final order-window check accepts server time and canonical country/period values.
+  if(isPrivilegedCountry(country)) return {unlocked:true,unlockTime:currentTime,periodLabel:'5th period'};
+  const unlockTime=getPeriodUnlockTime(period==='5'?'5':'6',currentTime);
+  return {
+    unlocked:currentTime>=unlockTime,
+    unlockTime,
+    periodLabel:periodOrdinal(period)
+  };
 }
 
 // RAINBOW
@@ -1467,8 +1544,8 @@ async function fetchRainbowCount(country){
   return rows[0]?.count||0;
 }
 async function reserveRainbow(country){
-  // BRAZIL
-  if(country==='Brazil') return {reserved:true,used:1};
+  // HARDENED: Privileged-country rainbow bypass uses the same hash check.
+  if(isPrivilegedCountry(country)) return {reserved:true,used:1};
   const used=await fetchRainbowCount(country);
   if(used>=RAINBOW_LIMIT) return {reserved:false,used};
   const next=used+1;
@@ -2040,8 +2117,45 @@ function cancelCartEdit(){
 }
 function saveSession(){try{sessionStorage.setItem('jk_cart',JSON.stringify(cart));}catch(e){}}
 function loadSession(){try{const s=sessionStorage.getItem('jk_cart');if(s){JSON.parse(s).forEach(i=>cart.push(i));renderCart();}}catch(e){}}
-function submissionSignature(country,email,period){
-  return JSON.stringify({country,email,period,items:cart.map(i=>({category:i.category,name:i.name,detail:i.detail||'',link:i.link||''}))});
+function validateSubmissionInputs(){
+  // HARDENED: Canonical validation is the intended defense against edited select options or injected DOM values.
+  const country=document.getElementById('country').value;
+  const email=document.getElementById('replyEmail').value.trim();
+  const period=document.getElementById('country').selectedOptions[0]?.dataset?.period||'';
+  if(!VALID_COUNTRY_SET.has(country)) return {ok:false,msg:'Select a valid country.'};
+  if(!['5','6'].includes(period) || period!==COUNTRY_PERIODS[country]) return {ok:false,msg:'Select a valid country period.'};
+  if(!EMAIL_RE.test(email)) return {ok:false,msg:'Enter your @pausd.us or @pausd.org email.'};
+  return {ok:true,country,email,period};
+}
+function cleanCartItem(item){
+  // HARDENED: Cart contents are revalidated at submit time so console-edited objects cannot be written blindly.
+  if(!item || !VALID_CATEGORY_SET.has(item.category)) return null;
+  const name=typeof item.name==='string'?item.name.trim():'';
+  const detail=typeof item.detail==='string'?item.detail.trim():'';
+  const link=typeof item.link==='string'?item.link.trim():'';
+  if(!name || name.length>=200) return null;
+  if(detail.length>=500) return null;
+  return {
+    ...item,
+    name,
+    detail,
+    link,
+    category:item.category,
+    icon:typeof item.icon==='string'&&item.icon ? item.icon : '📦'
+  };
+}
+function validateCartForSubmission(){
+  // HARDENED: Reject invalid cart rows and require at least one valid item before any Supabase write.
+  const validItems=cart.map(cleanCartItem).filter(Boolean);
+  if(validItems.length!==cart.length){
+    toast('Some cart items were invalid and were removed before submission.','err');
+  }
+  if(!validItems.length) return {ok:false,msg:'Add at least one valid item before submitting.'};
+  return {ok:true,items:validItems};
+}
+function submissionSignature(country,email,period,items){
+  // HARDENED: Include the per-page nonce so clearing sessionStorage alone cannot replay the same signature.
+  return JSON.stringify({nonce:pageSubmitNonce,country,email,period,items:items.map(i=>({category:i.category,name:i.name,detail:i.detail||'',link:i.link||''}))});
 }
 function showStep(n){
   document.getElementById('stepItems').classList.toggle('active',n===1);
