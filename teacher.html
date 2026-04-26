@@ -982,7 +982,7 @@ function clearAuthToken() {
 }
 
 function hasValidAuthToken() {
-  // HARDENED: Missing or forged token forces re-auth even if a browser-stored Supabase session exists.
+  // SAFARI FIX: Token validation is for post-login operations only; initial page render must not depend on it.
   try {
     const ts = sessionStorage.getItem(AUTH_TOKEN_TS_KEY);
     const token = sessionStorage.getItem(AUTH_TOKEN_KEY);
@@ -993,8 +993,8 @@ function hasValidAuthToken() {
 }
 
 function requirePrivilegedAccess(context = 'Privileged operation') {
-  // HARDENED: Every REST/write path checks both Supabase session state and dashboard token integrity.
-  if (!currentSession?.access_token || !hasValidAuthToken()) {
+  // SAFARI FIX: Gate authenticated operations after login without kicking the initial render into a loop.
+  if (!currentSession || !currentSession.access_token || !hasValidAuthToken()) {
     logError(`${context} blocked`, new Error('missing or invalid dashboard auth token'));
     showLogin('Please sign in again.');
     throw new Error('not authenticated');
@@ -1019,9 +1019,10 @@ function logError(context, err) {
 }
 
 function friendlyError(err, fallback = 'Something went wrong.') {
-  const text = `${err?.message || ''} ${err?.body || ''}`.toLowerCase();
-  if (err?.status === 401 || text.includes('jwt') || text.includes('not authenticated')) return 'Session expired. Please sign in again.';
-  if (err?.status === 403 || text.includes('row-level security') || text.includes('permission denied') || text.includes('rls')) return 'Unauthorized or RLS blocked this action.';
+  // SAFARI FIX: Avoid optional chaining for broader Safari compatibility.
+  const text = `${err && err.message || ''} ${err && err.body || ''}`.toLowerCase();
+  if (err && err.status === 401 || text.includes('jwt') || text.includes('not authenticated')) return 'Session expired. Please sign in again.';
+  if (err && err.status === 403 || text.includes('row-level security') || text.includes('permission denied') || text.includes('rls')) return 'Unauthorized or RLS blocked this action.';
   if (text.includes('failed to fetch') || text.includes('network')) return 'Network problem. Check your connection and try again.';
   return fallback;
 }
@@ -1134,7 +1135,8 @@ function hasRecoveryUrl() {
 }
 
 function cleanRecoveryUrl() {
-  if (!window.history?.replaceState) return;
+  // SAFARI FIX: Avoid optional chaining for broader Safari compatibility.
+  if (!window.history || !window.history.replaceState) return;
   const clean = window.location.origin + window.location.pathname;
   window.history.replaceState({}, document.title, clean);
 }
@@ -1181,14 +1183,15 @@ async function patch(id, data) {
 async function patchRows(rows, data, context) {
   requirePrivilegedAccess(context || 'Patch rows');
   if (!validatePatchData(data, context || 'Patch rows')) return { ok: 0, failed: rows.length, okRows: [], failedRows: rows, firstError: null };
-  const safeRows = rows.filter(item => isValidRowId(normalizeId(item?.id)));
+  // SAFARI FIX: Avoid optional chaining for broader Safari compatibility.
+  const safeRows = rows.filter(item => isValidRowId(normalizeId(item ? item.id : '')));
   if (safeRows.length !== rows.length) logError(context || 'Patch rows', new Error('one or more invalid row ids were blocked'));
   const results = await Promise.allSettled(safeRows.map(item => patch(item.id, data)));
   const failedRows = safeRows.filter((_row, idx) => results[idx].status === 'rejected');
   const okRows = safeRows.filter((_row, idx) => results[idx].status === 'fulfilled');
   const failed = results.filter(r => r.status === 'rejected');
   if (failed.length) logError(context, failed.map(r => r.reason));
-  return { ok: okRows.length, failed: failedRows.length, okRows, failedRows, firstError: failed[0]?.reason };
+  return { ok: okRows.length, failed: failedRows.length, okRows, failedRows, firstError: failed.length ? failed[0].reason : null };
 }
 
 function showLogin(message = '') {
@@ -1252,7 +1255,6 @@ async function signInTeacher() {
   loginInProgress = true;
   btn.disabled = true;
   btn.textContent = 'Signing in...';
-  establishAuthToken();
   try {
     const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
     if (error) {
@@ -1261,6 +1263,8 @@ async function signInTeacher() {
       if (!recordLoginFailure()) setAuthMessage(error.message || 'Login failed.');
       return;
     }
+    // SAFARI FIX: Establish the integrity token only after a real successful login.
+    establishAuthToken();
     clearLoginFailures();
     showApp(data.session);
   } catch(e) {
@@ -1401,8 +1405,10 @@ async function initAuth() {
       return;
     }
     if (authMode === 'recovery') return;
-    if (session?.access_token === currentSession?.access_token) return;
-    if (session && (loginInProgress || hasValidAuthToken())) showApp(session);
+    // SAFARI FIX: Avoid optional chaining and keep initial session discovery from thrashing the login UI.
+    if (session && currentSession && session.access_token === currentSession.access_token) return;
+    if (session && loginInProgress) return;
+    if (session && hasValidAuthToken()) showApp(session);
     else if (session) showLogin('Please sign in again.');
     else showLogin();
   });
@@ -1412,15 +1418,15 @@ async function initAuth() {
     if (error) logError('Session check failed', error);
     if (authMode === 'recovery') return;
     if (recoveryFromUrl) {
-      if (data?.session) {
+      if (data && data.session) {
         recoverySessionReady = true;
         showRecovery('Set a new password for your teacher account.', true);
       } else {
         showRecovery('This reset link is invalid or expired. Request a new reset email.', false);
       }
-    } else if (data?.session && hasValidAuthToken()) showApp(data.session);
-    else if (data?.session) {
-      await supabaseClient.auth.signOut().catch(e => logError('Stale session sign out failed', e));
+    // SAFARI FIX: Only honor the extra token after a real login; otherwise keep the login screen stable.
+    } else if (data && data.session && hasValidAuthToken()) showApp(data.session);
+    else if (data && data.session) {
       showLogin('Please sign in again.');
     }
     else showLogin();
@@ -1480,7 +1486,8 @@ function setMode(m) {
   document.getElementById('btnReview').classList.toggle('active', m === 'reviewer');
   document.getElementById('btnShop').classList.toggle('active', m === 'shopper');
   // RAINBOW MANAGER
-  document.getElementById('btnSettings')?.classList.toggle('active', m === 'settings');
+  // SAFARI FIX: Avoid optional chaining for broader Safari compatibility.
+  if (document.getElementById('btnSettings')) document.getElementById('btnSettings').classList.toggle('active', m === 'settings');
   document.getElementById('doneBar').style.display = m === 'shopper' ? 'flex' : 'none';
   const fb = document.getElementById('filterBar');
   // RAINBOW MANAGER
@@ -2429,6 +2436,8 @@ function showToast(msg) {
   }, 2200);
 }
 
+// SAFARI FIX: REMOVED: DevTools deterrent — iOS Safari incompatible.
+
 // HARDENED: Controlled export list for functions required by inline HTML event handlers.
 Object.assign(window, {
   setMode,
@@ -2465,7 +2474,6 @@ Object.assign(window, {
   openRainbowResetModal
 });
 
-initDevToolsDeterrent();
 initAuth();
 })();
 </script>
