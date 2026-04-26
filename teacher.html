@@ -2429,17 +2429,6 @@ function showToast(msg) {
   }, 2200);
 }
 
-function initDevToolsDeterrent() {
-  // HARDENED: DevTools deterrent only; real security still depends on Supabase Auth/RLS and guarded operations.
-  const threshold = 160;
-  setInterval(() => {
-    if (window.outerWidth - window.innerWidth > threshold ||
-        window.outerHeight - window.innerHeight > threshold) {
-      document.body.innerHTML = '<div style="display:grid;place-items:center;height:100vh;font-family:sans-serif;color:#666">This page is not available.</div>';
-    }
-  }, 1000);
-}
-
 // HARDENED: Controlled export list for functions required by inline HTML event handlers.
 Object.assign(window, {
   setMode,
