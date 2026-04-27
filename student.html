@@ -211,33 +211,6 @@ button, .pill, .finish-btn, .color-swatch { -webkit-tap-highlight-color: transpa
   transition: background 0.18s ease, color 0.18s ease, transform 0.18s ease;
 }
 .step-chip.active { background: var(--text); color: var(--bg); box-shadow: 0 12px 26px -20px rgba(28,27,27,0.7); }
-.embargo-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.42rem;
-  width: 100%;
-  margin: -0.42rem 0 1rem;
-  padding: 0.68rem 0.85rem;
-  border-radius: var(--radius-md);
-  background: #fff3c4;
-  color: #72520a;
-  font-family: var(--headline);
-  font-size: 0.78rem;
-  font-weight: 800;
-  line-height: 1.35;
-  outline: 1px solid rgba(162,117,17,0.2);
-}
-.embargo-chip.open {
-  background: #e2f4e7;
-  color: var(--success);
-  outline-color: rgba(39,99,59,0.2);
-}
-.embargo-chip.partial {
-  background: #fff8df;
-  color: #5d4a11;
-  outline-color: rgba(162,117,17,0.18);
-}
-.embargo-chip .ui-icon { width: 1.05rem; height: 1.05rem; font-size: 1.05rem; }
 .step-panel { display: none; }
 .step-panel.active { display: block; }
 .step-nav { display: flex; gap: 0.65rem; margin-top: 0.95rem; align-items: center; }
@@ -967,7 +940,6 @@ hr.div { border: none; height: 0.8rem; margin: 0.25rem 0; }
     <div class="step-chip" id="stepChip2">2 · Group</div>
     <div class="step-chip" id="stepChip3">3 · Review</div>
   </div>
-  <div class="embargo-chip" id="embargoStatus" aria-live="polite"></div>
 
   <div class="step-panel active" id="stepItems">
   <div class="section-label">Your Cart</div>
@@ -1425,87 +1397,6 @@ function spendSubmitNonce(){
   try{sessionStorage.setItem('jk_submit_nonce','spent');}catch(e){}
 }
 
-// EMBARGO
-// Friday remains the unlock day for the whole day, so groups stay open after
-// their period's unlock time. Starting Saturday, the window points to next Friday.
-function getNextFriday(fromDate=new Date()){
-  const friday=new Date(fromDate);
-  friday.setHours(0,0,0,0);
-  const daysUntilFriday=(5-friday.getDay()+7)%7;
-  friday.setDate(friday.getDate()+daysUntilFriday);
-  return friday;
-}
-function periodOrdinal(period){
-  return period==='5'?'5th period':period==='6'?'6th period':'your period';
-}
-function getPeriodUnlockTime(period,fromDate=new Date()){
-  const unlockTime=getNextFriday(fromDate);
-  unlockTime.setHours(period==='5'?10:11, period==='5'?0:50, 0, 0);
-  return unlockTime;
-}
-function getOrderWindow(){
-  const country=document.getElementById('country');
-  // HARDENED: Privileged-country display bypass uses a hash check; final submit gate uses server time.
-  if(isPrivilegedCountry(country?.value)) return {unlocked:true,unlockTime:new Date(),periodLabel:'5th period'};
-  const period=country?.selectedOptions?.[0]?.dataset?.period;
-  const unlockTime=getPeriodUnlockTime(period==='5'?'5':'6');
-  return {
-    unlocked:new Date()>=unlockTime,
-    unlockTime,
-    periodLabel:periodOrdinal(period)
-  };
-}
-function formatUnlockDay(date){
-  return date.toLocaleDateString([], {weekday:'long', month:'long', day:'numeric'});
-}
-function formatUnlockTime(date){
-  return date.toLocaleTimeString([], {hour:'numeric', minute:'2-digit'});
-}
-function updateEmbargoStatus(){
-  const chip=document.getElementById('embargoStatus');
-  if(!chip) return;
-  const now=new Date();
-  const fifthUnlock=getPeriodUnlockTime('5');
-  const sixthUnlock=getPeriodUnlockTime('6');
-  const fifthOpen=now>=fifthUnlock;
-  const sixthOpen=now>=sixthUnlock;
-  chip.classList.toggle('open',fifthOpen&&sixthOpen);
-  chip.classList.toggle('partial',fifthOpen&&!sixthOpen);
-  if(fifthOpen&&sixthOpen){
-    chip.innerHTML=`${uiIcon('circle-check')}Orders are open.`;
-  } else if(fifthOpen&&!sixthOpen){
-    chip.innerHTML=`${uiIcon('clock')}5th period orders are open · 6th period opens at ${escHtml(formatUnlockTime(sixthUnlock))}.`;
-  } else {
-    chip.innerHTML=`${uiIcon('clock')}Orders open ${escHtml(formatUnlockDay(fifthUnlock))} — ${escHtml(formatUnlockTime(fifthUnlock))} (5th period) · ${escHtml(formatUnlockTime(sixthUnlock))} (6th period).`;
-  }
-}
-function embargoToastMessage(orderWindow){
-  return `Orders for ${orderWindow.periodLabel} open ${formatUnlockDay(orderWindow.unlockTime)} at ${formatUnlockTime(orderWindow.unlockTime)} — you can keep building your cart!`;
-}
-async function fetchSupabaseServerTime(){
-  // HARDENED: Trust Supabase REST response headers for the final gate instead of client Date overrides.
-  const res=await fetch(SUPABASE_URL+'/rest/v1/rainbows?select=country&limit=1',{
-    headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY},
-    cache:'no-store'
-  });
-  if(!res.ok) throw new Error('Server time check failed');
-  const serverDate=res.headers.get('date');
-  if(!serverDate) throw new Error('Missing server time');
-  const currentTime=new Date(serverDate);
-  if(Number.isNaN(currentTime.getTime())) throw new Error('Invalid server time');
-  return currentTime;
-}
-function getOrderWindowAt(currentTime,country,period){
-  // HARDENED: Final order-window check accepts server time and canonical country/period values.
-  if(isPrivilegedCountry(country)) return {unlocked:true,unlockTime:currentTime,periodLabel:'5th period'};
-  const unlockTime=getPeriodUnlockTime(period==='5'?'5':'6',currentTime);
-  return {
-    unlocked:currentTime>=unlockTime,
-    unlockTime,
-    periodLabel:periodOrdinal(period)
-  };
-}
-
 // RAINBOW
 const RAINBOW_LIMIT = 3;
 const RAINBOW_SCHEMA_SQL = `CREATE TABLE rainbows (
@@ -1784,7 +1675,6 @@ function onCountry(){
   const p=opt?.dataset?.period;
   document.getElementById('periodRow').style.display=p?'block':'none';
   if(p) document.getElementById('periodVal').textContent=p+'th Period';
-  updateEmbargoStatus();
 }
 function clearValidation(){
   validationOverrideKey='';
@@ -2200,7 +2090,7 @@ function startAnotherRequest(){
 }
 
 async function openConfirm(){
-  // HARDENED: Review modal only opens after canonical input/cart validation and fresh server-time verification.
+  // Review modal only opens after canonical input/cart validation.
   if(isSubmitting) return;
   if(editingCartIndex>-1){toast('Save or cancel your edit first.','err');showStep(1);return;}
   if(!cart.length){toast('Add at least one item first.','err');return;}
@@ -2208,20 +2098,6 @@ async function openConfirm(){
   if(!input.ok){toast(input.msg,'err');return;}
   const cartValidation=validateCartForSubmission();
   if(!cartValidation.ok){toast(cartValidation.msg,'err');return;}
-  let orderWindow;
-  try{
-    const serverTime=await fetchSupabaseServerTime();
-    orderWindow=getOrderWindowAt(serverTime,input.country,input.period);
-  }catch(e){
-    console.error('Order window verification failed:',e);
-    toast("Couldn't verify order window. Check your connection and try again.",'err');
-    return;
-  }
-  if(!orderWindow.unlocked){
-    updateEmbargoStatus();
-    toast(embargoToastMessage(orderWindow));
-    return;
-  }
   const {country,email,period}=input;
   document.getElementById('confirmMeta').innerHTML=`<strong>${escHtml(country)}</strong> · Period ${escHtml(period)}<br><span style="color:var(--muted)">${escHtml(email)}</span>`;
   const cont=document.getElementById('confirmItems'); cont.innerHTML='';
@@ -2240,7 +2116,7 @@ async function openConfirm(){
 function closeConfirm(){if(isSubmitting) return; document.getElementById('confirmOverlay').classList.remove('open'); showStep(2);}
 
 async function submitOrder(){
-  // HARDENED: Direct calls still pass nonce, input, cart, and server-time gates before any write.
+  // Direct calls still pass nonce, input, and cart gates before any write.
   if(isSubmitting) return;
   if(submitNonceSpent){toast('Start another request before submitting again.','err');return;}
   isSubmitting=true;
@@ -2252,20 +2128,6 @@ async function submitOrder(){
     const cartValidation=validateCartForSubmission();
     if(!cartValidation.ok){toast(cartValidation.msg,'err');return;}
     const {country,email,period}=input;
-    let orderWindow;
-    try{
-      const serverTime=await fetchSupabaseServerTime();
-      orderWindow=getOrderWindowAt(serverTime,country,period);
-    }catch(e){
-      console.error('Order window verification failed:',e);
-      toast("Couldn't verify order window. Check your connection and try again.",'err');
-      return;
-    }
-    if(!orderWindow.unlocked){
-      updateEmbargoStatus();
-      toast(embargoToastMessage(orderWindow));
-      return;
-    }
     const submittedItems=cartValidation.items.map(item=>({...item}));
     const sig=submissionSignature(country,email,period,submittedItems);
     let lastSig='', lastAt=0;
@@ -2347,7 +2209,7 @@ Object.assign(window,{
   closeRainbowExhausted
 });
 
-initGrids(); initValidationListeners(); loadSession(); updateEmbargoStatus();
+initGrids(); initValidationListeners(); loadSession();
 })();
 </script>
 </body>
