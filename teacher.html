@@ -345,6 +345,16 @@ button { -webkit-tap-highlight-color: transparent; }
 .oos-sub { font-size: 0.9rem; color: var(--muted); margin-bottom: 0.75rem; line-height: 1.45; }
 .oos-note-label { font-family: var(--headline); font-size: 0.72rem; font-weight: 700; color: var(--yellow); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.45rem; }
 .oos-hint { font-size: 0.84rem; color: var(--muted); margin-bottom: 0.85rem; line-height: 1.5; }
+.report-options { display: flex; flex-direction: column; gap: 0.55rem; margin-bottom: 0.85rem; }
+.report-option { background: var(--surface2); border: 0; border-radius: var(--radius-md); padding: 0.86rem 0.95rem; cursor: pointer; transition: all 0.15s; text-align: left; color: var(--text); display: flex; align-items: flex-start; gap: 0.7rem; }
+.report-option:hover, .report-option.sel { background: var(--yellow-bg); color: var(--yellow); box-shadow: inset 0 0 0 1px rgba(138,84,0,0.22); }
+.report-dot { width: 1rem; height: 1rem; border-radius: 999px; border: 2px solid currentColor; margin-top: 0.12rem; flex-shrink: 0; box-shadow: inset 0 0 0 3px var(--surface2); }
+.report-option.sel .report-dot { background: currentColor; box-shadow: inset 0 0 0 3px var(--yellow-bg); }
+.report-option-title { display: block; font-family: var(--headline); font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; line-height: 1.2; }
+.report-option-copy { font-size: 0.82rem; color: var(--muted); margin-top: 0.24rem; line-height: 1.35; font-weight: 600; }
+.report-note-wrap { display: none; }
+.report-note-wrap.open { display: block; }
+.btn-mok:disabled { opacity: 0.45; cursor: not-allowed; filter: grayscale(0.2); box-shadow: none; }
 
 /* SHOPPER MODE */
 .aisle { margin-bottom: 1.25rem; background: var(--surface2); border-radius: var(--radius-lg); padding: 0.65rem; box-shadow: var(--shadow-soft); }
@@ -847,17 +857,39 @@ button { -webkit-tap-highlight-color: transparent; }
   </div>
 </div>
 
-<!-- Out of Stock Modal -->
+<!-- Report Issue Modal -->
 <div class="modal-bg" id="oosModal">
   <div class="oos-modal">
-    <h3>Out of Stock</h3>
+    <h3>Report Issue</h3>
     <p class="oos-sub" id="oosItemLabel"></p>
-    <p class="oos-hint">Did you buy something similar instead? Note it here — it'll show in the email.</p>
-    <div class="oos-note-label">What did you get instead? (optional)</div>
-    <textarea class="oos-note-input" id="oosNote" placeholder="e.g. Got navy blue instead of midnight blue, or couldn't find 16g so grabbed 18g…"></textarea>
+    <p class="oos-hint">Choose how to handle this item.</p>
+    <div class="report-options">
+      <button class="report-option" type="button" onclick="selectReportIssueType('oos', this)">
+        <span class="report-dot" aria-hidden="true"></span>
+        <span>
+          <span class="report-option-title">Out of Stock</span>
+          <span class="report-option-copy">Mark this item out of stock and optionally note what you bought instead.</span>
+        </span>
+      </button>
+      <button class="report-option" type="button" onclick="selectReportIssueType('note', this)">
+        <span class="report-dot" aria-hidden="true"></span>
+        <span>
+          <span class="report-option-title">Flag for Follow-up</span>
+          <span class="report-option-copy">Add an internal note without changing the item status.</span>
+        </span>
+      </button>
+    </div>
+    <div class="report-note-wrap" id="oosNoteWrap">
+      <div class="oos-note-label">What did you get instead? (optional)</div>
+      <textarea class="oos-note-input" id="oosNote" placeholder="e.g. Got navy blue instead of midnight blue, or couldn't find 16g so grabbed 18g…"></textarea>
+    </div>
+    <div class="report-note-wrap" id="internalNoteWrap">
+      <div class="oos-note-label">Internal note</div>
+      <textarea class="oos-note-input" id="internalNote" placeholder="e.g. Student needs to clarify size, link is broken, item seems inappropriate…"></textarea>
+    </div>
     <div class="modal-btns">
       <button class="btn-mc" onclick="closeOosModal()">Cancel</button>
-      <button class="btn-mok" style="background:var(--yellow);color:#fff" onclick="confirmOos()"><img class="ui-icon" src="icons/alert-triangle.svg" alt="" aria-hidden="true">Mark Out of Stock</button>
+      <button class="btn-mok" id="reportIssueConfirm" style="background:var(--yellow);color:#fff" onclick="confirmReportIssue()" disabled><img class="ui-icon" src="icons/alert-triangle.svg" alt="" aria-hidden="true"><span id="reportIssueConfirmText">Report Issue</span></button>
     </div>
   </div>
 </div>
@@ -920,6 +952,7 @@ let mode = 'reviewer';
 let filter = 'all';
 let denyTargetId = null, denyReason = '';
 let oosTargetId = null;
+let reportIssueType = '';
 let reviewView = 'grouped'; // 'grouped' or 'chrono'
 let purchasedArchiveOpen = false;
 let currentSession = null;
@@ -1609,7 +1642,7 @@ function renderReqRow(item, opts = {}) {
   const safe = safeUrl(item.link);
   const linkHtml = safe ? `<a class="req-link" href="${escHtml(safe)}" target="_blank" rel="noopener noreferrer">↗ Reference</a>` : '';
   const denialNote = item.status === 'denied' && item.denial_reason ? `<div class="req-note">Reason: ${escHtml(item.denial_reason)}${item.denial_notified?' · ✓ notified':''}</div>` : '';
-  const oosNote = item.status === 'outofstock' && item.oos_note ? `<div class="req-note">Got instead: ${escHtml(item.oos_note)}</div>` : '';
+  const oosNote = item.oos_note ? `<div class="req-note"${item.status === 'outofstock' ? '' : ' style="color:var(--muted)"'}>${item.status === 'outofstock' ? 'Got instead' : 'Note'}: ${escHtml(item.oos_note)}</div>` : '';
   const purchasedWhen = item.purchased_at ? `<div class="req-note" style="color:var(--blue)">Purchased ${new Date(item.purchased_at).toLocaleString([], {month:'short', day:'numeric', hour:'numeric', minute:'2-digit'})}</div>` : '';
   const requestedAt = item.created_at && opts.showRequestedAt !== false ? `<div class="req-note" style="color:var(--muted)">Requested ${new Date(item.created_at).toLocaleString([], {month:'short', day:'numeric', hour:'numeric', minute:'2-digit'})}</div>` : '';
   const meta = opts.meta ? `<div class="req-detail">${opts.meta}</div>` : '';
@@ -1907,7 +1940,7 @@ function renderShopper(main) {
           <div class="shop-meta">${escHtml(group.item_detail)}${linksHtml}</div>
           <span class="shop-tag" style="background:${pColor};color:${pText}">${group.rows.length} request${group.rows.length>1?'s':''} · ${countries.join(' · ')}</span>
         </div>
-        <div class="shop-actions"><button class="btn-oos" onclick="openOosModal('${idsArg(ids)}','${esc(group.item_name)}')">${icon('alert-triangle')}Out of Stock</button></div>
+        <div class="shop-actions"><button class="btn-oos" onclick="openOosModal('${idsArg(ids)}','${esc(group.item_name)}')">${icon('alert-triangle')}Report Issue</button></div>
       </div>`;
     });
     html += '</div>';
@@ -2219,6 +2252,44 @@ async function resetToPending(ids) {
 }
 
 // ===== OOS =====
+function resetReportIssueModal() {
+  reportIssueType = '';
+  document.querySelectorAll('#oosModal .report-option').forEach(o => o.classList.remove('sel'));
+  document.getElementById('oosNote').value = '';
+  document.getElementById('internalNote').value = '';
+  document.getElementById('oosNoteWrap').classList.remove('open');
+  document.getElementById('internalNoteWrap').classList.remove('open');
+  document.getElementById('reportIssueConfirm').disabled = true;
+  document.getElementById('reportIssueConfirmText').textContent = 'Report Issue';
+}
+function selectReportIssueType(type, el) {
+  reportIssueType = type;
+  document.querySelectorAll('#oosModal .report-option').forEach(o => o.classList.remove('sel'));
+  el.classList.add('sel');
+  document.getElementById('oosNoteWrap').classList.toggle('open', type === 'oos');
+  document.getElementById('internalNoteWrap').classList.toggle('open', type === 'note');
+  document.getElementById('reportIssueConfirm').disabled = false;
+  document.getElementById('reportIssueConfirmText').textContent = type === 'oos' ? 'Mark Out of Stock' : 'Save Note';
+  document.getElementById(type === 'oos' ? 'oosNote' : 'internalNote').focus();
+}
+async function saveInternalNote() {
+  const noteText = document.getElementById('internalNote').value.trim();
+  const rows = rowsFromIds(oosTargetId);
+  try {
+    const result = await patchRows(rows, {oos_note: noteText}, 'Note save failed');
+    result.okRows.forEach(item => { item.oos_note = noteText; });
+    closeOosModal(); render();
+    showToast(result.failed ? `Note save: ${result.ok} saved, ${result.failed} failed.` : `${result.ok} note${result.ok===1?'':'s'} saved`);
+  } catch(e) {
+    logError('Note save failed', e);
+    showToast(friendlyError(e, 'Save failed. Note was not updated.'));
+  }
+}
+function confirmReportIssue() {
+  if (reportIssueType === 'oos') return confirmOos();
+  if (reportIssueType === 'note') return saveInternalNote();
+  showToast('Choose an issue type.');
+}
 function openOosModal(id, name) {
   oosTargetId=id;
   document.getElementById('oosItemLabel').textContent=name;
@@ -2251,6 +2322,9 @@ async function unOos(id) {
     showToast(friendlyError(e, 'Save failed. OOS was not restored.'));
   }
 }
+new MutationObserver(() => {
+  if (document.getElementById('oosModal').classList.contains('open')) resetReportIssueModal();
+}).observe(document.getElementById('oosModal'), {attributes: true, attributeFilter: ['class']});
 
 async function undoPurchase(id) {
   const rows=rowsFromIds(id);
@@ -2311,33 +2385,54 @@ async function openEmailModal() {
     g.allRows = allRequests.filter(r => r.submission_id === g.submission_id);
     g.completedNotified = g.allRows.length > 0 && g.allRows.every(i => i.completed_notified);
     const purch = g.items.filter(i => i.purchased && i.status==='approved');
+    const newPurch = g.completedNotified ? purch.filter(i => !i.purchase_notified) : purch;
+    const alreadyNotifiedPurch = g.completedNotified ? purch.filter(i => i.purchase_notified) : [];
     const oos = g.items.filter(i => i.status==='outofstock');
     const pending = g.items.filter(i => i.status==='approved' && !i.purchased);
     const sentBadge = g.completedNotified ? `<span style="font-family:var(--mono);font-size:0.62rem;font-weight:700;text-transform:uppercase;color:var(--green);background:var(--green-bg);border-radius:999px;padding:0.22rem 0.48rem;">Sent</span>` : '';
     html += `<div class="eg">
       <div class="eg-head"><span class="eg-country">${escHtml(g.country)} · Per. ${escHtml(g.period)}</span><span style="display:flex;align-items:center;gap:0.4rem;"><span class="eg-email">${escHtml(g.email)}</span>${sentBadge}</span></div>
       <div class="eg-items">
-        ${purch.map(i=>`<div class="ep">✓ ${escHtml(i.item_name)}${i.item_detail?' — '+escHtml(i.item_detail):''}</div>`).join('')}
+        ${newPurch.map(i=>`<div class="ep">✓ ${escHtml(i.item_name)}${i.item_detail?' — '+escHtml(i.item_detail):''}</div>`).join('')}
+        ${alreadyNotifiedPurch.map(i=>`<div style="color:var(--muted-soft);opacity:0.72;">✓ ${escHtml(i.item_name)}${i.item_detail?' — '+escHtml(i.item_detail):''} (already notified)</div>`).join('')}
         ${oos.map(i=>`<div class="eo">~ ${escHtml(i.item_name)}${i.item_detail?' — '+escHtml(i.item_detail):''}${i.oos_note?' ('+escHtml(i.oos_note)+')':''}</div>`).join('')}
         ${pending.map(i=>`<div style="color:var(--muted)">○ ${escHtml(i.item_name)}${i.item_detail?' — '+escHtml(i.item_detail):''} (not yet grabbed)</div>`).join('')}
       </div>
+      ${pending.length ? `<div style="margin:0.5rem 0.7rem 0.25rem">
+        <div style="font-family:var(--mono);font-size:0.62rem;font-weight:700;text-transform:uppercase;color:var(--muted);margin-bottom:0.35rem;">Note to group (optional)</div>
+        <textarea class="oos-note-input" id="pending_note_${escHtml(g.submission_id)}" placeholder="e.g. Still looking — will update you soon. Let me know if you want to swap to a different color." style="min-height:64px;font-size:0.82rem;"></textarea>
+      </div>` : ''}
     </div>`;
   });
 
   document.getElementById('emailGroups').innerHTML = html;
-  const unsentGroups = groupList.filter(g => !g.completedNotified);
+  let unsentGroups = [];
   const sentGroups = groupList.filter(g => g.completedNotified);
-  document.getElementById('emailCard_sub').textContent = unsentGroups.length
-    ? `${unsentGroups.length} unsent group${unsentGroups.length>1?'s':''} will receive a shopping update email.`
-    : `All ${groupList.length} group${groupList.length>1?'s were':' was'} already sent. Use resend only if needed.`;
   document.getElementById('emailModal').classList.add('open');
   const sendBtn = document.getElementById('emailSendBtn');
   const resendBtn = document.getElementById('emailResendBtn');
-  sendBtn.innerHTML = `${icon('mail')}${unsentGroups.length ? 'Send New Emails' : 'All Sent'}`;
-  sendBtn.disabled = unsentGroups.length === 0;
-  sendBtn.style.background = unsentGroups.length ? 'var(--green)' : 'var(--border)';
-  sendBtn.style.color = unsentGroups.length ? '#fff' : 'var(--muted)';
-  sendBtn.onclick = () => sendCompletedEmails(unsentGroups);
+  const getTeacherNote = (g) => {
+    const noteEl = document.getElementById(`pending_note_${g.submission_id}`);
+    return noteEl ? noteEl.value.trim() : '';
+  };
+  const hasFollowupActivity = (g) => {
+    const newPurch = g.items.some(i => i.purchased && i.status === 'approved' && !i.purchase_notified);
+    const pendingNote = g.items.some(i => i.status === 'approved' && !i.purchased) && !!getTeacherNote(g);
+    return newPurch || pendingNote;
+  };
+  const updateSendNewState = () => {
+    unsentGroups = groupList.filter(g => !g.completedNotified || hasFollowupActivity(g));
+    document.getElementById('emailCard_sub').textContent = unsentGroups.length
+      ? `${unsentGroups.length} group${unsentGroups.length>1?'s':''} will receive a shopping update email.`
+      : `All ${groupList.length} group${groupList.length>1?'s are':' is'} fully notified. Add a pending note to send a follow-up.`;
+    sendBtn.innerHTML = `${icon('mail')}${unsentGroups.length ? 'Send New Emails' : 'All Sent'}`;
+    sendBtn.disabled = unsentGroups.length === 0;
+    sendBtn.style.background = unsentGroups.length ? 'var(--green)' : 'var(--border)';
+    sendBtn.style.color = unsentGroups.length ? '#fff' : 'var(--muted)';
+    sendBtn.onclick = () => sendCompletedEmails(unsentGroups);
+  };
+  document.querySelectorAll('.oos-note-input[id^="pending_note_"]').forEach(el => el.addEventListener('input', updateSendNewState));
+  updateSendNewState();
   resendBtn.style.display = sentGroups.length ? 'block' : 'none';
   resendBtn.disabled = false;
   resendBtn.innerHTML = `${icon('mail')}${sentGroups.length === groupList.length ? 'Resend All' : 'Resend Sent'}`;
@@ -2356,14 +2451,18 @@ async function sendCompletedEmails(groupList, isResend = false) {
 
   try {
     for (const g of groupList) {
-      const purch = g.items.filter(i => i.purchased && i.status==='approved');
+      const allPurchased = g.items.filter(i => i.purchased && i.status==='approved');
+      const isFollowup = !!g.completedNotified;
+      const purch = isFollowup ? allPurchased.filter(i => !i.purchase_notified) : allPurchased;
       const oos = g.items.filter(i => i.status==='outofstock');
       const pending = g.items.filter(i => i.status==='approved' && !i.purchased);
+      const noteEl = document.getElementById(`pending_note_${g.submission_id}`);
+      const teacherNote = noteEl ? noteEl.value.trim() : '';
 
       const lines = [];
       if (purch.length) { lines.push('PURCHASED:'); purch.forEach(i=>lines.push(`  ✓ ${i.item_name}${i.item_detail?' — '+i.item_detail:''}`)); lines.push(''); }
       if (oos.length) { lines.push('OUT OF STOCK:'); oos.forEach(i=>lines.push(`  ~ ${i.item_name}${i.oos_note?' (got instead: '+i.oos_note+')':''}`)); lines.push(''); }
-      if (pending.length) { lines.push('STILL WORKING ON:'); pending.forEach(i=>lines.push(`  ○ ${i.item_name}`)); lines.push(''); }
+      if (pending.length) { lines.push('STILL WORKING ON:'); pending.forEach(i=>lines.push(`  ○ ${i.item_name}`)); if (teacherNote) lines.push(`  📝 ${teacherNote}`); lines.push(''); }
       const itemSummary = lines.join('\n');
 
       try {
@@ -2377,10 +2476,16 @@ async function sendCompletedEmails(groupList, isResend = false) {
         }
         sent++;
         const rowsToMark = g.allRows || allRequests.filter(r => r.submission_id === g.submission_id);
-        const result = await patchRows(rowsToMark, { completed_notified: true }, `Completed notification save failed for ${g.country}`);
-        result.okRows.forEach(item => { item.completed_notified = true; });
-        marked += result.ok;
-        markFailed += result.failed;
+        const completedResult = await patchRows(rowsToMark, { completed_notified: true }, `Completed notification save failed for ${g.country}`);
+        completedResult.okRows.forEach(item => { item.completed_notified = true; });
+        marked += completedResult.ok;
+        markFailed += completedResult.failed;
+        if (purch.length) {
+          const purchaseResult = await patchRows(purch, { purchase_notified: true }, `Purchase notification save failed for ${g.country}`);
+          purchaseResult.okRows.forEach(item => { item.purchase_notified = true; });
+          marked += purchaseResult.ok;
+          markFailed += purchaseResult.failed;
+        }
       } catch(e) {
         logError(`Completed email failed for ${g.country}`, e);
         failed++;
@@ -2456,6 +2561,8 @@ Object.assign(window, {
   confirmDeny,
   closeOosModal,
   confirmOos,
+  selectReportIssueType,
+  confirmReportIssue,
   closeRainbowResetModal,
   confirmRainbowReset,
   notifyDenials,
