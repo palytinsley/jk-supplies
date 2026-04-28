@@ -944,6 +944,10 @@ const AUTH_FAIL_COUNT_KEY = 'jk_teacher_auth_fail_count';
 const AUTH_LOCKOUT_UNTIL_KEY = 'jk_teacher_auth_lockout_until';
 const AUTH_LOCKOUT_MS = 60000;
 const AUTH_MAX_ATTEMPTS = 5;
+const REMOVED_CATALOG_ITEM_NAMES = Object.freeze({
+  mod_podge: 'Mod Podge',
+  glue_mod_podge: 'Mod Podge'
+});
 let authLockoutTimer = null;
 let loginInProgress = false;
 
@@ -1573,6 +1577,21 @@ function stats(reqs = allRequests) {
   </div>`;
 }
 
+function normalizedCatalogId(item) {
+  const raw = item && (item.item_id || item.itemId || item.catalog_id || item.catalogId);
+  return raw ? String(raw).trim().toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '') : '';
+}
+
+function displayItemName(item) {
+  const storedName = item && typeof item.item_name === 'string' ? item.item_name.trim() : '';
+  if (storedName) return storedName;
+  return REMOVED_CATALOG_ITEM_NAMES[normalizedCatalogId(item)] || 'Removed catalog item';
+}
+
+function displayItemDetail(item) {
+  return item && typeof item.item_detail === 'string' ? item.item_detail.trim() : '';
+}
+
 function render() {
   const main = document.getElementById('mainContent');
   const savedScroll = main.scrollTop;
@@ -1601,7 +1620,7 @@ function rowSelected(id) {
 
 function renderSelectBox(item) {
   const checked = rowSelected(item.id);
-  return `<button class="select-box ${checked?'checked':''}" onclick="toggleReviewSelection('${esc(item.id)}')" aria-label="Select ${escHtml(item.item_name)}">${icon(checked?'square-check':'square')}</button>`;
+  return `<button class="select-box ${checked?'checked':''}" onclick="toggleReviewSelection('${esc(item.id)}')" aria-label="Select ${escHtml(displayItemName(item))}">${icon(checked?'square-check':'square')}</button>`;
 }
 
 function selectedRows() {
@@ -1624,7 +1643,7 @@ function renderBatchTools(visibleRows) {
 function reviewActions(item) {
   const status = VALID_STATUS_SET.has(item.status) ? item.status : 'pending';
   if (item.status === 'pending') {
-    return `<div class="req-actions"><button class="btn-approve" onclick="approve('${esc(item.id)}')">${icon('check')}OK</button><button class="btn-deny" onclick="openDenyModal('${esc(item.id)}','${esc(item.item_name)}')">${icon('x')}Deny</button></div>`;
+    return `<div class="req-actions"><button class="btn-approve" onclick="approve('${esc(item.id)}')">${icon('check')}OK</button><button class="btn-deny" onclick="openDenyModal('${esc(item.id)}','${esc(displayItemName(item))}')">${icon('x')}Deny</button></div>`;
   }
   if (item.purchased) return `<div class="req-actions"><span class="sbadge s-purchased">${icon('shopping-cart-check')}purchased</span><button class="btn-oos" onclick="undoPurchase('${esc(item.id)}')">${icon('arrow-back-up')}Undo</button></div>`;
   return `<div class="req-actions"><span class="sbadge s-${status}">${escHtml(status)}</span><button class="btn-oos" onclick="resetToPending('${esc(item.id)}')">${icon('arrow-back-up')}Reset to pending</button></div>`;
@@ -1650,8 +1669,8 @@ function renderReqRow(item, opts = {}) {
   return `<div class="req-item ${opts.className||''}">
     ${opts.selectable ? renderSelectBox(item) : `<div class="req-icon">${catIcon[item.category]||'📦'}</div>`}
     <div class="req-body">
-      <div class="req-name">${escHtml(item.item_name)}</div>
-      <div class="req-detail">${escHtml(item.item_detail)}</div>
+      <div class="req-name">${escHtml(displayItemName(item))}</div>
+      <div class="req-detail">${escHtml(displayItemDetail(item))}</div>
       ${meta}${linkHtml}${denialNote}${oosNote}${requestedAt}${purchasedWhen}
     </div>
     ${opts.actions || reviewActions(item)}
@@ -1832,19 +1851,20 @@ async function notifyDenials() {
   let sent = 0, failed = 0, saveFailed = 0;
   try {
     for (const item of unnotified) {
+      const itemName = displayItemName(item);
       try {
         if (window.emailjs) {
           await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_DENIAL_TEMPLATE_ID, {
             to_email: item.reply_email,
             country: item.country,
             period: item.period,
-            item_name: item.item_name,
+            item_name: itemName,
             denial_reason: item.denial_reason
           });
         }
         sent++;
       } catch(e) {
-        logError(`Denial email failed for ${item.item_name}`, e);
+        logError(`Denial email failed for ${itemName}`, e);
         failed++;
         continue;
       }
@@ -1852,7 +1872,7 @@ async function notifyDenials() {
         await patch(item.id, { denial_notified: true });
         item.denial_notified = true;
       } catch(e) {
-        logError(`Denial notification save failed for ${item.item_name}`, e);
+        logError(`Denial notification save failed for ${itemName}`, e);
         saveFailed++;
       }
     }
@@ -1870,7 +1890,7 @@ function normShopText(v) {
 }
 
 function shopKey(r) {
-  return [r.category, normShopText(r.item_name), normShopText(r.item_detail)].join('|');
+  return [r.category, normShopText(displayItemName(r)), normShopText(displayItemDetail(r))].join('|');
 }
 
 function idsArg(ids) {
@@ -1892,7 +1912,7 @@ function groupedShopItems(rows) {
   rows.forEach(r => {
     const key = shopKey(r);
     if (!groups[key]) {
-      groups[key] = { key, domId: key.replace(/[^a-z0-9_-]/gi,'_'), category: r.category, item_name: r.item_name, item_detail: r.item_detail || '', rows: [] };
+      groups[key] = { key, domId: key.replace(/[^a-z0-9_-]/gi,'_'), category: r.category, item_name: displayItemName(r), item_detail: displayItemDetail(r), rows: [] };
     }
     groups[key].rows.push(r);
   });
@@ -2391,10 +2411,10 @@ async function openEmailModal() {
     html += `<div class="eg">
       <div class="eg-head"><span class="eg-country">${escHtml(g.country)} · Per. ${escHtml(g.period)}</span><span style="display:flex;align-items:center;gap:0.4rem;"><span class="eg-email">${escHtml(g.email)}</span>${sentBadge}</span></div>
       <div class="eg-items">
-        ${newPurch.map(i=>`<div class="ep">✓ ${escHtml(i.item_name)}${i.item_detail?' — '+escHtml(i.item_detail):''}</div>`).join('')}
-        ${alreadyNotifiedPurch.map(i=>`<div style="color:var(--muted-soft);opacity:0.72;">✓ ${escHtml(i.item_name)}${i.item_detail?' — '+escHtml(i.item_detail):''} (already notified)</div>`).join('')}
-        ${oos.map(i=>`<div class="eo">~ ${escHtml(i.item_name)}${i.item_detail?' — '+escHtml(i.item_detail):''}${i.oos_note?' ('+escHtml(i.oos_note)+')':''}</div>`).join('')}
-        ${pending.map(i=>`<div style="color:var(--muted)">○ ${escHtml(i.item_name)}${i.item_detail?' — '+escHtml(i.item_detail):''} (not yet grabbed)</div>`).join('')}
+        ${newPurch.map(i=>`<div class="ep">✓ ${escHtml(displayItemName(i))}${displayItemDetail(i)?' — '+escHtml(displayItemDetail(i)):''}</div>`).join('')}
+        ${alreadyNotifiedPurch.map(i=>`<div style="color:var(--muted-soft);opacity:0.72;">✓ ${escHtml(displayItemName(i))}${displayItemDetail(i)?' — '+escHtml(displayItemDetail(i)):''} (already notified)</div>`).join('')}
+        ${oos.map(i=>`<div class="eo">~ ${escHtml(displayItemName(i))}${displayItemDetail(i)?' — '+escHtml(displayItemDetail(i)):''}${i.oos_note?' ('+escHtml(i.oos_note)+')':''}</div>`).join('')}
+        ${pending.map(i=>`<div style="color:var(--muted)">○ ${escHtml(displayItemName(i))}${displayItemDetail(i)?' — '+escHtml(displayItemDetail(i)):''} (not yet grabbed)</div>`).join('')}
       </div>
       ${pending.length ? `<div style="margin:0.5rem 0.7rem 0.25rem">
         <div style="font-family:var(--mono);font-size:0.62rem;font-weight:700;text-transform:uppercase;color:var(--muted);margin-bottom:0.35rem;">Note to group (optional)</div>
@@ -2458,9 +2478,9 @@ async function sendCompletedEmails(groupList, isResend = false) {
       const teacherNote = noteEl ? noteEl.value.trim() : '';
 
       const lines = [];
-      if (purch.length) { lines.push('PURCHASED:'); purch.forEach(i=>lines.push(`  ✓ ${i.item_name}${i.item_detail?' — '+i.item_detail:''}`)); lines.push(''); }
-      if (oos.length) { lines.push('OUT OF STOCK:'); oos.forEach(i=>lines.push(`  ~ ${i.item_name}${i.oos_note?' (got instead: '+i.oos_note+')':''}`)); lines.push(''); }
-      if (pending.length) { lines.push('STILL WORKING ON:'); pending.forEach(i=>lines.push(`  ○ ${i.item_name}`)); if (teacherNote) lines.push(`  📝 ${teacherNote}`); lines.push(''); }
+      if (purch.length) { lines.push('PURCHASED:'); purch.forEach(i=>lines.push(`  ✓ ${displayItemName(i)}${displayItemDetail(i)?' — '+displayItemDetail(i):''}`)); lines.push(''); }
+      if (oos.length) { lines.push('OUT OF STOCK:'); oos.forEach(i=>lines.push(`  ~ ${displayItemName(i)}${i.oos_note?' (got instead: '+i.oos_note+')':''}`)); lines.push(''); }
+      if (pending.length) { lines.push('STILL WORKING ON:'); pending.forEach(i=>lines.push(`  ○ ${displayItemName(i)}`)); if (teacherNote) lines.push(`  📝 ${teacherNote}`); lines.push(''); }
       const itemSummary = lines.join('\n');
 
       try {
