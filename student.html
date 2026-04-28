@@ -1098,7 +1098,6 @@ hr.div { border: none; height: 0.8rem; margin: 0.25rem 0; }
           <div class="pill multi" onclick="togMulti(this,'glueType','Elmers Glue')">Elmer's</div>
           <div class="pill multi" onclick="togMulti(this,'glueType','E6000')">E6000</div>
           <div class="pill multi" onclick="togMulti(this,'glueType','Glitter Glue')">Glitter Glue</div>
-          <div class="pill multi" onclick="togMulti(this,'glueType','Mod Podge')">Mod Podge</div>
         </div>
       </div>
       <div id="glitterRow" style="display:none;margin-top:0.5rem">
@@ -1916,7 +1915,7 @@ function itemToFormState(item){
   const afterDash=(item.name||'').split('—').slice(1).join('—').trim();
   const known={
     tapeType:['Duct Tape','Painters Tape','Masking Tape','Double-Sided Tape','Scotch Tape','Fabric Tape'],
-    glueType:['Hot Glue Sticks','Hot Glue Gun','Elmers Glue','E6000','Glitter Glue','Mod Podge'],
+    glueType:['Hot Glue Sticks','Hot Glue Gun','Elmers Glue','E6000','Glitter Glue'],
     fastType:['Zip Ties','Velcro','Staples','Silver Eyelets','Elastic Band','Sewing Needles'],
     toolsType:['Needle Nose Pliers','Hammer','Screwdrivers','Crochet Hook','Bolt Cutters','Extension Cord'],
     threadType:['Thread','Ribbon','Yarn','Elastic']
