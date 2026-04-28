@@ -1643,15 +1643,15 @@ function renderReqRow(item, opts = {}) {
   const linkHtml = safe ? `<a class="req-link" href="${escHtml(safe)}" target="_blank" rel="noopener noreferrer">↗ Reference</a>` : '';
   const denialNote = item.status === 'denied' && item.denial_reason ? `<div class="req-note">Reason: ${escHtml(item.denial_reason)}${item.denial_notified?' · ✓ notified':''}</div>` : '';
   const oosNote = item.oos_note ? `<div class="req-note"${item.status === 'outofstock' ? '' : ' style="color:var(--muted)"'}>${item.status === 'outofstock' ? 'Got instead' : 'Note'}: ${escHtml(item.oos_note)}</div>` : '';
-  const purchasedWhen = item.purchased_at ? `<div class="req-note" style="color:var(--blue)">Purchased ${new Date(item.purchased_at).toLocaleString([], {month:'short', day:'numeric', hour:'numeric', minute:'2-digit'})}</div>` : '';
   const requestedAt = item.created_at ? `<div class="req-note" style="color:var(--muted)">Requested ${new Date(item.created_at).toLocaleString([], {month:'short', day:'numeric', hour:'numeric', minute:'2-digit'})}</div>` : '';
+  const purchasedWhen = item.purchased_at ? `<div class="req-note" style="color:var(--blue)">Purchased ${new Date(item.purchased_at).toLocaleString([], {month:'short', day:'numeric', hour:'numeric', minute:'2-digit'})}</div>` : '';
   const meta = opts.meta ? `<div class="req-detail">${opts.meta}</div>` : '';
   return `<div class="req-item ${opts.className||''}">
     ${opts.selectable ? renderSelectBox(item) : `<div class="req-icon">${catIcon[item.category]||'📦'}</div>`}
     <div class="req-body">
       <div class="req-name">${escHtml(item.item_name)}</div>
       <div class="req-detail">${escHtml(item.item_detail)}</div>
-      ${meta}${linkHtml}${denialNote}${oosNote}${purchasedWhen}${requestedAt}
+      ${meta}${linkHtml}${denialNote}${oosNote}${requestedAt}${purchasedWhen}
     </div>
     ${opts.actions || reviewActions(item)}
   </div>`;
@@ -1668,7 +1668,6 @@ function renderHistorySection(label, rows, open, toggleFnName, emptyText) {
     html += renderReqRow(item, {
       className: item.status === 'denied' ? 'denied-row' : '',
       meta: `${escHtml(item.country)} · Per. ${escHtml(item.period)} · ${escHtml(item.reply_email)}${requestedAt}`,
-      showRequestedAt: false,
       actions: historyActions(item)
     });
   });
@@ -1709,16 +1708,13 @@ function renderReviewer(main) {
     }
     sorted.forEach(item => {
       const pc = item.period === '5' ? 'p5' : 'p6';
-      const requestedAt = item.created_at ? `<span class="req-note" style="color:var(--muted); margin-top:0">Requested ${new Date(item.created_at).toLocaleString([], {month:'short', day:'numeric', hour:'numeric', minute:'2-digit'})}</span>` : '';
-      const purchasedAt = item.purchased_at ? `<span class="req-note" style="color:var(--muted); margin-top:0"> · Purchased ${new Date(item.purchased_at).toLocaleString([], {month:'short', day:'numeric', hour:'numeric', minute:'2-digit'})}</span>` : '';
       html += `<div class="sub-group">
         <div class="sub-head">
           <div class="sub-country">${escHtml(item.country)}</div>
           <span class="pbadge ${pc}">Per. ${escHtml(item.period)}</span>
           <span class="sub-email">${escHtml(item.reply_email)}</span>
-          ${requestedAt}${purchasedAt}
         </div>
-        ${renderReqRow(item, { selectable: true, showRequestedAt: false, actions: reviewActions(item) })}
+        ${renderReqRow(item, { selectable: true, actions: reviewActions(item) })}
       </div>`;
     });
     html += renderHistorySection('History', historyReqs, reviewHistoryOpen, 'toggleReviewHistory', 'No history rows match this filter.');
