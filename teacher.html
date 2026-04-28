@@ -1583,11 +1583,11 @@ function render() {
 }
 
 function reviewActiveRows(reqs) {
-  return reqs.filter(r => !r.purchased && (r.status === 'pending' || r.status === 'approved'));
+  return reqs.filter(r => r.status === 'pending' || r.status === 'approved');
 }
 
 function reviewHistoryRows(reqs) {
-  return reqs.filter(r => r.purchased || r.status === 'denied' || r.status === 'outofstock');
+  return reqs.filter(r => r.status === 'denied' || r.status === 'outofstock');
 }
 
 function pruneSelection(visibleRows) {
@@ -1626,6 +1626,7 @@ function reviewActions(item) {
   if (item.status === 'pending') {
     return `<div class="req-actions"><button class="btn-approve" onclick="approve('${esc(item.id)}')">${icon('check')}OK</button><button class="btn-deny" onclick="openDenyModal('${esc(item.id)}','${esc(item.item_name)}')">${icon('x')}Deny</button></div>`;
   }
+  if (item.purchased) return `<div class="req-actions"><span class="sbadge s-purchased">${icon('shopping-cart-check')}purchased</span><button class="btn-oos" onclick="undoPurchase('${esc(item.id)}')">${icon('arrow-back-up')}Undo</button></div>`;
   return `<div class="req-actions"><span class="sbadge s-${status}">${escHtml(status)}</span><button class="btn-oos" onclick="resetToPending('${esc(item.id)}')">${icon('arrow-back-up')}Reset to pending</button></div>`;
 }
 
