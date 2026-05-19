@@ -260,6 +260,34 @@ button, .pill, .finish-btn, .color-swatch { -webkit-tap-highlight-color: transpa
   font-size: 1.45rem;
   opacity: 0.48;
 }
+.cart-topline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: 1.65rem;
+  margin-bottom: 0.7rem;
+}
+.cart-topline .section-label {
+  margin: 0;
+}
+.recent-orders-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  min-height: 40px;
+  padding: 0.62rem 0.78rem;
+  border: 0;
+  border-radius: var(--radius-md);
+  background: var(--surface-mid);
+  color: var(--primary);
+  font-family: var(--headline);
+  font-size: 0.78rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+.recent-orders-btn:active { transform: translateY(1px); }
 .cart-items { display: flex; flex-direction: column; gap: 0.55rem; }
 .cart-item {
   background: var(--surface);
@@ -649,6 +677,63 @@ hr.div { border: none; height: 0.8rem; margin: 0.25rem 0; }
   outline: 1px solid var(--ghost);
 }
 .ci-detail { font-weight: 600; color: var(--muted); font-size: 0.78rem; margin-top: 0.1rem; }
+.recent-ledger {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  margin-bottom: 1.15rem;
+}
+.recent-ledger-state {
+  background: var(--surface-mid);
+  border-radius: var(--radius-lg);
+  padding: 1rem;
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 800;
+  text-align: center;
+}
+.recent-card {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  padding: 0.85rem 0.9rem;
+  outline: 1px solid var(--ghost);
+}
+.recent-card-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.7rem;
+  margin-bottom: 0.55rem;
+}
+.recent-country {
+  font-family: var(--headline);
+  font-size: 0.96rem;
+  font-weight: 800;
+}
+.recent-date {
+  color: var(--muted);
+  font-size: 0.76rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+.recent-items {
+  display: flex;
+  flex-direction: column;
+  gap: 0.42rem;
+}
+.recent-item {
+  background: var(--surface-low);
+  border-radius: var(--radius-md);
+  padding: 0.58rem 0.65rem;
+  font-size: 0.84rem;
+  font-weight: 800;
+}
+.recent-item-detail {
+  color: var(--muted);
+  font-size: 0.76rem;
+  font-weight: 600;
+  margin-top: 0.12rem;
+}
 .sheet-actions { display: flex; gap: 0.65rem; }
 .btn-back {
   background: var(--surface-mid);
@@ -790,7 +875,10 @@ hr.div { border: none; height: 0.8rem; margin: 0.25rem 0; }
   </div>
 
   <div class="step-panel active" id="stepItems">
-  <div class="section-label">Your Cart</div>
+  <div class="cart-topline">
+    <div class="section-label">Your Cart</div>
+    <button class="recent-orders-btn" onclick="openRecentOrders()"><i class="ui-icon ti ti-history" aria-hidden="true"></i>Recently Ordered</button>
+  </div>
   <div class="cart-empty" id="cartEmpty"><i class="ui-icon ti ti-shopping-cart-off" aria-hidden="true"></i>Nothing yet — add your first item below</div>
   <div class="cart-items" id="cartItems"></div>
 
@@ -1148,7 +1236,21 @@ hr.div { border: none; height: 0.8rem; margin: 0.25rem 0; }
   </div>
   <p class="submit-hint">You'll review everything before it sends.</p>
   </div>
+  </div>
 </div>
+
+<!-- Recently ordered sheet -->
+<div class="overlay" id="recentOverlay">
+  <div class="sheet">
+    <h2>Recently Ordered</h2>
+    <p class="sheet-sub">Recent supply requests, grouped by request. Student emails are not shown here.</p>
+    <div class="recent-ledger" id="recentLedger">
+      <div class="recent-ledger-state">Loading recent orders...</div>
+    </div>
+    <div class="sheet-actions">
+      <button class="btn-back" onclick="closeRecentOrders()"><i class="ui-icon ti ti-x" aria-hidden="true"></i>Close</button>
+    </div>
+  </div>
 </div>
 
 <!-- Confirm sheet -->
@@ -1656,6 +1758,75 @@ function startAnotherRequest(){
   document.getElementById('mainContent').style.display='block';
   showStep(1);
   toast('Ready for another request.','ok');
+}
+
+function recentState(msg){
+  document.getElementById('recentLedger').innerHTML=`<div class="recent-ledger-state">${escHtml(msg)}</div>`;
+}
+function formatRecentDate(value){
+  if(!value) return '';
+  const d=new Date(value);
+  if(Number.isNaN(d.getTime())) return '';
+  const diffMs=Date.now()-d.getTime();
+  const minute=60000, hour=60*minute, day=24*hour;
+  if(diffMs>=0 && diffMs<minute) return 'Just now';
+  if(diffMs>=0 && diffMs<hour){
+    const n=Math.max(1,Math.floor(diffMs/minute));
+    return n+' minute'+(n===1?'':'s')+' ago';
+  }
+  if(diffMs>=0 && diffMs<day){
+    const n=Math.floor(diffMs/hour);
+    return n+' hour'+(n===1?'':'s')+' ago';
+  }
+  if(diffMs>=0 && diffMs<7*day){
+    const n=Math.floor(diffMs/day);
+    return n+' day'+(n===1?'':'s')+' ago';
+  }
+  return d.toLocaleDateString(undefined,{month:'short',day:'numeric'});
+}
+function renderRecentOrders(rows){
+  if(!rows.length){recentState('No recent orders yet.');return;}
+  const groups=[];
+  const byId=new Map();
+  rows.forEach((row,index)=>{
+    const id=row.submission_id||'row_'+index;
+    if(!byId.has(id)){
+      const group={id,country:row.country||'Unknown country',created_at:row.created_at||'',items:[]};
+      byId.set(id,group);
+      groups.push(group);
+    }
+    byId.get(id).items.push({
+      name:row.item_name||row.category||'Supply item',
+      detail:row.item_detail||''
+    });
+  });
+  document.getElementById('recentLedger').innerHTML=groups.map(group=>{
+    const items=group.items.map(item=>`<div class="recent-item"><div>${escHtml(item.name)}</div>${item.detail?`<div class="recent-item-detail">${escHtml(item.detail)}</div>`:''}</div>`).join('');
+    const date=formatRecentDate(group.created_at);
+    return `<div class="recent-card">
+      <div class="recent-card-head">
+        <div class="recent-country">${escHtml(group.country)}</div>
+        ${date?`<div class="recent-date">${escHtml(date)}</div>`:''}
+      </div>
+      <div class="recent-items">${items}</div>
+    </div>`;
+  }).join('');
+}
+async function openRecentOrders(){
+  document.getElementById('recentOverlay').classList.add('open');
+  recentState('Loading recent orders...');
+  try{
+    const url=SUPABASE_URL+'/rest/v1/requests?select=created_at,submission_id,country,item_name,item_detail,category&order=created_at.desc&limit=50';
+    const res=await fetch(url,{headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY}});
+    if(!res.ok) throw new Error('Recent orders blocked');
+    renderRecentOrders(await res.json());
+  }catch(e){
+    recentState('Could not load recent orders.');
+    toast('Recent orders are unavailable right now.','err');
+  }
+}
+function closeRecentOrders(){
+  document.getElementById('recentOverlay').classList.remove('open');
 }
 
 function openConfirm(){
