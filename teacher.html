@@ -404,16 +404,24 @@ button { -webkit-tap-highlight-color: transparent; }
 /* EMAIL MODAL */
 .email-modal-bg { display: none; position: fixed; inset: 0; background: rgba(28,27,27,0.42); backdrop-filter: blur(18px); z-index: 200; align-items: center; justify-content: center; padding: 1rem; }
 .email-modal-bg.open { display: flex; }
-.email-card { background: rgba(252,249,248,0.97); border-radius: var(--radius-lg); padding: 1.35rem; width: 100%; max-width: 560px; max-height: 85vh; overflow-y: auto; box-shadow: var(--shadow-float); }
+.email-card { background: rgba(252,249,248,0.97); border-radius: var(--radius-lg); width: 100%; max-width: 560px; max-height: 85vh; overflow: hidden; box-shadow: var(--shadow-float); display: flex; flex-direction: column; }
+.email-card-header { padding: 1.35rem 1.35rem 0; }
 .email-card-sub { font-size: 0.9rem; color: var(--muted); margin-bottom: 1rem; line-height: 1.45; }
+.email-card-body { overflow-y: auto; padding: 0 1.35rem 1rem; }
+.email-actions { display: flex; gap: 0.5rem; padding: 0.85rem 1.35rem calc(0.85rem + env(safe-area-inset-bottom)); background: rgba(252,249,248,0.98); border-top: 1px solid rgba(28,27,27,0.08); box-shadow: 0 -12px 30px -26px rgba(28,27,27,0.7); }
+.email-empty { background: var(--surface2); border-radius: var(--radius-md); padding: 0.85rem 0.95rem; color: var(--muted); font-weight: 700; line-height: 1.4; margin-bottom: 0.75rem; }
 .eg { background: var(--surface2); border-radius: var(--radius-lg); margin-bottom: 0.75rem; overflow: hidden; padding: 0.45rem; }
 .eg-head { padding: 0.65rem 0.7rem; display: flex; align-items: center; justify-content: space-between; gap: 0.7rem; background: var(--surface); border-radius: var(--radius-md); }
 .eg-country { font-family: var(--headline); font-size: 0.86rem; font-weight: 700; }
 .eg-email { font-size: 0.68rem; color: var(--muted); }
+.eg-reason { font-family: var(--mono); font-size: 0.62rem; font-weight: 700; text-transform: uppercase; color: var(--blue); background: var(--blue-bg); border-radius: 999px; padding: 0.22rem 0.48rem; white-space: nowrap; }
 .eg-items { padding: 0.6rem 0.7rem 0.25rem; font-size: 0.82rem; line-height: 1.9; font-weight: 600; }
 .eg-items .ep { color: var(--green); }
 .eg-items .ed { color: var(--red); text-decoration: line-through; }
 .eg-items .eo { color: var(--yellow); }
+.email-resend { margin-top: 0.25rem; }
+.email-resend summary { cursor: pointer; color: var(--muted); font-family: var(--headline); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 0.65rem 0.1rem; }
+.email-resend-copy { color: var(--muted); font-size: 0.82rem; line-height: 1.45; margin: 0 0 0.7rem; }
 .btn-gmail { display: block; width: 100%; background: linear-gradient(135deg, var(--accent), var(--blue)); color: #fff; text-align: center; padding: 0.8rem; border-radius: var(--radius-sm); font-family: var(--headline); font-size: 0.7rem; font-weight: 700; text-decoration: none; margin-top: 0.5rem; text-transform: uppercase; letter-spacing: 0.08em; transition: filter 0.15s; }
 .btn-gmail:hover { filter: brightness(1.04); }
 .email-close { display: block; width: 100%; background: var(--surface3); border: 0; border-radius: var(--radius-sm); padding: 0.86rem; font-family: var(--headline); font-size: 0.7rem; font-weight: 700; cursor: pointer; margin-top: 0.9rem; text-transform: uppercase; color: var(--muted); letter-spacing: 0.08em; }
@@ -901,10 +909,15 @@ button { -webkit-tap-highlight-color: transparent; }
 <!-- Email Modal -->
 <div class="email-modal-bg" id="emailModal">
   <div class="email-card">
-    <h3>Send Shopping Update</h3>
-    <p class="email-card-sub" id="emailCard_sub">Review before sending.</p>
-    <div id="emailGroups"></div>
-    <div style="display:flex;gap:0.5rem;margin-top:0.9rem">
+    <div class="email-card-header">
+      <h3 id="emailModalTitle">Send Shopping Update</h3>
+      <p class="email-card-sub" id="emailCard_sub">Review before sending.</p>
+    </div>
+    <div class="email-card-body">
+      <div id="emailGroups"></div>
+      <div id="emailResendSection"></div>
+    </div>
+    <div class="email-actions">
       <button class="email-close" style="flex:1;margin:0" onclick="closeEmailModal()">Cancel</button>
       <button id="emailSendBtn" style="flex:2;"><img class="ui-icon" src="icons/mail.svg" alt="" aria-hidden="true">Send All Emails</button>
       <button id="emailResendBtn" style="display:none;flex:2;"><img class="ui-icon" src="icons/mail.svg" alt="" aria-hidden="true">Resend Sent</button>
@@ -2438,55 +2451,66 @@ async function openEmailModal() {
     return;
   }
 
-  // Build preview modal first
-  let html = blockedGroupCount
-    ? `<div style="margin-bottom:0.8rem;color:var(--muted);font-size:0.82rem;">${blockedGroupCount} test/blocked recipient${blockedGroupCount>1?'s':''} hidden from batch send.</div>`
-    : '';
-  groupList.forEach((g, idx) => {
+  groupList.forEach(g => {
     g.allRows = allRequests.filter(r => r.submission_id === g.submission_id);
     g.completedNotified = g.allRows.length > 0 && g.allRows.every(i => i.completed_notified);
-    const purch = g.items.filter(i => i.purchased && i.status==='approved');
-    const newPurch = g.completedNotified ? purch.filter(i => !i.purchase_notified) : purch;
-    const alreadyNotifiedPurch = g.completedNotified ? purch.filter(i => i.purchase_notified) : [];
-    const oos = g.items.filter(i => i.status==='outofstock');
-    const pending = g.items.filter(i => i.status==='approved' && !i.purchased);
-    const sentBadge = g.completedNotified ? `<span style="font-family:var(--mono);font-size:0.62rem;font-weight:700;text-transform:uppercase;color:var(--green);background:var(--green-bg);border-radius:999px;padding:0.22rem 0.48rem;">Sent</span>` : '';
-    html += `<div class="eg">
-      <div class="eg-head"><span class="eg-country">${escHtml(g.country)} · Per. ${escHtml(g.period)}</span><span style="display:flex;align-items:center;gap:0.4rem;"><span class="eg-email">${escHtml(g.email)}</span>${sentBadge}</span></div>
+    g.purchasedItems = g.items.filter(i => i.purchased && i.status === 'approved');
+    g.newPurchasedItems = g.completedNotified ? g.purchasedItems.filter(i => !i.purchase_notified) : g.purchasedItems;
+    g.oosItems = g.items.filter(i => i.status === 'outofstock');
+    g.pendingItems = g.items.filter(i => i.status === 'approved' && !i.purchased);
+    g.emailReason = g.completedNotified ? 'new purchased items' : 'new shopping update';
+  });
+
+  const previewGroups = groupList.filter(g => !g.completedNotified || g.newPurchasedItems.length);
+  const sentGroups = groupList.filter(g => g.completedNotified);
+
+  const renderItemLine = (item, className, marker, suffix = '') =>
+    `<div class="${className}">${marker} ${escHtml(displayItemName(item))}${displayItemDetail(item)?' — '+escHtml(displayItemDetail(item)):''}${suffix}</div>`;
+  const renderPreviewGroup = (g) => {
+    const outgoingPurchased = g.completedNotified ? g.newPurchasedItems : g.purchasedItems;
+    const oosHtml = g.oosItems.map(i => renderItemLine(i, 'eo', '~', i.oos_note?' ('+escHtml(i.oos_note)+')':'')).join('');
+    const pendingHtml = g.pendingItems.map(i => renderItemLine(i, '', '○', ' (not yet grabbed)')).join('');
+    return `<div class="eg">
+      <div class="eg-head"><span class="eg-country">${escHtml(g.country)} · Per. ${escHtml(g.period)}</span><span style="display:flex;align-items:center;gap:0.4rem;"><span class="eg-email">${escHtml(g.email)}</span><span class="eg-reason">${escHtml(g.emailReason)}</span></span></div>
       <div class="eg-items">
-        ${newPurch.map(i=>`<div class="ep">✓ ${escHtml(displayItemName(i))}${displayItemDetail(i)?' — '+escHtml(displayItemDetail(i)):''}</div>`).join('')}
-        ${alreadyNotifiedPurch.map(i=>`<div style="color:var(--muted-soft);opacity:0.72;">✓ ${escHtml(displayItemName(i))}${displayItemDetail(i)?' — '+escHtml(displayItemDetail(i)):''} (already notified)</div>`).join('')}
-        ${oos.map(i=>`<div class="eo">~ ${escHtml(displayItemName(i))}${displayItemDetail(i)?' — '+escHtml(displayItemDetail(i)):''}${i.oos_note?' ('+escHtml(i.oos_note)+')':''}</div>`).join('')}
-        ${pending.map(i=>`<div style="color:var(--muted)">○ ${escHtml(displayItemName(i))}${displayItemDetail(i)?' — '+escHtml(displayItemDetail(i)):''} (not yet grabbed)</div>`).join('')}
+        ${outgoingPurchased.map(i=>renderItemLine(i, 'ep', '✓')).join('')}
+        ${oosHtml}
+        ${pendingHtml}
       </div>
-      ${pending.length ? `<div style="margin:0.5rem 0.7rem 0.25rem">
+      ${g.pendingItems.length ? `<div style="margin:0.5rem 0.7rem 0.25rem">
         <div style="font-family:var(--mono);font-size:0.62rem;font-weight:700;text-transform:uppercase;color:var(--muted);margin-bottom:0.35rem;">Note to group (optional)</div>
         <textarea class="oos-note-input" id="pending_note_${escHtml(g.submission_id)}" placeholder="e.g. Still looking — will update you soon. Let me know if you want to swap to a different color." style="min-height:64px;font-size:0.82rem;"></textarea>
       </div>` : ''}
     </div>`;
-  });
+  };
+
+  let html = blockedGroupCount
+    ? `<div style="margin-bottom:0.8rem;color:var(--muted);font-size:0.82rem;">${blockedGroupCount} test/blocked recipient${blockedGroupCount>1?'s':''} hidden from batch send.</div>`
+    : '';
+  html += previewGroups.length
+    ? previewGroups.map(renderPreviewGroup).join('')
+    : `<div class="email-empty">No new shopping updates to send.</div>`;
 
   document.getElementById('emailGroups').innerHTML = html;
-  let unsentGroups = [];
-  const sentGroups = groupList.filter(g => g.completedNotified);
+  document.getElementById('emailResendSection').innerHTML = sentGroups.length
+    ? `<details class="email-resend">
+        <summary>Previously sent / resend (${sentGroups.length})</summary>
+        <p class="email-resend-copy">Already-sent groups are hidden from the default preview. Use Resend Sent if you need to send those updates again.</p>
+      </details>`
+    : '';
   document.getElementById('emailModal').classList.add('open');
+  const title = document.getElementById('emailModalTitle');
   const sendBtn = document.getElementById('emailSendBtn');
   const resendBtn = document.getElementById('emailResendBtn');
-  const getTeacherNote = (g) => {
-    const noteEl = document.getElementById(`pending_note_${g.submission_id}`);
-    return noteEl ? noteEl.value.trim() : '';
-  };
-  const hasFollowupActivity = (g) => {
-    const newPurch = g.items.some(i => i.purchased && i.status === 'approved' && !i.purchase_notified);
-    const pendingNote = g.items.some(i => i.status === 'approved' && !i.purchased) && !!getTeacherNote(g);
-    return newPurch || pendingNote;
-  };
+  const unsentGroups = previewGroups;
   const updateSendNewState = () => {
-    unsentGroups = groupList.filter(g => !g.completedNotified || hasFollowupActivity(g));
     const hiddenText = blockedGroupCount ? ` ${blockedGroupCount} test/blocked recipient${blockedGroupCount>1?'s were':' was'} hidden.` : '';
+    title.textContent = unsentGroups.length
+      ? `${unsentGroups.length} email update${unsentGroups.length>1?'s':''} ready to send`
+      : 'No new shopping updates to send';
     document.getElementById('emailCard_sub').textContent = unsentGroups.length
       ? `${unsentGroups.length} group${unsentGroups.length>1?'s':''} will receive a shopping update email.`
-      : `All ${groupList.length} eligible group${groupList.length>1?'s are':' is'} fully notified. Add a pending note to send a follow-up.`;
+      : `All ${groupList.length} eligible group${groupList.length>1?'s are':' is'} fully notified.`;
     document.getElementById('emailCard_sub').textContent += hiddenText;
     sendBtn.innerHTML = `${icon('mail')}${unsentGroups.length ? `Send New Emails (${unsentGroups.length})` : 'All Sent'}`;
     sendBtn.disabled = unsentGroups.length === 0;
