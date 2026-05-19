@@ -551,33 +551,6 @@ hr.div { border: none; height: 0.8rem; margin: 0.25rem 0; }
   background: var(--surface-mid);
   color: var(--primary);
 }
-.btn-rainbow {
-  width: 100%;
-  position: relative;
-  overflow: hidden;
-  background:
-    linear-gradient(var(--surface), var(--surface)) padding-box,
-    linear-gradient(90deg,#ff365f,#ff9d00,#ffe34d,#28c76f,#29a7ff,#8b5cf6,#ff45c8) border-box;
-  border: 2px solid transparent;
-  color: var(--text);
-  font-family: var(--headline);
-  font-size: 0.98rem;
-  font-weight: 900;
-  padding: 1rem;
-  min-height: 58px;
-  border-radius: var(--radius-lg);
-  cursor: pointer;
-  margin: 0.55rem 0 0.5rem;
-  box-shadow: 0 22px 46px -34px rgba(28,27,27,0.62);
-}
-.btn-rainbow::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(90deg,rgba(255,54,95,0.13),rgba(255,227,77,0.18),rgba(41,167,255,0.13),rgba(255,69,200,0.12));
-  pointer-events: none;
-}
-.btn-rainbow span { position: relative; z-index: 1; }
 
 .btn-submit {
   width: 100%;
@@ -760,131 +733,6 @@ hr.div { border: none; height: 0.8rem; margin: 0.25rem 0; }
 .success-next { max-width: 620px; margin: 1.15rem auto 0; }
 .success-next-note { color: var(--muted); font-size: 0.84rem; font-weight: 700; line-height: 1.55; margin-bottom: 0.7rem; }
 
-/* RAINBOW */
-.rainbow-warning {
-  display: none;
-  max-width: 620px;
-  margin: 1.1rem auto 0;
-  padding: 1rem;
-  border-radius: var(--radius-lg);
-  background:
-    linear-gradient(var(--surface), var(--surface)) padding-box,
-    linear-gradient(90deg,#ff365f,#ff9d00,#ffe34d,#28c76f,#29a7ff,#8b5cf6,#ff45c8) border-box;
-  border: 2px solid transparent;
-  box-shadow: 0 24px 54px -34px rgba(28,27,27,0.5);
-  opacity: 0;
-  transform: translateY(8px);
-  transition: opacity 0.32s ease, transform 0.32s ease;
-}
-.rainbow-warning.visible { display: block; opacity: 1; transform: translateY(0); }
-.rainbow-warning-title { font-family: var(--headline); font-size: 1rem; font-weight: 900; margin-bottom: 0.34rem; }
-.rainbow-warning-copy { color: var(--muted); font-size: 0.88rem; font-weight: 700; line-height: 1.5; margin-bottom: 0.8rem; }
-.rainbow-confirm-btn {
-  width: 100%;
-  border: 0;
-  border-radius: var(--radius-md);
-  min-height: 50px;
-  cursor: pointer;
-  font-family: var(--headline);
-  font-weight: 900;
-  color: #fff;
-  background: linear-gradient(90deg,#d61f46,#e97d00,#209953,#137bd1,#7c3aed);
-  box-shadow: 0 20px 42px -22px rgba(124,58,237,0.58);
-}
-.rainbow-confirm-btn:disabled { filter: grayscale(0.45); opacity: 0.58; cursor: default; }
-.rainbow-modal {
-  display: none;
-  position: fixed;
-  inset: 0;
-  z-index: 220;
-  align-items: center;
-  justify-content: center;
-  padding: 1rem;
-  background: rgba(28,27,27,0.38);
-  backdrop-filter: blur(12px);
-}
-.rainbow-modal.open { display: flex; }
-.rainbow-modal-card {
-  width: min(420px,100%);
-  background: var(--surface);
-  color: var(--text);
-  border-radius: var(--radius-lg);
-  padding: 1.25rem;
-  box-shadow: 0 28px 80px -34px rgba(28,27,27,0.7);
-}
-.rainbow-modal-card h3 { font-family: var(--headline); font-size: 1.18rem; margin-bottom: 0.5rem; }
-.rainbow-modal-card p { color: var(--muted); font-weight: 700; line-height: 1.55; margin-bottom: 1rem; }
-.rainbow-modal-actions { display: flex; gap: 0.6rem; }
-.rainbow-modal-actions button {
-  flex: 1;
-  min-height: 48px;
-  border: 0;
-  border-radius: var(--radius-md);
-  cursor: pointer;
-  font-family: var(--headline);
-  font-weight: 900;
-}
-.rainbow-modal-actions .cancel { background: var(--surface-mid); color: var(--muted); }
-.rainbow-modal-actions .confirm { background: var(--text); color: var(--bg); }
-.rainbow-countdown, .rainbow-chaos {
-  position: fixed;
-  inset: 0;
-  z-index: 240;
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(8,6,16,0.88);
-  color: #fff;
-}
-.rainbow-countdown {
-  font-family: var(--headline);
-  font-size: clamp(6rem,28vw,14rem);
-  font-weight: 900;
-}
-.rainbow-chaos { cursor: pointer; animation: rainbowShake 0.16s infinite; }
-.rainbow-chaos.exiting { animation: rainbowExit 1s ease forwards; }
-.rainbow-chaos canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
-.rainbow-up {
-  position: relative;
-  z-index: 4;
-  font-family: var(--headline);
-  font-size: clamp(3.1rem,17vw,9rem);
-  font-weight: 900;
-  letter-spacing: 0;
-  text-align: center;
-  color: #fff;
-  animation: rainbowHue 0.42s linear infinite;
-  text-shadow:
-    0 0 8px #ff365f,
-    0 0 16px #ff9d00,
-    0 0 24px #ffe34d,
-    0 0 34px #28c76f,
-    0 0 46px #29a7ff,
-    0 0 60px #ff45c8;
-}
-.rainbow-emoji {
-  position: absolute;
-  z-index: 3;
-  font-size: 2rem;
-  pointer-events: none;
-  animation-fill-mode: forwards;
-}
-.unicorn-fall { top: -4rem; animation-name: unicornFall; animation-timing-function: linear; }
-.rainbow-rise { bottom: -4rem; left: 50%; animation-name: rainbowRise; animation-timing-function: ease-out; }
-.body-rainbow-chaos { animation: bodyHue 2s linear 4; }
-@keyframes rainbowShake {
-  0%,100% { transform: translate(0,0) rotate(0deg); }
-  25% { transform: translate(3px,-2px) rotate(0.4deg); }
-  50% { transform: translate(-3px,3px) rotate(-0.4deg); }
-  75% { transform: translate(2px,2px) rotate(0.25deg); }
-}
-@keyframes rainbowHue { to { filter: hue-rotate(360deg); } }
-@keyframes bodyHue { to { filter: hue-rotate(360deg); } }
-@keyframes unicornFall { to { transform: translateY(calc(100vh + 8rem)) rotate(28deg); opacity: 0.92; } }
-@keyframes rainbowRise { to { transform: translate(var(--drift), -105vh) rotate(var(--spin)); opacity: 0; } }
-@keyframes rainbowExit { to { opacity: 0; transform: scale(1.18); } }
-
 /* TOAST */
 .toast {
   position: fixed;
@@ -958,16 +806,23 @@ hr.div { border: none; height: 0.8rem; margin: 0.25rem 0; }
         <option value="tape">📦 Tape</option>
         <option value="glue">🧲 Glue</option>
         <option value="fasteners">🔗 Fasteners</option>
+        <option value="safety">🛡️ Safety</option>
+        <option value="structural">🏗️ Structural Materials</option>
         <option value="thread">🧵 Thread / Ribbon / Yarn</option>
         <option value="tools">🔧 Tools</option>
         <option value="other">✏️ Other</option>
-        <!-- RAINBOW -->
-        <option value="rainbow">🌈 Order a Rainbow</option>
       </select>
     </div>
 
     <!-- SPRAY PAINT -->
     <div class="sub-options" id="sub_spray_paint">
+      <div class="sub-section">
+        <label>Product type</label>
+        <div class="pill-group">
+          <div class="pill" onclick="selPill(this,'sprayKind','Primer + Paint (combo can)')">Primer + Paint (combo can)</div>
+          <div class="pill" onclick="selPill(this,'sprayKind','Clear coat')">Clear coat</div>
+        </div>
+      </div>
       <div class="sub-section">
         <label>Finish</label>
         <div class="finish-toggle">
@@ -1042,6 +897,9 @@ hr.div { border: none; height: 0.8rem; margin: 0.25rem 0; }
           <div class="pill" onclick="selPill(this,'wireType','Thick (15 gauge)')">Thick (15g)</div>
           <div class="pill" onclick="selPill(this,'wireType','Gold Wire')">Gold Wire</div>
           <div class="pill" onclick="selPill(this,'wireType','Thin Craft Wire')">Thin Craft</div>
+          <div class="pill" onclick="selPill(this,'wireType','Chicken wire')">Chicken wire</div>
+          <div class="pill" onclick="selPill(this,'wireType','Floral wire')">Floral wire</div>
+          <div class="pill" onclick="selPill(this,'wireType','Wire cutters')">Wire cutters</div>
         </div>
       </div>
       <div class="other-field" id="wireOF">
@@ -1067,10 +925,10 @@ hr.div { border: none; height: 0.8rem; margin: 0.25rem 0; }
         <div class="pill-group">
           <div class="pill multi" onclick="togMulti(this,'tapeType','Duct Tape')">Duct</div>
           <div class="pill multi" onclick="togMulti(this,'tapeType','Painters Tape')">Painters</div>
-          <div class="pill multi" onclick="togMulti(this,'tapeType','Masking Tape')">Masking</div>
           <div class="pill multi" onclick="togMulti(this,'tapeType','Double-Sided Tape')">Double-Sided</div>
-          <div class="pill multi" onclick="togMulti(this,'tapeType','Scotch Tape')">Scotch</div>
+          <div class="pill multi" onclick="togMulti(this,'tapeType','Gaffer Tape')">Gaffer</div>
           <div class="pill multi" onclick="togMulti(this,'tapeType','Fabric Tape')">Fabric</div>
+          <div class="pill multi" onclick="togMulti(this,'tapeType','Foam Mounting Tape')">Foam Mounting</div>
         </div>
       </div>
       <div class="other-field" id="tapeOF">
@@ -1098,6 +956,9 @@ hr.div { border: none; height: 0.8rem; margin: 0.25rem 0; }
           <div class="pill multi" onclick="togMulti(this,'glueType','Elmers Glue')">Elmer's</div>
           <div class="pill multi" onclick="togMulti(this,'glueType','E6000')">E6000</div>
           <div class="pill multi" onclick="togMulti(this,'glueType','Glitter Glue')">Glitter Glue</div>
+          <div class="pill multi" onclick="togMulti(this,'glueType','Mod Podge')">Mod Podge</div>
+          <div class="pill multi" onclick="togMulti(this,'glueType','Spray Adhesive (3M Super 77)')">Spray Adhesive</div>
+          <div class="pill multi" onclick="togMulti(this,'glueType','Fabric Adhesive')">Fabric Adhesive</div>
         </div>
       </div>
       <div id="glitterRow" style="display:none;margin-top:0.5rem">
@@ -1124,8 +985,6 @@ hr.div { border: none; height: 0.8rem; margin: 0.25rem 0; }
         <div class="pill-group">
           <div class="pill multi" onclick="togMulti(this,'fastType','Zip Ties')">Zip Ties</div>
           <div class="pill multi" onclick="togMulti(this,'fastType','Velcro')">Velcro</div>
-          <div class="pill multi" onclick="togMulti(this,'fastType','Staples')">Staples</div>
-          <div class="pill multi" onclick="togMulti(this,'fastType','Silver Eyelets')">Silver Eyelets</div>
           <div class="pill multi" onclick="togMulti(this,'fastType','Elastic Band')">Elastic Band</div>
           <div class="pill multi" onclick="togMulti(this,'fastType','Sewing Needles')">Sewing Needles</div>
         </div>
@@ -1135,6 +994,48 @@ hr.div { border: none; height: 0.8rem; margin: 0.25rem 0; }
         <input type="text" id="fastOther" placeholder="e.g. snaps, grommets, binder clips..." />
       </div>
       <div class="other-trigger"><div class="pill" onclick="togOther('fastOF',this)">+ Other type</div></div>
+    </div>
+
+    <!-- SAFETY -->
+    <div class="sub-options" id="sub_safety">
+      <div class="sub-section">
+        <label>Type — select all that apply</label>
+        <div class="pill-group">
+          <div class="pill multi" onclick="togMulti(this,'safetyType','N95 masks')">N95 masks</div>
+          <div class="pill multi" onclick="togMulti(this,'safetyType','Respirators')">Respirators</div>
+          <div class="pill multi" onclick="togMulti(this,'safetyType','Gloves')">Gloves</div>
+          <div class="pill multi" onclick="togMulti(this,'safetyType','Aprons')">Aprons</div>
+          <div class="pill multi" onclick="togMulti(this,'safetyType','Eye protection')">Eye protection</div>
+        </div>
+      </div>
+      <div class="other-field" id="safetyOF">
+        <label>Other safety item</label>
+        <input type="text" id="safetyOther" placeholder="e.g. ear protection, face shield..." />
+      </div>
+      <div class="other-trigger"><div class="pill" onclick="togOther('safetyOF',this)">+ Other type</div></div>
+      <div class="field-hint" id="safetyVal"></div>
+    </div>
+
+    <!-- STRUCTURAL MATERIALS -->
+    <div class="sub-options" id="sub_structural">
+      <div class="sub-section">
+        <label>Material — select all that apply</label>
+        <div class="pill-group">
+          <div class="pill multi" onclick="togMulti(this,'structuralType','Chicken wire')">Chicken wire</div>
+          <div class="pill multi" onclick="togMulti(this,'structuralType','Armature wire')">Armature wire</div>
+          <div class="pill multi" onclick="togMulti(this,'structuralType','Floral wire')">Floral wire</div>
+          <div class="pill multi" onclick="togMulti(this,'structuralType','Wire mesh')">Wire mesh</div>
+          <div class="pill multi" onclick="togMulti(this,'structuralType','Foam board')">Foam board</div>
+          <div class="pill multi" onclick="togMulti(this,'structuralType','PVC pipe / tubing (small diameter)')">PVC pipe / tubing</div>
+          <div class="pill multi" onclick="togMulti(this,'structuralType','Zip ties')">Zip ties</div>
+        </div>
+      </div>
+      <div class="other-field" id="structuralOF">
+        <label>Other structural material</label>
+        <input type="text" id="structuralOther" placeholder="e.g. cardboard tubes, dowels..." />
+      </div>
+      <div class="other-trigger"><div class="pill" onclick="togOther('structuralOF',this)">+ Other type</div></div>
+      <div class="field-hint" id="structuralVal"></div>
     </div>
 
     <!-- THREAD -->
@@ -1165,10 +1066,7 @@ hr.div { border: none; height: 0.8rem; margin: 0.25rem 0; }
         <label>Tool needed — select all that apply</label>
         <div class="pill-group">
           <div class="pill multi" onclick="togMulti(this,'toolsType','Needle Nose Pliers')">Needle Nose Pliers</div>
-          <div class="pill multi" onclick="togMulti(this,'toolsType','Hammer')">Hammer</div>
-          <div class="pill multi" onclick="togMulti(this,'toolsType','Screwdrivers')">Screwdrivers</div>
           <div class="pill multi" onclick="togMulti(this,'toolsType','Crochet Hook')">Crochet Hook</div>
-          <div class="pill multi" onclick="togMulti(this,'toolsType','Bolt Cutters')">Bolt Cutters</div>
           <div class="pill multi" onclick="togMulti(this,'toolsType','Extension Cord')">Extension Cord</div>
         </div>
       </div>
@@ -1190,7 +1088,7 @@ hr.div { border: none; height: 0.8rem; margin: 0.25rem 0; }
     </div>
 
     <hr class="div">
-    <div class="form-row" id="itemLinkRow">
+    <div class="form-row">
       <label>Reference link (optional)</label>
       <div class="input-with-icon">
         <i class="ui-icon ti ti-link" aria-hidden="true"></i>
@@ -1216,8 +1114,6 @@ hr.div { border: none; height: 0.8rem; margin: 0.25rem 0; }
       <select id="country" onchange="onCountry()">
         <option value="">— Select your country —</option>
         <option data-period="6">Afghanistan</option>
-        <!-- BRAZIL -->
-        <option data-period="5">Brazil</option>
         <option data-period="6">Cambodia</option>
         <option data-period="6">China</option>
         <option data-period="5">Cuba</option>
@@ -1277,11 +1173,6 @@ hr.div { border: none; height: 0.8rem; margin: 0.25rem 0; }
   <p>Mr. Tinsley has your list.<br>You do not need to submit again.</p>
   <div class="success-summary" id="successSummary"></div>
   <div class="success-id" id="confirmId"></div>
-  <div class="rainbow-warning" id="rainbowWarning">
-    <div class="rainbow-warning-title">Rainbow request ready.</div>
-    <div class="rainbow-warning-copy" id="rainbowWarningCopy"></div>
-    <button class="rainbow-confirm-btn" id="rainbowOrderBtn" onclick="showRainbowConfirm()" disabled>Order your Rainbow</button>
-  </div>
   <div class="success-next">
     <div class="success-next-note">Your first request is already submitted. Use this only if you forgot something or need to add more items.</div>
     <button class="btn-submit" onclick="startAnotherRequest()"><i class="ui-icon ti ti-plus" aria-hidden="true"></i>Start another request</button>
@@ -1291,61 +1182,9 @@ hr.div { border: none; height: 0.8rem; margin: 0.25rem 0; }
 
 <div class="toast" id="toast"></div>
 
-<div class="rainbow-modal" id="rainbowConfirmModal">
-  <div class="rainbow-modal-card">
-    <h3>Are you sure?</h3>
-    <p>This uses one of your group's rainbows.</p>
-    <div class="rainbow-modal-actions">
-      <button class="cancel" onclick="closeRainbowConfirm()">Cancel</button>
-      <button class="confirm" onclick="confirmRainbowChaos()">Confirm</button>
-    </div>
-  </div>
-</div>
-
-<div class="rainbow-modal" id="rainbowExhaustedModal">
-  <div class="rainbow-modal-card">
-    <h3>Your order went through!</h3>
-    <p>Your group has used all 3 rainbows, so this one wasn't included — but everything else is confirmed.</p>
-    <div class="rainbow-modal-actions">
-      <button class="confirm" onclick="closeRainbowExhausted()">Got it</button>
-    </div>
-  </div>
-</div>
-
 <script>
-(function(){
-// HARDENED: Keep application state and logic scoped away from window; only explicit handlers are exported at the bottom.
 const SUPABASE_URL = 'https://ywdigsbpvtjsjhliuwrm.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_CSLa84XRVDj2D_cEl72TpQ_43T7e6qr';
-
-// HARDENED: Canonical allowlists used at submit time so edited DOM options cannot authorize invalid values.
-const COUNTRY_PERIODS = Object.freeze({
-  'Afghanistan':'6',
-  'Brazil':'5',
-  'Cambodia':'6',
-  'China':'6',
-  'Cuba':'5',
-  'El Salvador':'6',
-  'India':'5',
-  'Indonesia':'5',
-  'Kenya':'5',
-  'Mexico':'5',
-  'Mozambique':'5',
-  'New Zealand':'5',
-  'Nigeria':'5',
-  'Philippines':'6',
-  'Rwanda':'6',
-  'Vietnam':'6'
-});
-const VALID_COUNTRIES = Object.freeze(Object.keys(COUNTRY_PERIODS));
-const VALID_CATEGORIES = Object.freeze(['spray_paint','paint','wire','tape','glue','fasteners','thread','tools','other','rainbow']);
-const VALID_COUNTRY_SET = new Set(VALID_COUNTRIES);
-const VALID_CATEGORY_SET = new Set(VALID_CATEGORIES);
-const EMAIL_RE = /^[^\s@]+@pausd\.(?:us|org)$/i;
-const PRIVILEGED_COUNTRY_HASH = 2692490923;
-let isSubmitting = false;
-let pageSubmitNonce = makeSubmitNonce();
-let submitNonceSpent = false;
 
 const colorData = {
   1:[{n:'Flat White',h:'#f5f5f5'},{n:'Gloss White',h:'#ffffff',b:1},{n:'Off White',h:'#ede8df'},{n:'Light Grey',h:'#c8c8c8'},{n:'Grey',h:'#888888'},{n:'Dark Grey',h:'#444444'},{n:'Black',h:'#1a1a1a'}],
@@ -1359,6 +1198,7 @@ const cart=[], sel={}, multi={};
 let sprayC=null, paintC=null;
 let validationOverrideKey='';
 let editingCartIndex=-1;
+window.__submitting = false;
 
 function uiIcon(name){
   return `<i class="ui-icon ti ti-${name}" aria-hidden="true"></i>`;
@@ -1370,252 +1210,6 @@ function escHtml(s) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
-}
-function hashFn(s){
-  // HARDENED: Small non-crypto hash for hiding privileged-country comparisons from casual source scans.
-  let h=5381;
-  const text=String(s||'');
-  for(let i=0;i<text.length;i++) h=((h<<5)+h)^text.charCodeAt(i);
-  return h>>>0;
-}
-function isPrivilegedCountry(country){
-  // HARDENED: No direct privileged-country string literal in bypass conditionals.
-  return hashFn(country)===PRIVILEGED_COUNTRY_HASH;
-}
-function makeSubmitNonce(){
-  // HARDENED: Per-page token included in duplicate-submit signature; clearing sessionStorage does not recreate it.
-  const bytes=new Uint32Array(4);
-  if(window.crypto?.getRandomValues) window.crypto.getRandomValues(bytes);
-  else for(let i=0;i<bytes.length;i++) bytes[i]=Math.floor(Math.random()*0xffffffff);
-  return Array.from(bytes,n=>n.toString(36)).join('-')+'-'+Date.now().toString(36);
-}
-function spendSubmitNonce(){
-  // HARDENED: Invalidate this page-load token after a successful submit.
-  submitNonceSpent=true;
-  pageSubmitNonce='spent';
-  try{sessionStorage.setItem('jk_submit_nonce','spent');}catch(e){}
-}
-
-// RAINBOW
-const RAINBOW_LIMIT = 3;
-const RAINBOW_SCHEMA_SQL = `CREATE TABLE rainbows (
-  country TEXT PRIMARY KEY,
-  count INTEGER NOT NULL DEFAULT 0
-);`;
-let pendingRainbow = null;
-let rainbowChaosTimer = null;
-let rainbowAnimationFrame = null;
-
-function isRainbowItem(item){
-  return item?.category==='rainbow';
-}
-function hasRainbowInCart(){
-  return cart.some(isRainbowItem);
-}
-function addRainbowToCart(){
-  if(hasRainbowInCart()){
-    // RAINBOW
-    toast('You already have a rainbow in your cart.','err');
-    return;
-  }
-  // RAINBOW
-  cart.push({icon:'🌈',name:'Order a Rainbow',detail:'',category:'rainbow',id:Date.now()+Math.random(),formState:currentFormState('rainbow')});
-  saveSession(); renderCart(); shakeCartIcon();
-  toast('Rainbow added to cart.','ok');
-}
-function rainbowRequestRow(sid,country,email,period){
-  return {submission_id:sid,period,country,reply_email:email,category:'rainbow',item_name:'Order a Rainbow',item_detail:'',link:'',status:'pending',denial_reason:'',oos_note:''};
-}
-async function fetchRainbowCount(country){
-  const url=SUPABASE_URL+'/rest/v1/rainbows?country=eq.'+encodeURIComponent(country)+'&select=count';
-  const res=await fetch(url,{headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY}});
-  if(!res.ok) throw new Error('Rainbow count failed');
-  const rows=await res.json();
-  return rows[0]?.count||0;
-}
-async function reserveRainbow(country){
-  // HARDENED: Privileged-country rainbow bypass uses the same hash check.
-  if(isPrivilegedCountry(country)) return {reserved:true,used:1};
-  const used=await fetchRainbowCount(country);
-  if(used>=RAINBOW_LIMIT) return {reserved:false,used};
-  const next=used+1;
-  const method=used? 'PATCH':'POST';
-  const url=used
-    ? SUPABASE_URL+'/rest/v1/rainbows?country=eq.'+encodeURIComponent(country)
-    : SUPABASE_URL+'/rest/v1/rainbows';
-  const body=used?{count:next}:{country,count:next};
-  const res=await fetch(url,{method,headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Prefer':'return=minimal'},body:JSON.stringify(body)});
-  if(!res.ok) throw new Error('Rainbow reserve failed');
-  return {reserved:true,used:next};
-}
-async function writeRainbowRequest(sid,country,email,period){
-  const res=await fetch(SUPABASE_URL+'/rest/v1/requests',{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Prefer':'return=minimal'},body:JSON.stringify([rainbowRequestRow(sid,country,email,period)])});
-  if(!res.ok) throw new Error('Rainbow request failed');
-}
-async function handleRainbowAfterSubmit({sid,country,email,period,items}){
-  if(!items.some(isRainbowItem)) return;
-  try{
-    const result=await reserveRainbow(country);
-    if(!result.reserved){
-      showRainbowExhausted();
-      return;
-    }
-    await writeRainbowRequest(sid,country,email,period);
-    showRainbowWarning(result.used,{sid,country,email,period});
-  }catch(e){
-    console.error('Rainbow error:',e);
-    showRainbowExhausted();
-  }
-}
-function showRainbowWarning(used,context){
-  pendingRainbow=context;
-  const warning=document.getElementById('rainbowWarning');
-  const copy=document.getElementById('rainbowWarningCopy');
-  const btn=document.getElementById('rainbowOrderBtn');
-  if(!warning||!copy||!btn) return;
-  copy.textContent=`Your group has used ${used} of ${RAINBOW_LIMIT} rainbows available.`;
-  btn.disabled=true;
-  warning.classList.add('visible');
-  setTimeout(()=>{btn.disabled=false;},2000);
-}
-function showRainbowConfirm(){
-  if(!pendingRainbow) return;
-  document.getElementById('rainbowConfirmModal').classList.add('open');
-}
-function closeRainbowConfirm(){
-  document.getElementById('rainbowConfirmModal').classList.remove('open');
-}
-function confirmRainbowChaos(){
-  closeRainbowConfirm();
-  runRainbowCountdown();
-}
-function showRainbowExhausted(){
-  document.getElementById('rainbowExhaustedModal').classList.add('open');
-}
-function closeRainbowExhausted(){
-  document.getElementById('rainbowExhaustedModal').classList.remove('open');
-}
-function vibrate(pattern){
-  if(navigator.vibrate) navigator.vibrate(pattern);
-}
-function runRainbowCountdown(){
-  const overlay=document.createElement('div');
-  overlay.className='rainbow-countdown';
-  document.body.appendChild(overlay);
-  const steps=[
-    {n:'3',v:200},
-    {n:'2',v:200},
-    {n:'1',v:[300,100,300]}
-  ];
-  let i=0;
-  function tick(){
-    const step=steps[i];
-    overlay.textContent=step.n;
-    vibrate(step.v);
-    i++;
-    if(i<steps.length) setTimeout(tick,800);
-    else setTimeout(()=>{overlay.remove(); startRainbowChaos();},800);
-  }
-  tick();
-}
-function startRainbowChaos(){
-  vibrate([100,50,100,50,200,100,400]);
-  document.body.classList.add('body-rainbow-chaos');
-  const overlay=document.createElement('div');
-  overlay.className='rainbow-chaos';
-  overlay.innerHTML='<canvas></canvas><div class="rainbow-up">RAINBOW UP!</div>';
-  document.body.appendChild(overlay);
-  spawnRainbowEmojis(overlay);
-  const stopConfetti=startRainbowConfetti(overlay.querySelector('canvas'));
-  const finish=()=>{
-    clearTimeout(rainbowChaosTimer);
-    stopConfetti();
-    document.body.classList.remove('body-rainbow-chaos');
-    overlay.classList.add('exiting');
-    setTimeout(()=>overlay.remove(),1000);
-  };
-  overlay.addEventListener('click',finish,{once:true});
-  rainbowChaosTimer=setTimeout(finish,8000);
-}
-function spawnRainbowEmojis(overlay){
-  for(let i=0;i<34;i++){
-    ['left','right'].forEach(side=>{
-      const e=document.createElement('div');
-      e.className='rainbow-emoji unicorn-fall';
-      e.textContent='🦄';
-      e.style[side]=(Math.random()*14)+'vw';
-      e.style.animationDuration=(3.2+Math.random()*4.8)+'s';
-      e.style.animationDelay=(Math.random()*3.8)+'s';
-      e.style.fontSize=(1.35+Math.random()*1.7)+'rem';
-      overlay.appendChild(e);
-    });
-  }
-  for(let i=0;i<70;i++){
-    const e=document.createElement('div');
-    e.className='rainbow-emoji rainbow-rise';
-    e.textContent='🌈';
-    e.style.setProperty('--drift',((Math.random()-0.5)*120)+'vw');
-    e.style.setProperty('--spin',((Math.random()-0.5)*560)+'deg');
-    e.style.animationDuration=(2.5+Math.random()*3.2)+'s';
-    e.style.animationDelay=(Math.random()*4.6)+'s';
-    e.style.fontSize=(1.25+Math.random()*1.8)+'rem';
-    overlay.appendChild(e);
-  }
-}
-function startRainbowConfetti(canvas){
-  const ctx=canvas.getContext('2d');
-  const colors=['#ff365f','#ff9d00','#ffe34d','#28c76f','#29a7ff','#8b5cf6','#ff45c8'];
-  const particles=[];
-  function resize(){
-    canvas.width=window.innerWidth*devicePixelRatio;
-    canvas.height=window.innerHeight*devicePixelRatio;
-  }
-  resize();
-  window.addEventListener('resize',resize);
-  for(let i=0;i<360;i++){
-    particles.push({
-      x:Math.random()*canvas.width,
-      y:-Math.random()*canvas.height,
-      size:(4+Math.random()*10)*devicePixelRatio,
-      speed:(1.5+Math.random()*5)*devicePixelRatio,
-      drift:(Math.random()-0.5)*2.4*devicePixelRatio,
-      spin:Math.random()*Math.PI,
-      rot:(Math.random()-0.5)*0.25,
-      color:colors[Math.floor(Math.random()*colors.length)],
-      shape:Math.floor(Math.random()*3)
-    });
-  }
-  function drawStar(p){
-    ctx.beginPath();
-    for(let i=0;i<10;i++){
-      const r=i%2?p.size*0.42:p.size;
-      const a=p.spin+i*Math.PI/5;
-      ctx.lineTo(Math.cos(a)*r,Math.sin(a)*r);
-    }
-    ctx.closePath();
-    ctx.fill();
-  }
-  function frame(){
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    particles.forEach(p=>{
-      p.y+=p.speed; p.x+=p.drift; p.spin+=p.rot;
-      if(p.y>canvas.height+40){p.y=-40;p.x=Math.random()*canvas.width;}
-      ctx.save();
-      ctx.translate(p.x,p.y);
-      ctx.rotate(p.spin);
-      ctx.fillStyle=p.color;
-      if(p.shape===0){ctx.beginPath();ctx.arc(0,0,p.size*0.55,0,Math.PI*2);ctx.fill();}
-      else if(p.shape===1){ctx.fillRect(-p.size/2,-p.size/4,p.size,p.size/2);}
-      else drawStar(p);
-      ctx.restore();
-    });
-    rainbowAnimationFrame=requestAnimationFrame(frame);
-  }
-  frame();
-  return ()=>{
-    cancelAnimationFrame(rainbowAnimationFrame);
-    window.removeEventListener('resize',resize);
-  };
 }
 
 function buildGrid(id,group,type){
@@ -1664,9 +1258,6 @@ function onCat(){
   clearValidation();
   const v=document.getElementById('category').value;
   document.querySelectorAll('.sub-options').forEach(el=>el.classList.remove('visible'));
-  // RAINBOW
-  const linkRow=document.getElementById('itemLinkRow');
-  if(linkRow) linkRow.style.display=v==='rainbow'?'none':'block';
   if(v){const s=document.getElementById('sub_'+v);if(s)s.classList.add('visible');}
 }
 function onCountry(){
@@ -1687,11 +1278,10 @@ function showValidation(id,msg,soft=false){
 }
 function validationKey(cat,msg){return cat+'|'+msg;}
 function validateCurrentItem(cat){
-  // RAINBOW
-  if(cat==='rainbow') return null;
   if(cat==='spray_paint'){
+    const kind=sel['sprayKind']||'';
     const color=sprayC?.n||document.getElementById('sprayOther').value.trim();
-    if(!color) return {block:true,id:'sprayVal',msg:'Pick a color or type the color you need.'};
+    if(kind!=='Clear coat' && !color) return {block:true,id:'sprayVal',msg:'Pick a color or type the color you need.'};
     if(!sel['sprayQty']) return {soft:true,id:'sprayQtyVal',msg:'How many cans? Add a number if you know it, or tap Add to Cart again to keep going.'};
   }
   if(cat==='paint'){
@@ -1709,6 +1299,16 @@ function validateCurrentItem(cat){
     if(other) types.push(other);
     if(!types.length) return {block:true,id:'toolsVal',msg:'What exact tool do you need?'};
   }
+  if(cat==='safety'){
+    const types=[...(multi['safetyType']||[])],other=document.getElementById('safetyOther').value.trim();
+    if(other) types.push(other);
+    if(!types.length) return {block:true,id:'safetyVal',msg:'What safety item do you need?'};
+  }
+  if(cat==='structural'){
+    const types=[...(multi['structuralType']||[])],other=document.getElementById('structuralOther').value.trim();
+    if(other) types.push(other);
+    if(!types.length) return {block:true,id:'structuralVal',msg:'What structural material do you need?'};
+  }
   if(cat==='other'){
     const d=document.getElementById('otherDesc').value.trim();
     if(!d) return {block:true,id:'otherVal',msg:'Describe the item so Mr. Tinsley knows what to buy.'};
@@ -1719,15 +1319,14 @@ function validateCurrentItem(cat){
 function checkEmail(){
   const v=document.getElementById('replyEmail').value.trim(), fb=document.getElementById('emailFb');
   if(!v){fb.textContent='';fb.className='email-feedback';return false;}
-  // HARDENED: Match the submit-time email allowlist.
-  if(EMAIL_RE.test(v)){fb.textContent='✓ Looks good';fb.className='email-feedback ok';return true;}
-  if(v.includes('@')){fb.textContent='Use your @pausd.us or @pausd.org school email';fb.className='email-feedback warn';return false;}
+  if(v.endsWith('@pausd.us')){fb.textContent='✓ Looks good';fb.className='email-feedback ok';return true;}
+  if(v.includes('@')){fb.textContent='Use your @pausd.us school email';fb.className='email-feedback warn';return false;}
   fb.textContent='Enter your full school email'; fb.className='email-feedback warn'; return false;
 }
 
 function currentFormState(cat){
   const fields={};
-  ['itemLink','otherDesc','threadColor','sprayOther','paintOther','wireOther','tapeOther','glueOther','fastOther','threadOther','toolsOther'].forEach(id=>{
+  ['itemLink','otherDesc','threadColor','sprayOther','paintOther','wireOther','tapeOther','glueOther','fastOther','safetyOther','structuralOther','threadOther','toolsOther'].forEach(id=>{
     const el=document.getElementById(id);
     if(el) fields[id]=el.value;
   });
@@ -1743,14 +1342,16 @@ function currentFormState(cat){
 }
 
 function buildItem(cat){
-  const icons={spray_paint:'🎨',paint:'🖌️',wire:'🔩',tape:'📦',glue:'🧲',fasteners:'🔗',thread:'🧵',tools:'🔧',other:'✏️',rainbow:'🌈'};
+  const icons={spray_paint:'🎨',paint:'🖌️',wire:'🔩',tape:'📦',glue:'🧲',fasteners:'🔗',safety:'🛡️',structural:'🏗️',thread:'🧵',tools:'🔧',other:'✏️'};
   let name='',detail='';
-  // RAINBOW
-  if(cat==='rainbow'){
-    name='Order a Rainbow';
-  } else if(cat==='spray_paint'){
-    const cn=sprayC?.n||document.getElementById('sprayOther').value.trim(); if(!cn) return null;
-    name='Spray Paint — '+cn; detail=[sel['sprayFinish'],sel['sprayQty']?'×'+sel['sprayQty']:''].filter(Boolean).join(', ');
+  if(cat==='spray_paint'){
+    const kind=sel['sprayKind']||'', cn=sprayC?.n||document.getElementById('sprayOther').value.trim();
+    if(kind==='Clear coat') name='Spray Paint — Clear coat';
+    else {
+      if(!cn) return null;
+      name='Spray Paint — '+(kind?kind+', ':'')+cn;
+    }
+    detail=[sel['sprayFinish'],sel['sprayQty']?'×'+sel['sprayQty']:''].filter(Boolean).join(', ');
   } else if(cat==='paint'){
     const cn=paintC?.n||document.getElementById('paintOther').value.trim(); if(!cn) return null;
     name='Paint — '+cn; detail=sel['paintSize']||'';
@@ -1769,6 +1370,14 @@ function buildItem(cat){
     const types=[...(multi['fastType']||[])],other=document.getElementById('fastOther').value.trim();
     if(other) types.push(other); if(!types.length) return null;
     name='Fasteners — '+types.join(', ');
+  } else if(cat==='safety'){
+    const types=[...(multi['safetyType']||[])],other=document.getElementById('safetyOther').value.trim();
+    if(other) types.push(other); if(!types.length) return null;
+    name='Safety — '+types.join(', ');
+  } else if(cat==='structural'){
+    const types=[...(multi['structuralType']||[])],other=document.getElementById('structuralOther').value.trim();
+    if(other) types.push(other); if(!types.length) return null;
+    name='Structural Materials — '+types.join(', ');
   } else if(cat==='thread'){
     const t=sel['threadType']||document.getElementById('threadOther').value.trim(); if(!t) return null;
     name=t; const col=document.getElementById('threadColor').value.trim(); detail=col?'Color: '+col:'';
@@ -1786,8 +1395,6 @@ function buildItem(cat){
 function addToCart(){
   const cat=document.getElementById('category').value;
   if(!cat){toast('Pick a category first.','err');return;}
-  // RAINBOW
-  if(cat==='rainbow' && cart.some((item,index)=>index!==editingCartIndex && isRainbowItem(item))){toast('You already have a rainbow in your cart.','err');return;}
   const validation=validateCurrentItem(cat);
   if(validation){
     showValidation(validation.id,validation.msg,!!validation.soft);
@@ -1796,8 +1403,7 @@ function addToCart(){
     if(validationOverrideKey!==key){validationOverrideKey=key;return;}
   }
   const item=buildItem(cat); if(!item){toast('Fill in the required details.','err');return;}
-  // RAINBOW
-  item.link=cat==='rainbow'?'':document.getElementById('itemLink').value.trim();
+  item.link=document.getElementById('itemLink').value.trim();
   clearValidation();
   if(editingCartIndex>-1){
     item.id=cart[editingCartIndex]?.id||item.id;
@@ -1834,25 +1440,19 @@ function renderCart(){
   cart.forEach((item,index)=>{
     const el=document.createElement('div'); el.className='cart-item';
     if(index===editingCartIndex) el.classList.add('editing');
-    const editAction=isRainbowItem(item)?'':`<button class="cart-item-action" onclick="editCartItem(${index})" aria-label="Edit item"><i class="ui-icon ti ti-pencil" aria-hidden="true"></i></button>`;
-    // RAINBOW
-    const detailHtml=isRainbowItem(item)?'':`<div class="cart-item-detail">${[item.detail,item.link].filter(Boolean).map(escHtml).join(' · ')||'&nbsp;'}</div>`;
-    el.innerHTML=`<div class="cart-item-icon">${item.icon}</div><div class="cart-item-body"><div class="cart-item-name">${escHtml(item.name)}</div>${detailHtml}</div><div class="cart-item-actions">${editAction}<button class="cart-item-action remove" onclick="removeFromCart(${item.id})" aria-label="Remove item"><i class="ui-icon ti ti-trash" aria-hidden="true"></i></button></div>`;
+    el.innerHTML=`<div class="cart-item-icon">${item.icon}</div><div class="cart-item-body"><div class="cart-item-name">${escHtml(item.name)}</div><div class="cart-item-detail">${[item.detail,item.link].filter(Boolean).map(escHtml).join(' · ')||'&nbsp;'}</div></div><div class="cart-item-actions"><button class="cart-item-action" onclick="editCartItem(${index})" aria-label="Edit item"><i class="ui-icon ti ti-pencil" aria-hidden="true"></i></button><button class="cart-item-action remove" onclick="removeFromCart(${item.id})" aria-label="Remove item"><i class="ui-icon ti ti-trash" aria-hidden="true"></i></button></div>`;
     c.appendChild(el);
   });
 }
 function resetForm(keepEditing=false){
   clearValidation();
   document.getElementById('category').value='';
-  // RAINBOW
-  const linkRow=document.getElementById('itemLinkRow');
-  if(linkRow) linkRow.style.display='block';
   document.querySelectorAll('.sub-options').forEach(el=>el.classList.remove('visible'));
   document.querySelectorAll('.pill').forEach(p=>p.classList.remove('selected'));
   document.querySelectorAll('.finish-btn').forEach(b=>b.classList.remove('selected'));
   document.querySelectorAll('.color-swatch').forEach(s=>s.classList.remove('selected'));
   document.querySelectorAll('.other-field').forEach(r=>r.classList.remove('visible'));
-  ['itemLink','otherDesc','threadColor','sprayOther','paintOther','wireOther','tapeOther','glueOther','fastOther','threadOther','toolsOther'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  ['itemLink','otherDesc','threadColor','sprayOther','paintOther','wireOther','tapeOther','glueOther','fastOther','safetyOther','structuralOther','threadOther','toolsOther'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   document.getElementById('sprayCDisp').innerHTML='<span>Tap a color</span>';
   document.getElementById('paintCDisp').innerHTML='<span>Tap a color</span>';
   document.getElementById('glitterRow').style.display='none';
@@ -1910,19 +1510,28 @@ function findColorByName(name){
 }
 function itemToFormState(item){
   const state={category:item.category,sel:{},multi:{},sprayC:null,paintC:null,fields:{itemLink:item.link||''},otherVisible:[]};
-  // RAINBOW
-  if(item.category==='rainbow') return state;
   const afterDash=(item.name||'').split('—').slice(1).join('—').trim();
   const known={
-    tapeType:['Duct Tape','Painters Tape','Masking Tape','Double-Sided Tape','Scotch Tape','Fabric Tape'],
-    glueType:['Hot Glue Sticks','Hot Glue Gun','Elmers Glue','E6000','Glitter Glue'],
+    tapeType:['Duct Tape','Painters Tape','Masking Tape','Double-Sided Tape','Scotch Tape','Gaffer Tape','Fabric Tape','Foam Mounting Tape'],
+    glueType:['Hot Glue Sticks','Hot Glue Gun','Elmers Glue','E6000','Glitter Glue','Mod Podge','Spray Adhesive (3M Super 77)','Fabric Adhesive'],
     fastType:['Zip Ties','Velcro','Staples','Silver Eyelets','Elastic Band','Sewing Needles'],
+    safetyType:['N95 masks','Respirators','Gloves','Aprons','Eye protection'],
+    structuralType:['Chicken wire','Armature wire','Floral wire','Wire mesh','Foam board','PVC pipe / tubing (small diameter)','Zip ties'],
     toolsType:['Needle Nose Pliers','Hammer','Screwdrivers','Crochet Hook','Bolt Cutters','Extension Cord'],
     threadType:['Thread','Ribbon','Yarn','Elastic']
   };
   if(item.category==='spray_paint'){
-    const color=findColorByName(afterDash);
-    if(color) state.sprayC=color; else {state.fields.sprayOther=afterDash; state.otherVisible.push('sprayOF');}
+    let colorName=afterDash;
+    if(afterDash==='Clear coat'){
+      state.sel.sprayKind='Clear coat';
+      colorName='';
+    } else if(afterDash.startsWith('Primer + Paint (combo can), ')){
+      state.sel.sprayKind='Primer + Paint (combo can)';
+      colorName=afterDash.replace('Primer + Paint (combo can), ','');
+    }
+    const color=findColorByName(colorName);
+    if(color) state.sprayC=color;
+    else if(colorName){state.fields.sprayOther=colorName; state.otherVisible.push('sprayOF');}
     (item.detail||'').split(',').map(s=>s.trim()).forEach(part=>{
       if(['Gloss','Matte','Metallic','Satin','Flat'].includes(part)) state.sel.sprayFinish=part;
       if(part.startsWith('×')) state.sel.sprayQty=part.slice(1);
@@ -1951,6 +1560,16 @@ function itemToFormState(item){
     state.multi.fastType=vals.filter(v=>known.fastType.includes(v));
     const other=vals.filter(v=>!known.fastType.includes(v)).join(', ');
     if(other){state.fields.fastOther=other; state.otherVisible.push('fastOF');}
+  } else if(item.category==='safety'){
+    const vals=afterDash?afterDash.split(',').map(s=>s.trim()).filter(Boolean):[];
+    state.multi.safetyType=vals.filter(v=>known.safetyType.includes(v));
+    const other=vals.filter(v=>!known.safetyType.includes(v)).join(', ');
+    if(other){state.fields.safetyOther=other; state.otherVisible.push('safetyOF');}
+  } else if(item.category==='structural'){
+    const vals=afterDash?afterDash.split(',').map(s=>s.trim()).filter(Boolean):[];
+    state.multi.structuralType=vals.filter(v=>known.structuralType.includes(v));
+    const other=vals.filter(v=>!known.structuralType.includes(v)).join(', ');
+    if(other){state.fields.structuralOther=other; state.otherVisible.push('structuralOF');}
   } else if(item.category==='thread'){
     if(known.threadType.includes(item.name)) state.sel.threadType=item.name;
     else {state.fields.threadOther=item.name||''; state.otherVisible.push('threadOF');}
@@ -1969,8 +1588,6 @@ function applyFormState(state){
   resetForm(true);
   document.getElementById('category').value=state.category||'';
   onCat();
-  // RAINBOW
-  if(state.category==='rainbow') return;
   Object.entries(state.fields||{}).forEach(([id,value])=>{
     const el=document.getElementById(id);
     if(el) el.value=value||'';
@@ -2007,48 +1624,8 @@ function cancelCartEdit(){
 }
 function saveSession(){try{sessionStorage.setItem('jk_cart',JSON.stringify(cart));}catch(e){}}
 function loadSession(){try{const s=sessionStorage.getItem('jk_cart');if(s){JSON.parse(s).forEach(i=>cart.push(i));renderCart();}}catch(e){}}
-function validateSubmissionInputs(){
-  // HARDENED: Canonical validation is the intended defense against edited select options or injected DOM values.
-  const country=document.getElementById('country').value;
-  const email=document.getElementById('replyEmail').value.trim();
-  const period=document.getElementById('country').selectedOptions[0]?.dataset?.period||'';
-  if(!VALID_COUNTRY_SET.has(country)) return {ok:false,msg:'Select a valid country.'};
-  if(!['5','6'].includes(period) || period!==COUNTRY_PERIODS[country]) return {ok:false,msg:'Select a valid country period.'};
-  if(!EMAIL_RE.test(email)) return {ok:false,msg:'Enter your @pausd.us or @pausd.org email.'};
-  return {ok:true,country,email,period};
-}
-function cleanCartItem(item){
-  // HARDENED: Cart contents are revalidated at submit time so console-edited objects cannot be written blindly.
-  if(!item || !VALID_CATEGORY_SET.has(item.category)) return null;
-  const name=typeof item.name==='string'?item.name.trim():'';
-  const detail=typeof item.detail==='string'?item.detail.trim():'';
-  const link=typeof item.link==='string'?item.link.trim():'';
-  if(!name || name.length>=200) return null;
-  if(detail.length>=500) return null;
-  return {
-    ...item,
-    name,
-    detail,
-    link,
-    category:item.category,
-    icon:typeof item.icon==='string'&&item.icon ? item.icon : '📦'
-  };
-}
-function validateCartForSubmission(){
-  // HARDENED: Reject invalid cart rows and require at least one valid item before any Supabase write.
-  const validItems=cart.map(cleanCartItem).filter(Boolean);
-  if(validItems.length!==cart.length){
-    cart.splice(0,cart.length,...validItems);
-    saveSession();
-    renderCart();
-    toast('Some cart items were invalid and were removed before submission.','err');
-  }
-  if(!validItems.length) return {ok:false,msg:'Add at least one valid item before submitting.'};
-  return {ok:true,items:validItems};
-}
-function submissionSignature(country,email,period,items){
-  // HARDENED: Include the per-page nonce so clearing sessionStorage alone cannot replay the same signature.
-  return JSON.stringify({nonce:pageSubmitNonce,country,email,period,items:items.map(i=>({category:i.category,name:i.name,detail:i.detail||'',link:i.link||''}))});
+function submissionSignature(country,email,period){
+  return JSON.stringify({country,email,period,items:cart.map(i=>({category:i.category,name:i.name,detail:i.detail||'',link:i.link||''}))});
 }
 function showStep(n){
   document.getElementById('stepItems').classList.toggle('active',n===1);
@@ -2071,14 +1648,7 @@ function renderSuccessSummary(country,email,period,items){
     <div class="success-summary-items">${list}</div>`;
 }
 function startAnotherRequest(){
-  // HARDENED: A new intentional request gets a fresh nonce; the spent nonce cannot be reused.
-  pageSubmitNonce=makeSubmitNonce();
-  submitNonceSpent=false;
   cart.length=0;
-  pendingRainbow=null;
-  document.getElementById('rainbowWarning')?.classList.remove('visible');
-  document.getElementById('rainbowConfirmModal')?.classList.remove('open');
-  document.getElementById('rainbowExhaustedModal')?.classList.remove('open');
   try{sessionStorage.removeItem('jk_cart');}catch(e){}
   renderCart();
   resetForm();
@@ -2088,19 +1658,18 @@ function startAnotherRequest(){
   toast('Ready for another request.','ok');
 }
 
-async function openConfirm(){
-  // Review modal only opens after canonical input/cart validation.
-  if(isSubmitting) return;
+function openConfirm(){
+  if(window.__submitting) return;
   if(editingCartIndex>-1){toast('Save or cancel your edit first.','err');showStep(1);return;}
   if(!cart.length){toast('Add at least one item first.','err');return;}
-  const input=validateSubmissionInputs();
-  if(!input.ok){toast(input.msg,'err');return;}
-  const cartValidation=validateCartForSubmission();
-  if(!cartValidation.ok){toast(cartValidation.msg,'err');return;}
-  const {country,email,period}=input;
+  const country=document.getElementById('country').value;
+  const email=document.getElementById('replyEmail').value.trim();
+  if(!country){toast('Select your country.','err');return;}
+ if(!email.endsWith('@pausd.us') && !email.endsWith('@pausd.org')){toast('Enter your @pausd.us email.','err');return;}
+  const period=document.getElementById('country').selectedOptions[0]?.dataset?.period||'?';
   document.getElementById('confirmMeta').innerHTML=`<strong>${escHtml(country)}</strong> · Period ${escHtml(period)}<br><span style="color:var(--muted)">${escHtml(email)}</span>`;
   const cont=document.getElementById('confirmItems'); cont.innerHTML='';
-  cartValidation.items.forEach(item=>{
+  cart.forEach(item=>{
     const el=document.createElement('div'); el.className='confirm-item';
     el.innerHTML=`<span>${item.icon}</span><div><div>${escHtml(item.name)}</div>${item.detail?`<div class="ci-detail">${escHtml(item.detail)}</div>`:''}</div>`;
     cont.appendChild(el);
@@ -2112,23 +1681,19 @@ async function openConfirm(){
   document.getElementById('stepChip3').classList.add('active');
   document.getElementById('confirmOverlay').classList.add('open');
 }
-function closeConfirm(){if(isSubmitting) return; document.getElementById('confirmOverlay').classList.remove('open'); showStep(2);}
+function closeConfirm(){if(window.__submitting) return; document.getElementById('confirmOverlay').classList.remove('open'); showStep(2);}
 
 async function submitOrder(){
-  // Direct calls still pass nonce, input, and cart gates before any write.
-  if(isSubmitting) return;
-  if(submitNonceSpent){toast('Start another request before submitting again.','err');return;}
-  isSubmitting=true;
+  if(window.__submitting) return;
+  window.__submitting=true;
   const btn=document.getElementById('sendBtn');
   btn.disabled=true; btn.innerHTML=uiIcon('check')+'Sending...';
   try{
-    const input=validateSubmissionInputs();
-    if(!input.ok){toast(input.msg,'err');return;}
-    const cartValidation=validateCartForSubmission();
-    if(!cartValidation.ok){toast(cartValidation.msg,'err');return;}
-    const {country,email,period}=input;
-    const submittedItems=cartValidation.items.map(item=>({...item}));
-    const sig=submissionSignature(country,email,period,submittedItems);
+    const country=document.getElementById('country').value;
+    const email=document.getElementById('replyEmail').value.trim();
+    const period=document.getElementById('country').selectedOptions[0]?.dataset?.period||'?';
+    const sig=submissionSignature(country,email,period);
+    const submittedItems=cart.map(item=>({...item}));
     let lastSig='', lastAt=0;
     try{
       lastSig=sessionStorage.getItem('jk_last_submission_sig')||'';
@@ -2139,31 +1704,26 @@ async function submitOrder(){
       return;
     }
     const sid='sub_'+Date.now();
-    const mainItems=submittedItems.filter(item=>!isRainbowItem(item));
-    const rows=mainItems.map(item=>({submission_id:sid,period,country,reply_email:email,category:item.category,item_name:item.name,item_detail:item.detail||'',link:item.link||'',status:'pending',denial_reason:'',oos_note:''}));
-    if(rows.length){
-      const res=await fetch(SUPABASE_URL+'/rest/v1/requests',{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Prefer':'return=minimal'},body:JSON.stringify(rows)});
-      if(!res.ok) throw new Error('Supabase failed');
-    }
+    const rows=cart.map(item=>({submission_id:sid,period,country,reply_email:email,category:item.category,item_name:item.name,item_detail:item.detail||'',link:item.link||'',status:'pending',denial_reason:'',oos_note:''}));
+    const res=await fetch(SUPABASE_URL+'/rest/v1/requests',{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Prefer':'return=minimal'},body:JSON.stringify(rows)});
+    if(!res.ok) throw new Error('Supabase failed');
     try{
       sessionStorage.setItem('jk_last_submission_id',sid);
       sessionStorage.setItem('jk_last_submission_sig',sig);
       sessionStorage.setItem('jk_last_submission_at',String(Date.now()));
     }catch(e){}
-    spendSubmitNonce();
     try{sessionStorage.removeItem('jk_cart');}catch(e){}
     cart.length=0;
     document.getElementById('confirmOverlay').classList.remove('open');
     document.getElementById('mainContent').style.display='none';
-    renderSuccessSummary(country,email,period,mainItems);
+    renderSuccessSummary(country,email,period,submittedItems);
     document.getElementById('successScreen').classList.add('visible');
     document.getElementById('confirmId').textContent='Request ID: '+sid;
-    handleRainbowAfterSubmit({sid,country,email,period,items:submittedItems});
   }catch(e){
     console.error('Submit error:',e);
     toast('Something went wrong. Try again.','err');
   }finally{
-    isSubmitting=false;
+    window.__submitting=false;
     if(!document.getElementById('successScreen').classList.contains('visible')){
       btn.disabled=false; btn.innerHTML=uiIcon('check')+'Looks good — send it';
     }
@@ -2183,33 +1743,7 @@ function initValidationListeners(){
   });
 }
 
-// HARDENED: Controlled export list for inline HTML handlers; all state remains private inside the IIFE.
-Object.assign(window,{
-  onCat,
-  selFinish,
-  togOther,
-  selPill,
-  togMulti,
-  addToCart,
-  cancelCartEdit,
-  goGroupStep,
-  showStep,
-  onCountry,
-  checkEmail,
-  openConfirm,
-  closeConfirm,
-  submitOrder,
-  editCartItem,
-  removeFromCart,
-  showRainbowConfirm,
-  startAnotherRequest,
-  closeRainbowConfirm,
-  confirmRainbowChaos,
-  closeRainbowExhausted
-});
-
 initGrids(); initValidationListeners(); loadSession();
-})();
 </script>
 </body>
 </html>
