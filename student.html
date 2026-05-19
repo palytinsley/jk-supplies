@@ -71,6 +71,7 @@ button, .pill, .finish-btn, .color-swatch { -webkit-tap-highlight-color: transpa
 }
 .btn-submit img.ui-icon, .btn-send img.ui-icon { filter: brightness(0) invert(1); }
 .btn-add .ui-icon, .step-back .ui-icon, .btn-back .ui-icon, .cart-item-action .ui-icon, .btn-cancel-edit .ui-icon { opacity: 0.78; }
+.btn-add .ui-icon { opacity: 1; font-size: 1.35rem; }
 .input-with-icon { position: relative; }
 .input-with-icon .ui-icon {
   position: absolute;
@@ -166,19 +167,60 @@ button, .pill, .finish-btn, .color-swatch { -webkit-tap-highlight-color: transpa
 }
 .cart-badge .ui-icon { width: 1.1rem; height: 1.1rem; margin-bottom: 0.18rem; opacity: 0.72; }
 .cart-shake {
-  animation: cartShake 0.4s ease;
+  animation: cartShake 0.62s cubic-bezier(.34,1.56,.64,1);
   transform-origin: top center;
 }
 @keyframes cartShake {
   0% { transform: rotate(0deg); }
-  20% { transform: rotate(-12deg); }
-  40% { transform: rotate(10deg); }
-  60% { transform: rotate(-6deg); }
-  80% { transform: rotate(4deg); }
+  16% { transform: translateY(-3px) rotate(-14deg) scale(1.08); }
+  34% { transform: translateY(1px) rotate(12deg) scale(1.04); }
+  52% { transform: translateY(-2px) rotate(-9deg) scale(1.08); }
+  72% { transform: translateY(0) rotate(6deg); }
   100% { transform: rotate(0deg); }
 }
 .cart-badge .n { font-size: 1.22rem; font-weight: 800; }
 .cart-badge .l { font-size: 0.5rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); margin-top: 0.16rem; }
+.floating-cart {
+  position: fixed;
+  right: max(1rem, env(safe-area-inset-right));
+  bottom: max(1.05rem, env(safe-area-inset-bottom));
+  z-index: 70;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.42rem;
+  min-height: 48px;
+  padding: 0.72rem 0.9rem;
+  border: 0;
+  border-radius: var(--radius-lg);
+  background: rgba(255,255,255,0.86);
+  color: var(--muted);
+  font-family: var(--headline);
+  font-size: 0.84rem;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 20px 48px -28px rgba(28,27,27,0.58);
+  outline: 1px solid var(--ghost);
+  backdrop-filter: var(--blur);
+  transition: transform 0.16s ease, background 0.16s ease, color 0.16s ease, box-shadow 0.16s ease;
+}
+.floating-cart.has-items {
+  background: linear-gradient(135deg, var(--primary), var(--primary-2));
+  color: #fff;
+  box-shadow: var(--shadow-red);
+  outline-color: rgba(255,218,211,0.2);
+}
+.floating-cart .ui-icon { font-size: 1.18rem; }
+.floating-cart:active { transform: translateY(1px); }
+.floating-cart.cart-pop {
+  animation: floatingCartPop 0.62s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes floatingCartPop {
+  0% { transform: scale(1); }
+  34% { transform: translateY(-4px) scale(1.08); }
+  62% { transform: translateY(1px) scale(0.98); }
+  100% { transform: scale(1); }
+}
 
 /* CONTAINER */
 .container { max-width: 720px; margin: 0 auto; padding: 0.55rem 1rem 2.5rem; }
@@ -260,6 +302,7 @@ button, .pill, .finish-btn, .color-swatch { -webkit-tap-highlight-color: transpa
   font-size: 1.45rem;
   opacity: 0.48;
 }
+.cart-empty strong { color: var(--primary); }
 .cart-topline {
   display: flex;
   align-items: center;
@@ -537,25 +580,73 @@ hr.div { border: none; height: 0.8rem; margin: 0.25rem 0; }
 /* BUTTONS */
 .btn-add {
   width: 100%;
-  background: var(--surface-high);
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, rgba(165,25,0,0.92), rgba(201,51,24,0.88));
   border: 0;
-  color: var(--text);
+  color: #fff;
   font-family: var(--headline);
-  font-size: 0.98rem;
+  font-size: 1rem;
   font-weight: 800;
   padding: 1.05rem;
   min-height: 56px;
   border-radius: var(--radius-lg);
   cursor: pointer;
-  transition: all 0.12s;
+  transition: transform 0.12s, filter 0.12s, background 0.18s ease, box-shadow 0.18s ease;
   margin: 0.95rem 0 0.5rem;
   letter-spacing: 0;
-  box-shadow: inset 0 0 0 1px var(--ghost), 0 18px 36px -34px rgba(28,27,27,0.5);
+  box-shadow: 0 18px 38px -24px rgba(165,25,0,0.58);
 }
-.btn-add:hover { background: #fff7f5; color: var(--primary); }
+.btn-add::after {
+  content: '';
+  position: absolute;
+  inset: -45% auto -45% -58%;
+  width: 42%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.46), transparent);
+  transform: skewX(-18deg);
+  animation: addSheen 6.2s ease-in-out infinite;
+  pointer-events: none;
+}
+.btn-add:hover, .btn-add:focus-visible {
+  filter: saturate(1.04) brightness(1.02);
+}
+.btn-add:hover::after, .btn-add:active::after, .btn-add.is-paused::after {
+  animation-play-state: paused;
+}
+@keyframes addSheen {
+  0%, 62% { left: -58%; opacity: 0; }
+  70% { opacity: 0.72; }
+  84% { left: 118%; opacity: 0.18; }
+  100% { left: 118%; opacity: 0; }
+}
 .btn-add.editing {
   background: var(--text);
   color: var(--bg);
+  box-shadow: 0 18px 38px -28px rgba(28,27,27,0.7);
+}
+.btn-add.added {
+  background: linear-gradient(135deg, var(--success), #33824d);
+  box-shadow: 0 18px 38px -24px rgba(39,99,59,0.55);
+}
+.btn-add.needs-attention {
+  animation: addAttention 0.88s ease-in-out 2;
+}
+@keyframes addAttention {
+  0%, 100% { transform: translateY(0); box-shadow: 0 18px 38px -24px rgba(165,25,0,0.58); }
+  38% { transform: translateY(-2px) scale(1.015); box-shadow: 0 0 0 4px rgba(255,218,211,0.82), 0 22px 44px -18px rgba(165,25,0,0.62); }
+  68% { transform: translateY(1px); }
+}
+.add-helper {
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+  line-height: 1.35;
+  margin: 0 0 0.55rem;
+}
+.add-helper strong {
+  color: var(--primary);
+  letter-spacing: 0.02em;
 }
 .edit-controls {
   display: none;
@@ -839,12 +930,69 @@ hr.div { border: none; height: 0.8rem; margin: 0.25rem 0; }
 .toast.show { transform: translateX(-50%) translateY(0); }
 .toast.ok { background: rgba(39,99,59,0.94); }
 .toast.err { background: rgba(186,26,26,0.94); }
+.mobile-cart-bar {
+  display: none;
+}
 
 @media (min-width: 720px) {
   .header { padding: 0.95rem 1.5rem 1.35rem; }
   .container { padding-top: 0.8rem; }
   .form-card, .info-card { padding: 1.65rem; }
   .sheet { border-radius: var(--radius-lg); margin-bottom: 1rem; }
+}
+@media (max-width: 719px) {
+  body { padding-bottom: 9rem; }
+  .floating-cart {
+    bottom: calc(max(1rem, env(safe-area-inset-bottom)) + 4.35rem);
+  }
+  .mobile-cart-bar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 65;
+    display: none;
+    align-items: center;
+    gap: 0.7rem;
+    padding: 0.7rem 0.9rem calc(0.7rem + env(safe-area-inset-bottom));
+    background: rgba(252,249,248,0.94);
+    border-top: 1px solid var(--ghost);
+    box-shadow: 0 -18px 42px -30px rgba(28,27,27,0.62);
+    backdrop-filter: var(--blur);
+  }
+  .mobile-cart-bar.visible { display: flex; }
+  .mobile-cart-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.34rem;
+    min-width: 5.2rem;
+    min-height: 48px;
+    border-radius: var(--radius-md);
+    background: var(--surface-mid);
+    color: var(--muted);
+    font-family: var(--headline);
+    font-size: 0.82rem;
+    font-weight: 800;
+  }
+  .mobile-cart-count.has-items {
+    background: var(--primary-soft);
+    color: var(--primary);
+  }
+  .mobile-cart-add {
+    flex: 1;
+    margin: 0;
+    min-height: 48px;
+    padding: 0.78rem 0.9rem;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .btn-add::after,
+  .cart-shake,
+  .floating-cart.cart-pop,
+  .btn-add.needs-attention {
+    animation: none;
+  }
 }
 </style>
 </head>
@@ -858,7 +1006,7 @@ hr.div { border: none; height: 0.8rem; margin: 0.25rem 0; }
       <div class="header-title">Junk <em>Kouture</em><br>Supply Request</div>
       <div class="header-sub">Add items → review → submit once for your group</div>
     </div>
-    <div class="cart-badge">
+    <div class="cart-badge" id="headerCartBadge">
       <i class="ui-icon ti ti-shopping-cart" aria-hidden="true"></i>
       <span class="n" id="cartN">0</span>
       <span class="l">items</span>
@@ -875,11 +1023,11 @@ hr.div { border: none; height: 0.8rem; margin: 0.25rem 0; }
   </div>
 
   <div class="step-panel active" id="stepItems">
-  <div class="cart-topline">
+  <div class="cart-topline" id="cartSection">
     <div class="section-label">Your Cart</div>
     <button class="recent-orders-btn" onclick="openRecentOrders()"><i class="ui-icon ti ti-history" aria-hidden="true"></i>Recently Ordered</button>
   </div>
-  <div class="cart-empty" id="cartEmpty"><i class="ui-icon ti ti-shopping-cart-off" aria-hidden="true"></i>Nothing yet — add your first item below</div>
+  <div class="cart-empty" id="cartEmpty"><i class="ui-icon ti ti-shopping-cart-off" aria-hidden="true"></i>Fill out an item below, then press <strong>ADD TO CART</strong> before continuing.</div>
   <div class="cart-items" id="cartItems"></div>
 
   <div class="section-label">Add an Item</div>
@@ -1185,7 +1333,8 @@ hr.div { border: none; height: 0.8rem; margin: 0.25rem 0; }
     </div>
   </div>
 
-  <button class="btn-add" id="addCartBtn" onclick="addToCart()"><i class="ui-icon ti ti-plus" aria-hidden="true"></i><span id="addCartBtnText">Add to Cart</span></button>
+  <button class="btn-add" id="addCartBtn" onclick="addToCart()"><i class="ui-icon ti ti-shopping-cart-plus" aria-hidden="true"></i><span id="addCartBtnText">Add to Cart</span></button>
+  <p class="add-helper">Items are <strong>NOT</strong> saved until added to cart.</p>
   <div class="edit-controls" id="editControls">
     <button class="btn-cancel-edit" onclick="cancelCartEdit()"><i class="ui-icon ti ti-x" aria-hidden="true"></i>Cancel editing</button>
   </div>
@@ -1284,6 +1433,22 @@ hr.div { border: none; height: 0.8rem; margin: 0.25rem 0; }
 
 <div class="toast" id="toast"></div>
 
+<button class="floating-cart" id="floatingCartBtn" type="button" onclick="scrollToCart()" aria-label="Scroll to cart">
+  <i class="ui-icon ti ti-shopping-cart" aria-hidden="true"></i>
+  <span id="floatingCartText">Cart · 0</span>
+</button>
+
+<div class="mobile-cart-bar" id="mobileCartBar">
+  <button class="mobile-cart-count" id="mobileCartCount" type="button" onclick="scrollToCart()" aria-label="Scroll to cart">
+    <i class="ui-icon ti ti-shopping-cart" aria-hidden="true"></i>
+    <span id="mobileCartText">Cart · 0</span>
+  </button>
+  <button class="btn-add mobile-cart-add" id="mobileAddCartBtn" type="button" onclick="addToCart()">
+    <i class="ui-icon ti ti-shopping-cart-plus" aria-hidden="true"></i>
+    <span id="mobileAddCartBtnText">Add to Cart</span>
+  </button>
+</div>
+
 <script>
 const SUPABASE_URL = 'https://ywdigsbpvtjsjhliuwrm.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_CSLa84XRVDj2D_cEl72TpQ_43T7e6qr';
@@ -1300,6 +1465,7 @@ const cart=[], sel={}, multi={};
 let sprayC=null, paintC=null;
 let validationOverrideKey='';
 let editingCartIndex=-1;
+let addFeedbackTimer=null;
 window.__submitting = false;
 
 function uiIcon(name){
@@ -1511,19 +1677,76 @@ function addToCart(){
     item.id=cart[editingCartIndex]?.id||item.id;
     cart[editingCartIndex]=item;
     saveSession(); renderCart(); resetForm();
+    pulseCartBadges();
     toast('Changes saved.','ok');
     return;
   }
   cart.push(item); saveSession(); renderCart(); resetForm();
-  shakeCartIcon();
+  showAddSuccess();
+  pulseCartBadges();
   toast('Added to cart.','ok');
 }
-function shakeCartIcon(){
-  const icon=document.querySelector('.cart-badge .ui-icon');
-  if(!icon) return;
-  icon.classList.remove('cart-shake');
-  void icon.offsetWidth;
-  icon.classList.add('cart-shake');
+function setAddButtonState(label,icon='shopping-cart-plus',stateClass=''){
+  ['addCartBtn','mobileAddCartBtn'].forEach(btnId=>{
+    const btn=document.getElementById(btnId);
+    if(!btn) return;
+    btn.classList.remove('added');
+    if(stateClass) btn.classList.add(stateClass);
+    const iconEl=btn.querySelector('.ui-icon');
+    const textEl=btn.querySelector('span');
+    if(iconEl) iconEl.className='ui-icon ti ti-'+icon;
+    if(textEl) textEl.textContent=label;
+  });
+}
+function showAddSuccess(){
+  clearTimeout(addFeedbackTimer);
+  setAddButtonState('Added!','circle-check','added');
+  addFeedbackTimer=setTimeout(updateEditMode,1000);
+}
+function pulseCartBadges(){
+  const animated=[
+    document.querySelector('.cart-badge .ui-icon'),
+    document.getElementById('floatingCartBtn')
+  ].filter(Boolean);
+  animated.forEach(el=>{
+    el.classList.remove('cart-shake','cart-pop');
+    void el.offsetWidth;
+    if(el.id==='floatingCartBtn') el.classList.add('cart-pop');
+    else el.classList.add('cart-shake');
+  });
+}
+function pulseAddButton(){
+  ['addCartBtn','mobileAddCartBtn'].forEach(id=>{
+    const btn=document.getElementById(id);
+    if(!btn) return;
+    btn.classList.remove('needs-attention');
+    void btn.offsetWidth;
+    btn.classList.add('needs-attention');
+  });
+  document.getElementById('addCartBtn')?.scrollIntoView({behavior:'smooth',block:'center'});
+}
+function scrollToCart(){
+  showStep(1,false);
+  document.getElementById('cartSection')?.scrollIntoView({behavior:'smooth',block:'start'});
+}
+function updateCartIndicators(){
+  const count=cart.length;
+  const cartN=document.getElementById('cartN');
+  const floating=document.getElementById('floatingCartBtn');
+  const floatingText=document.getElementById('floatingCartText');
+  const mobileCount=document.getElementById('mobileCartCount');
+  const mobileText=document.getElementById('mobileCartText');
+  if(cartN) cartN.textContent=count;
+  if(floatingText) floatingText.textContent='Cart · '+count;
+  if(mobileText) mobileText.textContent='Cart · '+count;
+  [floating,mobileCount].forEach(el=>{if(el) el.classList.toggle('has-items',count>0);});
+}
+function updateMobileCartBar(){
+  const bar=document.getElementById('mobileCartBar');
+  if(!bar) return;
+  const onItemsStep=document.getElementById('stepItems')?.classList.contains('active');
+  const successVisible=document.getElementById('successScreen')?.classList.contains('visible');
+  bar.classList.toggle('visible',!!onItemsStep && !successVisible);
 }
 function removeFromCart(id){
   const i=cart.findIndex(x=>x.id===id);
@@ -1536,7 +1759,7 @@ function removeFromCart(id){
 }
 function renderCart(){
   const c=document.getElementById('cartItems'),e=document.getElementById('cartEmpty');
-  document.getElementById('cartN').textContent=cart.length;
+  updateCartIndicators();
   if(!cart.length){e.style.display='block';c.innerHTML='';return;}
   e.style.display='none'; c.innerHTML='';
   cart.forEach((item,index)=>{
@@ -1568,10 +1791,19 @@ function resetForm(keepEditing=false){
 function updateEditMode(){
   const btn=document.getElementById('addCartBtn');
   const txt=document.getElementById('addCartBtnText');
+  const mobileBtn=document.getElementById('mobileAddCartBtn');
+  const mobileTxt=document.getElementById('mobileAddCartBtnText');
   const controls=document.getElementById('editControls');
   const editing=editingCartIndex>-1;
-  if(btn) btn.classList.toggle('editing',editing);
+  [btn,mobileBtn].forEach(el=>{
+    if(!el) return;
+    el.classList.remove('added');
+    el.classList.toggle('editing',editing);
+    const icon=el.querySelector('.ui-icon');
+    if(icon) icon.className='ui-icon ti ti-'+(editing?'device-floppy':'shopping-cart-plus');
+  });
   if(txt) txt.textContent=editing?'Save Changes':'Add to Cart';
+  if(mobileTxt) mobileTxt.textContent=editing?'Save Changes':'Add to Cart';
   if(controls) controls.classList.toggle('visible',editing);
   renderCart();
 }
@@ -1729,17 +1961,22 @@ function loadSession(){try{const s=sessionStorage.getItem('jk_cart');if(s){JSON.
 function submissionSignature(country,email,period){
   return JSON.stringify({country,email,period,items:cart.map(i=>({category:i.category,name:i.name,detail:i.detail||'',link:i.link||''}))});
 }
-function showStep(n){
+function showStep(n,scroll=true){
   document.getElementById('stepItems').classList.toggle('active',n===1);
   document.getElementById('stepGroup').classList.toggle('active',n===2);
   document.getElementById('stepChip1').classList.toggle('active',n===1);
   document.getElementById('stepChip2').classList.toggle('active',n===2);
   document.getElementById('stepChip3').classList.toggle('active',n===3);
-  window.scrollTo({top:0,behavior:'smooth'});
+  updateMobileCartBar();
+  if(scroll) window.scrollTo({top:0,behavior:'smooth'});
 }
 function goGroupStep(){
   if(editingCartIndex>-1){toast('Save or cancel your edit first.','err');return;}
-  if(!cart.length){toast('Add at least one item first.','err');return;}
+  if(!cart.length){
+    toast('You still need to add your item to the cart first.','err');
+    pulseAddButton();
+    return;
+  }
   showStep(2);
 }
 function renderSuccessSummary(country,email,period,items){
@@ -1885,8 +2122,10 @@ async function submitOrder(){
     }catch(e){}
     try{sessionStorage.removeItem('jk_cart');}catch(e){}
     cart.length=0;
+    renderCart();
     document.getElementById('confirmOverlay').classList.remove('open');
     document.getElementById('mainContent').style.display='none';
+    updateMobileCartBar();
     renderSuccessSummary(country,email,period,submittedItems);
     document.getElementById('successScreen').classList.add('visible');
     document.getElementById('confirmId').textContent='Request ID: '+sid;
@@ -1914,7 +2153,7 @@ function initValidationListeners(){
   });
 }
 
-initGrids(); initValidationListeners(); loadSession();
+initGrids(); initValidationListeners(); loadSession(); updateCartIndicators(); updateMobileCartBar();
 </script>
 </body>
 </html>
