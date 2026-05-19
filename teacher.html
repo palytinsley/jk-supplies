@@ -936,6 +936,7 @@ const EMAILJS_SERVICE_ID = 'service_v7bchw7';
 const EMAILJS_DENIAL_TEMPLATE_ID = 'template_di08r5w';
 const EMAILJS_COMPLETED_TEMPLATE_ID = 'template_gsncn3g';
 const EMAILJS_PUBLIC_KEY = 't9UIpuX-5wgc4RPno';
+const TEST_OR_BLOCKED_EMAILS = ['tinsleyk@gmail.com'];
 const PASSWORD_RESET_REDIRECT = 'https://palytinsley.github.io/jk-supplies/teacher.html';
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 const VALID_STATUSES = Object.freeze(['pending', 'approved', 'denied', 'outofstock']);
@@ -1071,6 +1072,14 @@ function friendlyError(err, fallback = 'Something went wrong.') {
 
 function emailLooksValid(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+function normalizeEmail(email) {
+  return String(email == null ? '' : email).trim().toLowerCase();
+}
+
+function isBlockedEmail(email) {
+  return TEST_OR_BLOCKED_EMAILS.map(normalizeEmail).includes(normalizeEmail(email));
 }
 
 function isValidRowId(id) {
@@ -2421,14 +2430,18 @@ async function openEmailModal() {
     groups[r.submission_id].items.push(r);
   });
 
-  const groupList = Object.values(groups).sort((a,b)=>a.country.localeCompare(b.country));
+  const allGroupList = Object.values(groups).sort((a,b)=>a.country.localeCompare(b.country));
+  const blockedGroupCount = allGroupList.filter(g => isBlockedEmail(g.email)).length;
+  const groupList = allGroupList.filter(g => !isBlockedEmail(g.email));
   if (!groupList.length) {
-    showToast('No approved items to email yet.');
+    showToast(blockedGroupCount ? 'No eligible recipients to email. Test/blocked recipients were hidden.' : 'No approved items to email yet.');
     return;
   }
 
   // Build preview modal first
-  let html = '';
+  let html = blockedGroupCount
+    ? `<div style="margin-bottom:0.8rem;color:var(--muted);font-size:0.82rem;">${blockedGroupCount} test/blocked recipient${blockedGroupCount>1?'s':''} hidden from batch send.</div>`
+    : '';
   groupList.forEach((g, idx) => {
     g.allRows = allRequests.filter(r => r.submission_id === g.submission_id);
     g.completedNotified = g.allRows.length > 0 && g.allRows.every(i => i.completed_notified);
@@ -2470,10 +2483,12 @@ async function openEmailModal() {
   };
   const updateSendNewState = () => {
     unsentGroups = groupList.filter(g => !g.completedNotified || hasFollowupActivity(g));
+    const hiddenText = blockedGroupCount ? ` ${blockedGroupCount} test/blocked recipient${blockedGroupCount>1?'s were':' was'} hidden.` : '';
     document.getElementById('emailCard_sub').textContent = unsentGroups.length
       ? `${unsentGroups.length} group${unsentGroups.length>1?'s':''} will receive a shopping update email.`
-      : `All ${groupList.length} group${groupList.length>1?'s are':' is'} fully notified. Add a pending note to send a follow-up.`;
-    sendBtn.innerHTML = `${icon('mail')}${unsentGroups.length ? 'Send New Emails' : 'All Sent'}`;
+      : `All ${groupList.length} eligible group${groupList.length>1?'s are':' is'} fully notified. Add a pending note to send a follow-up.`;
+    document.getElementById('emailCard_sub').textContent += hiddenText;
+    sendBtn.innerHTML = `${icon('mail')}${unsentGroups.length ? `Send New Emails (${unsentGroups.length})` : 'All Sent'}`;
     sendBtn.disabled = unsentGroups.length === 0;
     sendBtn.style.background = unsentGroups.length ? 'var(--green)' : 'var(--border)';
     sendBtn.style.color = unsentGroups.length ? '#fff' : 'var(--muted)';
@@ -2483,7 +2498,7 @@ async function openEmailModal() {
   updateSendNewState();
   resendBtn.style.display = sentGroups.length ? 'block' : 'none';
   resendBtn.disabled = false;
-  resendBtn.innerHTML = `${icon('mail')}${sentGroups.length === groupList.length ? 'Resend All' : 'Resend Sent'}`;
+  resendBtn.innerHTML = `${icon('mail')}${sentGroups.length === groupList.length ? `Resend All (${sentGroups.length})` : `Resend Sent (${sentGroups.length})`}`;
   resendBtn.onclick = () => sendCompletedEmails(sentGroups, true);
 }
 
@@ -2499,6 +2514,10 @@ async function sendCompletedEmails(groupList, isResend = false) {
 
   try {
     for (const g of groupList) {
+      if (isBlockedEmail(g.email)) {
+        console.warn(`[Teacher dashboard] Blocked shopping email skipped for ${g.country}: ${normalizeEmail(g.email)}`);
+        continue;
+      }
       const allPurchased = g.items.filter(i => i.purchased && i.status==='approved');
       const isFollowup = !!g.completedNotified;
       const purch = isFollowup ? allPurchased.filter(i => !i.purchase_notified) : allPurchased;
